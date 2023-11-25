@@ -1,0 +1,54 @@
+[versions]
+agp = "8.1.4"
+kotlin = "1.9.20"
+compose = "1.5.4"
+compose-compiler = "1.5.4"
+compose-material3 = "1.1.2"
+androidx-activityCompose = "1.8.0"
+kotlinxCoroutinesCore = "1.7.3"
+loggerVersion = "1.7.26"
+ktorVersion = "2.3.5"
+sqldelight = "2.0.0"
+settingsVer = "1.1.1"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+
+#ktor common
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVersion" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorVersion" }
+ktor-client-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
+
+#ktor android
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorVersion" }
+
+#ktor ios
+ktor-client-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorVersion" }
+
+slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion" }
+
+#multiplatform shared pref
+russhwolf-settings = {module = "com.russhwolf:multiplatform-settings", version.ref = "settingsVer"}
+russhwolf-settings-no-arg = {module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "settingsVer"}
+
+#sqldelight-common
+#sqldelight android
+sqldelight-driver-android = {module="app.cash.sqldelight:android-driver", version.ref = "sqldelight"}
+#sqldelight native
+sqldelight-driver-native= {module="app.cash.sqldelight:native-driver", version.ref = "sqldelight"}
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+sqldelight = {id = "app.cash.sqldelight", version.ref = "sqldelight"}
