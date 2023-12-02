@@ -25,6 +25,7 @@ import org.altbeacon.beacon.MonitorNotifier
 import org.altbeacon.beacon.Region
 import kotlin.math.pow
 
+//TODO do not expose this class and require to use a helper class and add business logic there
 class AndroidBeaconScanner : BeaconScanner {
 
     private val scanBeaconFlow: MutableSharedFlow<List<BeaconScanResult>> =
