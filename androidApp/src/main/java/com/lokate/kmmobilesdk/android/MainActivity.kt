@@ -5,9 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.lokate.kmmobilesdk.Greeting
@@ -31,8 +34,9 @@ class MainActivity : ComponentActivity() {
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             android.Manifest.permission.BLUETOOTH_CONNECT,
             android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.BLUETOOTH
         )
-        val permissions = mutableListOf(false, false, false)
+        val permissions = mutableListOf(false, false, false, false)
 
         while (!permissions.all { it }) {
             requiredPermissions.forEachIndexed { index, permission ->
@@ -53,8 +57,7 @@ class MainActivity : ComponentActivity() {
             return getPermissionsS(afterGranted)
         }
         val requiredPermissions = arrayOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.BLUETOOTH
+            android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.BLUETOOTH
         )
         val permissions = mutableListOf(false, false, false)
         while (!permissions.all { it }) {
@@ -83,8 +86,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     GreetingView(Greeting().greet(), ::getPermissions, {
                         bluetoothScanner.start()
@@ -103,14 +105,28 @@ fun GreetingView(
     startScan: () -> Unit,
     textState: State<String> = mutableStateOf(emptyString())
 ) {
-    Column(Modifier.fillMaxWidth()) {
-        Text(text = text)
-        Button(modifier = Modifier.fillMaxWidth(), onClick = {
-            permissionCheck(startScan)
-        }) {
+
+    LazyColumn(
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        item {
+            Text(text = text)
 
         }
-        Text(text = textState.value)
+        item {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                permissionCheck(startScan)
+            }) {
+
+            }
+        }
+        item {
+            Text(text = textState.value)
+        }
     }
 }
 
