@@ -184,6 +184,8 @@ class AndroidBeaconScanner : BeaconScanner {
             beaconRegions.addAll(
                 listOf(Region("all-beacons-region", null, null, null))
             )
+
+            //TODO: remove this hardcoded values for testing
             setAndroidRegions(
                 listOf(
                     Beacon(
