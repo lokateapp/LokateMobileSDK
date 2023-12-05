@@ -68,6 +68,7 @@ android {
         minSdk = 24
     }
 }
+
 dependencies {
     implementation(libs.core.ktx)
 }
