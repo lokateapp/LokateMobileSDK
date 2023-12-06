@@ -20,7 +20,7 @@ class MainViewModel
 
     init(beaconScanner: IOSBeaconScanner) {
         self.beaconScanner = beaconScanner
-        self.beaconScanner.setScanPeriod(scanPeriodMillis: 100)
+        self.beaconScanner.setScanPeriod(scanPeriodMillis: 500)
     }
 
     func startScanning() {
@@ -32,6 +32,7 @@ class MainViewModel
         self.cancellables.forEach(){job in
             job.close()
         }
+        self.cancellables.removeAll()
         self.beaconScanner.stop()
         self.result = "Not Running"
     }
