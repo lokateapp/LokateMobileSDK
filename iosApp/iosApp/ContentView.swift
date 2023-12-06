@@ -6,11 +6,13 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Text("Hello, World!")
+            Text("Hello, Region!")
             Text(viewModel.result)
-            Button("Start") {
-                viewModel.startScanning()
-            }
+        }.onAppear(){
+            viewModel.startScanning()
+        }
+        .onDisappear(){
+            viewModel.stopScanning()
         }
     }
 }

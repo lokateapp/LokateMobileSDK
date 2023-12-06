@@ -14,22 +14,33 @@ import SwiftUI
 class MainViewModel
 : ObservableObject {
     private let beaconScanner: IOSBeaconScanner
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables:[Ktor_ioCloseable] = []
 
-    @Published var result: String = "a"
+    @Published var result: String = "Not Running"
 
     init(beaconScanner: IOSBeaconScanner) {
         self.beaconScanner = beaconScanner
+        self.beaconScanner.setScanPeriod(scanPeriodMillis: 100)
     }
 
     func startScanning() {
-        beaconScanner.start()
-        observeRegion()
+        self.beaconScanner.start()
+        self.observeRegion()
+    }
+    
+    func stopScanning(){
+        self.cancellables.forEach(){job in
+            job.close()
+        }
+        self.beaconScanner.stop()
+        self.result = "Not Running"
     }
 
     private func observeRegion() {
         // Assuming that `observeRegion()` returns `CFlow<BeaconScanResult>`
+        self.cancellables.append(
         beaconScanner.observeRegion().watch(){result in
-            self.result = "Beacon: \(result?.beacon.uuid):\(result?.beacon.major):\(result?.beacon.minor), RSSI: \(result?.rssi), Distance: \(result?.proximity)"        }
+            self.result = "Beacon: \(String(describing: result?.beacon.uuid)):\(String(describing: result?.beacon.major)):\(String(describing: result?.beacon.minor)), RSSI: \(String(describing: result?.rssi)), Distance: \(String(describing: result?.proximity))"        }
+        )
     }
 }

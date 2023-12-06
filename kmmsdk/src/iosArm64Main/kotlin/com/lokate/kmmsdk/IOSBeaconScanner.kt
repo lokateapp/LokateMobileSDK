@@ -2,6 +2,7 @@ package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.domain.beacon.BeaconScanner
 import com.lokate.kmmsdk.domain.beacon.CFlow
+import com.lokate.kmmsdk.domain.beacon.Defauls
 import com.lokate.kmmsdk.domain.beacon.wrap
 import com.lokate.kmmsdk.domain.model.beacon.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
@@ -62,6 +63,8 @@ class IOSBeaconScanner : BeaconScanner {
         private val AUTHORIZED_ALWAYS = 3
         private val AUTHORIZED_WHEN_IN_USE = 4
 
+        private var scanPeriodMillis = Defauls.DEFAULT_PERIOD_SCAN
+
         private val _errorObservable = MutableSharedFlow<Exception>()
         private val _beaconScanResultObservable = MutableSharedFlow<List<BeaconScanResult>>()
         private var _inRegion: BeaconScanResult? = null
@@ -89,7 +92,7 @@ class IOSBeaconScanner : BeaconScanner {
                     if(_inRegion != null)
                         _inRegionObservable.emit(_inRegion as BeaconScanResult)
                     NSLog("Emitting beacon: $_inRegion")
-                    kotlinx.coroutines.delay(1000)
+                    kotlinx.coroutines.delay(scanPeriodMillis)
                 }
             }
             regions.forEach {
@@ -250,11 +253,8 @@ class IOSBeaconScanner : BeaconScanner {
         }
 
         fun setScanPeriod(scanPeriodMillis: Long) {
-            throw UnsupportedOperationException("Cannot set scan period on iOS")
-        }
-
-        fun setBetweenScanPeriod(betweenScanPeriod: Long) {
-            throw UnsupportedOperationException("Cannot set between scan period on iOS")
+            NSLog("setScanPeriod called")
+            this.scanPeriodMillis = scanPeriodMillis
         }
 
         fun observeResuls(): CFlow<List<BeaconScanResult>> {
@@ -295,6 +295,8 @@ class IOSBeaconScanner : BeaconScanner {
         fun stop() {
             NSLog("stop called")
             stopRanging()
+
+            beaconEmitJob?.cancel()
         }
 
         private fun stopRanging() {
@@ -317,7 +319,7 @@ class IOSBeaconScanner : BeaconScanner {
     }
 
     override fun setScanPeriod(scanPeriodMillis: Long) {
-        //handler.setScanPeriod(scanPeriodMillis)
+        handler.setScanPeriod(scanPeriodMillis)
     }
 
     override fun setBetweenScanPeriod(betweenScanPeriod: Long) {
