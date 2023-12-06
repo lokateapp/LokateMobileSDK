@@ -43,9 +43,13 @@ class MainActivity : ComponentActivity() {
                 permissions[index] =
                     checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
             }
-            if (!permissions.all { it }) {
-                requestPermissions(requiredPermissions, 0)
+
+            permissions.filter { !it }.forEachIndexed { index, b ->
+
+                requestPermissions(arrayOf(requiredPermissions[index]), 0)
+
             }
+
         }
         afterGranted()
 
@@ -59,15 +63,17 @@ class MainActivity : ComponentActivity() {
         val requiredPermissions = arrayOf(
             android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.BLUETOOTH
         )
-        val permissions = mutableListOf(false, false, false)
+        val permissions = mutableListOf(false, false)
         while (!permissions.all { it }) {
             requiredPermissions.forEachIndexed { index, permission ->
                 permissions[index] =
                     checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
             }
-            if (!permissions.all { it }) {
-                requestPermissions(requiredPermissions, 0)
+
+            permissions.filter { !it }.forEachIndexed { index, b ->
+                requestPermissions(arrayOf(requiredPermissions[index]), 0)
             }
+
         }
         afterGranted()
     }
