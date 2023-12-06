@@ -10,6 +10,7 @@
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
+		727CE60D2B1FDCCD00969E61 /* kmmsdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 727CE60A2B1FD91D00969E61 /* kmmsdk.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				727CE60D2B1FDCCD00969E61 /* kmmsdk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,7 +326,7 @@
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 					"$(SRCROOT)/../kmmsdk/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
-				"FRAMEWORK_SEARCH_PATHS[arch=*]" = (
+				"FRAMEWORK_SEARCH_PATHS[sdk=*]" = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
@@ -338,11 +340,15 @@
 					"$(inherited)",
 					"-framework",
 					shared,
+					"-framework",
+					kmmsdk,
+					"-lsqlite3",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = lokate.iosexampleapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_LDFLAGS = "";
 			};
 			name = Debug;
 		};
@@ -373,11 +379,15 @@
 					"$(inherited)",
 					"-framework",
 					shared,
+					"-framework",
+					kmmsdk,
+					"-lsqlite3",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = lokate.iosexampleapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_LDFLAGS = "";
 			};
 			name = Release;
 		};

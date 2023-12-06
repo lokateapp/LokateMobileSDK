@@ -79,4 +79,5 @@ sqldelight{
             packageName.set("com.lokate.kmmsdk")
         }
     }
+    linkSqlite = true
 }

@@ -14,19 +14,11 @@ import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.CoreLocation.CLProximity
 import platform.Foundation.NSError
+import platform.Foundation.NSLog
 import platform.Foundation.NSUUID
 import platform.darwin.NSObject
 
 class IOSBeaconScanner : BeaconScanner {
-
-    enum class AuthorizationStatus(id: Int) {
-        NOT_DETERMINED(0),
-        RESTRICTED(1),
-        DENIED(2),
-        AUTHORIZED_ALWAYS(3),
-        AUTHORIZED_WHEN_IN_USE(4)
-    }
-
     object DefaultBeacons {
         val beacons = listOf(
             Beacon(
@@ -57,30 +49,40 @@ class IOSBeaconScanner : BeaconScanner {
         )//yellow)
     }
 
-    internal class IOSBeaconScannerHandler : NSObject(), CLLocationManagerDelegateProtocol{
+    internal class IOSBeaconScannerHandler : NSObject(), CLLocationManagerDelegateProtocol {
+
+        private val NOT_DETERMINED = 0
+        private val RESTRICTED = 1
+        private val DENIED = 2
+        private val AUTHORIZED_ALWAYS = 3
+        private val AUTHORIZED_WHEN_IN_USE = 4
 
         private val _errorObservable = MutableSharedFlow<Exception>()
         private val _beaconScanResultObservable = MutableSharedFlow<List<BeaconScanResult>>()
         private val regions = mutableListOf<Beacon>()
 
-        private val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-            CLLocationManager()
-        }
+        private val manager = CLLocationManager()
 
         init {
+            NSLog("IOSBeaconScannerHandler initialized")
             manager.delegate = this
             manager.allowsBackgroundLocationUpdates = true
         }
 
         private fun startRangingBeacons() {
-            if (regions.isEmpty())
+            NSLog("startRangingBeacons called")
+            if (regions.isEmpty()) {
+                NSLog("Adding default beacons")
                 regions.addAll(DefaultBeacons.beacons)
+            }
             regions.forEach {
+                NSLog("Starting ranging for beacon: UUID - ${it.uuid}, Major - ${it.major}, Minor - ${it.minor}")
                 manager.startRangingBeaconsInRegion(it.toCLBeaconRegion())
             }
         }
 
         private fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
+            NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
             return CLBeaconRegion(
                 uUID = NSUUID(this.uuid),
                 major = this.major.toUShort(),
@@ -91,7 +93,41 @@ class IOSBeaconScanner : BeaconScanner {
 
         private fun stopRangingBeacons(beacons: List<Beacon>) {
             beacons.forEach {
+                NSLog("Stopping ranging for beacon: UUID - ${it.uuid}, Major - ${it.major}, Minor - ${it.minor}")
                 manager.stopRangingBeaconsInRegion(it.toCLBeaconRegion())
+            }
+        }
+
+        override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
+            NSLog("locationManagerDidChangeAuthorization called")
+            startRegionOrAskPermissions()
+        }
+
+        override fun locationManager(
+            manager: CLLocationManager,
+            didChangeAuthorizationStatus: Int
+        ) {
+            NSLog("locationManager didChangeAuthorizationStatus: Status - $didChangeAuthorizationStatus")
+            when (didChangeAuthorizationStatus) {
+                NOT_DETERMINED -> {
+                    NSLog("Requesting location permissions")
+                    manager.requestAlwaysAuthorization()
+                }
+
+                AUTHORIZED_WHEN_IN_USE, AUTHORIZED_ALWAYS -> {
+                    NSLog("Permissions granted, starting ranging for regions")
+                    startRangingForRegions()
+                }
+
+                DENIED, RESTRICTED -> {
+                    NSLog("Localization permission denied")
+                    _errorObservable.tryEmit(Exception("Localization permission denied"))
+                }
+
+                else -> {
+                    NSLog("Requesting location")
+                    manager.requestLocation()
+                }
             }
         }
 
@@ -100,10 +136,11 @@ class IOSBeaconScanner : BeaconScanner {
             rangingBeaconsDidFailForRegion: CLBeaconRegion,
             withError: NSError
         ) {
-            println("rangingBeaconsDidFailForRegion")
+            NSLog("rangingBeaconsDidFailForRegion: Error - ${withError.localizedDescription}")
         }
 
         private fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
+            NSLog("Converting CLBeacon to BeaconScanResult: UUID - ${this.proximityUUID.UUIDString}, RSSI - ${this.rssi}")
             return BeaconScanResult(
                 Beacon(
                     emptyString(),
@@ -119,6 +156,7 @@ class IOSBeaconScanner : BeaconScanner {
         }
 
         private fun CLProximity.toLokateProximity(): BeaconProximity {
+            NSLog("Converting CLProximity to LokateProximity: Proximity - $this")
             return when (this) {
                 CLProximity.CLProximityUnknown -> BeaconProximity.Unknown
                 CLProximity.CLProximityImmediate -> BeaconProximity.Immediate
@@ -133,26 +171,43 @@ class IOSBeaconScanner : BeaconScanner {
             didRangeBeacons: List<*>,
             inRegion: CLBeaconRegion
         ) {
+            NSLog("locationManager didRangeBeacons in region: ${inRegion.identifier}")
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
-                    println(this)
+                    NSLog("Beacon ranged: $this")
                 }
             }
         }
 
         private fun startRangingForRegions() {
+            NSLog("startRangingForRegions called")
             startRangingBeacons()
         }
 
         private fun startRegionOrAskPermissions() {
+            NSLog("startRegionOrAskPermissions called")
+            NSLog("Checking location permissions")
+            NSLog("Authorization status: ${manager.authorizationStatus}")
             when (manager.authorizationStatus) {
-                AuthorizationStatus.NOT_DETERMINED.ordinal -> manager.requestWhenInUseAuthorization()
-                AuthorizationStatus.AUTHORIZED_WHEN_IN_USE.ordinal, AuthorizationStatus.AUTHORIZED_ALWAYS.ordinal -> startRangingForRegions()
-                AuthorizationStatus.DENIED.ordinal, AuthorizationStatus.RESTRICTED.ordinal -> _errorObservable.tryEmit(
-                    Exception("Localization permission denied")
-                )
+                NOT_DETERMINED -> {
+                    NSLog("Requesting location permissions")
+                    manager.requestAlwaysAuthorization()
+                }
 
-                else -> manager.requestLocation()
+                AUTHORIZED_WHEN_IN_USE, AUTHORIZED_ALWAYS -> {
+                    NSLog("Permissions granted, starting ranging for regions")
+                    startRangingForRegions()
+                }
+
+                DENIED, RESTRICTED -> {
+                    NSLog("Localization permission denied")
+                    _errorObservable.tryEmit(Exception("Localization permission denied"))
+                }
+
+                else -> {
+                    NSLog("Requesting location")
+                    manager.requestLocation()
+                }
             }
         }
 
@@ -190,15 +245,18 @@ class IOSBeaconScanner : BeaconScanner {
         }
 
         fun start() {
+            NSLog("start called")
+            manager.requestAlwaysAuthorization()
             startRegionOrAskPermissions()
+        }
+
+        fun stop() {
+            NSLog("stop called")
+            stopRanging()
         }
 
         private fun stopRanging() {
             stopRangingBeacons(regions)
-        }
-
-        fun stop() {
-            stopRanging()
         }
 
     }
