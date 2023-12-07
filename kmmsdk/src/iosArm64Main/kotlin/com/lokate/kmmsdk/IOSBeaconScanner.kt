@@ -2,7 +2,8 @@ package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.domain.beacon.BeaconScanner
 import com.lokate.kmmsdk.domain.beacon.CFlow
-import com.lokate.kmmsdk.domain.beacon.Defauls
+import com.lokate.kmmsdk.domain.beacon.Defaults
+import com.lokate.kmmsdk.domain.beacon.Defaults.MINIMUM_SECONDS_BEFORE_EXIT
 import com.lokate.kmmsdk.domain.beacon.wrap
 import com.lokate.kmmsdk.domain.model.beacon.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
@@ -15,13 +16,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import platform.CoreLocation.CLBeacon
+import platform.CoreLocation.CLBeaconIdentityConstraint
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.CoreLocation.CLProximity
+import platform.Foundation.NSDate
 import platform.Foundation.NSError
 import platform.Foundation.NSLog
 import platform.Foundation.NSUUID
+import platform.Foundation.timeIntervalSince1970
 import platform.darwin.NSObject
 
 class IOSBeaconScanner : BeaconScanner {
@@ -63,11 +67,10 @@ class IOSBeaconScanner : BeaconScanner {
         private val AUTHORIZED_ALWAYS = 3
         private val AUTHORIZED_WHEN_IN_USE = 4
 
-        private var scanPeriodMillis = Defauls.DEFAULT_PERIOD_SCAN
+        private var scanPeriodMillis = Defaults.DEFAULT_PERIOD_SCAN
 
         private val _errorObservable = MutableSharedFlow<Exception>()
         private val _beaconScanResultObservable = MutableSharedFlow<List<BeaconScanResult>>()
-        private var _inRegion: BeaconScanResult? = null
         private val _inRegionObservable = MutableSharedFlow<BeaconScanResult>()
         private val regions = mutableListOf<Beacon>()
 
@@ -89,14 +92,31 @@ class IOSBeaconScanner : BeaconScanner {
             beaconEmitJob = scope.launch {
                 NSLog("Starting beacon emitting job")
                 while (true) {
-                    regionedBeacons.forEach {
-                        NSLog("BeaconToConsider: $it")
-                    }
-                    var beaconWithMaxRssi = regionedBeacons.filter { it.proximity == BeaconProximity.Immediate }.maxByOrNull { it.rssi }
-                    if(beaconWithMaxRssi == null)
-                        beaconWithMaxRssi = regionedBeacons.filter { it.proximity == BeaconProximity.Near }.maxByOrNull { it.rssi }
-                    if(beaconWithMaxRssi != null)
+                    removeInvalidRegions()
+                    var beaconWithMaxRssi =
+                        regionedBeacons.filter { it.proximity == BeaconProximity.Immediate }
+                            .maxByOrNull { it.rssi }
+                    if (beaconWithMaxRssi == null)
+                        beaconWithMaxRssi =
+                            regionedBeacons.filter { it.proximity == BeaconProximity.Near }
+                                .maxByOrNull { it.rssi }
+                    if (beaconWithMaxRssi != null)
                         _inRegionObservable.emit(beaconWithMaxRssi)
+                    else
+                        _inRegionObservable.emit(BeaconScanResult(
+                            Beacon(
+                                emptyString(),
+                                emptyString(),
+                                0,
+                                0
+                            ),
+                            0.0,
+                            0,
+                            0.0,
+                            BeaconProximity.Unknown,
+                            NSDate().timeIntervalSince1970.toLong(),
+                            NSDate().timeIntervalSince1970.toLong()
+                        ))
                     NSLog("Emitting beacon: $beaconWithMaxRssi")
                     kotlinx.coroutines.delay(scanPeriodMillis)
                 }
@@ -177,7 +197,8 @@ class IOSBeaconScanner : BeaconScanner {
                 this.rssi.toDouble(),
                 0,
                 0.0,
-                this.proximity.toLokateProximity()
+                this.proximity.toLokateProximity(),
+                NSDate().timeIntervalSince1970.toLong()
             )
         }
 
@@ -201,10 +222,40 @@ class IOSBeaconScanner : BeaconScanner {
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
                     NSLog("Beacon ranged: $this")
-                    regionedBeacons.removeAll { it.beacon.uuid == this.beacon.uuid }
-                    regionedBeacons.add(this)
+                    if (this.rssi < 0 && this.proximity != BeaconProximity.Unknown) {
+                        if (regionedBeacons.none { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }) {
+                            regionedBeacons.add(
+                                this.copy(
+                                    firstSeen = NSDate().timeIntervalSince1970.toLong(),
+                                    lastSeen = NSDate().timeIntervalSince1970.toLong()
+                                )
+                            )
+                        } else {
+                            val beacon =
+                                regionedBeacons.first { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }
+                            regionedBeacons.removeAll { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }
+                            regionedBeacons.add(beacon.copy(lastSeen = NSDate().timeIntervalSince1970.toLong()))
+                        }
+                    }
                 }
             }
+        }
+        private fun removeInvalidRegions() {
+            val currentTimeStamp = NSDate().timeIntervalSince1970.toLong()
+            regionedBeacons.filter { currentTimeStamp - it.lastSeen > MINIMUM_SECONDS_BEFORE_EXIT }
+                .forEach {
+                    NSLog("Beacon removed: $it, timestamp: $currentTimeStamp, first seen: ${it.firstSeen} last timestamp: ${it.lastSeen}")
+                    regionedBeacons.removeAll { it.beacon.uuid == it.beacon.uuid && it.beacon.major == it.beacon.major && it.beacon.minor == it.beacon.minor }
+                }
+        }
+
+        override fun locationManager(
+            manager: CLLocationManager,
+            didFailRangingBeaconsForConstraint: CLBeaconIdentityConstraint,
+            error: NSError
+        ) {
+            NSLog("locationManager didFailRangingBeaconsForConstraint: Error - ${error.localizedDescription}")
+            regionedBeacons.removeAll { it.beacon.uuid == didFailRangingBeaconsForConstraint.UUID.UUIDString && it.beacon.major == didFailRangingBeaconsForConstraint.major?.intValue && it.beacon.minor == didFailRangingBeaconsForConstraint.minor?.intValue }
         }
 
         private val job = SupervisorJob()
@@ -212,22 +263,7 @@ class IOSBeaconScanner : BeaconScanner {
 
         private var beaconEmitJob: Job? = null
         private var regionedBeacons = mutableListOf<BeaconScanResult>()
-        /*private fun findTheCorrespondingBeacon(didRangeBeacons: List<*>, inRegion: CLBeaconRegion) {
-            //find the corresponding inRegion beacon
-            val beaconScanResult = didRangeBeacons.map {
-                (it as CLBeacon).toBeaconScanResult()
-            }.firstOrNull {
-                it.beacon.uuid == inRegion.proximityUUID.UUIDString &&
-                        it.beacon.major == inRegion.major?.intValue &&
-                        it.beacon.minor == inRegion.minor?.intValue
-            }
-            if (beaconScanResult != null) {
-                NSLog("Beacon found: $beaconScanResult")
-                this._inRegion = inRegion.asLocateBeacon(beaconScanResult)
-                regionedBeacons.removeAll { it.beacon.uuid == inRegion.proximityUUID.UUIDString }
-                regionedBeacons.add(beaconScanResult)
-            }
-        }*/
+
 
         private fun startRangingForRegions() {
             NSLog("startRangingForRegions called")
@@ -314,8 +350,6 @@ class IOSBeaconScanner : BeaconScanner {
 
     }
 
-    private val beaconRegions = mutableListOf<Beacon>()
-
     companion object {
         private val handler: IOSBeaconScannerHandler by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             IOSBeaconScannerHandler()
@@ -370,19 +404,4 @@ class IOSBeaconScanner : BeaconScanner {
     fun observeRegion(): CFlow<BeaconScanResult> {
         return handler.observeRegion()
     }
-}
-
-private fun CLBeaconRegion.asLocateBeacon(beacon: BeaconScanResult): BeaconScanResult {
-    return BeaconScanResult(
-        Beacon(
-            emptyString(),
-            this.proximityUUID.UUIDString,
-            this.major?.intValue ?: 0,
-            this.minor?.intValue ?: 0
-        ),
-        0.0,
-        0,
-        this.radius,
-        beacon.proximity
-    )
 }

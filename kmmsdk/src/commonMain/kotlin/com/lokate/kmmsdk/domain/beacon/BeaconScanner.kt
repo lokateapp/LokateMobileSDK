@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.onEach
  * we are adopting a similar api with kmm beacons, we will have some serious modifications over them so we cannot use directly their implementations.
  */
 
-object Defauls{
+object Defaults{
     const val DEFAULT_PERIOD_SCAN = 1000L
     const val DEFAULT_PERIOD_BETWEEEN_SCAN = 250L
     const val BEACON_LAYOUT_IBEACON = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25,i:0-56"
+    const val MINIMUM_SECONDS_BEFORE_EXIT = 10
 }
 interface BeaconScanner {
     fun setScanPeriod(scanPeriodMillis: Long)

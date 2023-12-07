@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.lokate.kmmsdk.domain.beacon.BeaconScanner
 import com.lokate.kmmsdk.domain.beacon.CFlow
-import com.lokate.kmmsdk.domain.beacon.Defauls.BEACON_LAYOUT_IBEACON
-import com.lokate.kmmsdk.domain.beacon.Defauls.DEFAULT_PERIOD_BETWEEEN_SCAN
-import com.lokate.kmmsdk.domain.beacon.Defauls.DEFAULT_PERIOD_SCAN
+import com.lokate.kmmsdk.domain.beacon.Defaults.BEACON_LAYOUT_IBEACON
+import com.lokate.kmmsdk.domain.beacon.Defaults.DEFAULT_PERIOD_BETWEEEN_SCAN
+import com.lokate.kmmsdk.domain.beacon.Defaults.DEFAULT_PERIOD_SCAN
 import com.lokate.kmmsdk.domain.beacon.wrap
 import com.lokate.kmmsdk.domain.model.beacon.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
