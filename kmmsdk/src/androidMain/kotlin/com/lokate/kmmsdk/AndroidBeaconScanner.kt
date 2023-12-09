@@ -115,10 +115,20 @@ class AndroidBeaconScanner : BeaconScanner {
                 scanBeaconFlow.emit(lastScannedBeacons.toList())
                 currentRegionEnteredBeacon = lastScannedBeacons.maxByOrNull { it.rssi }
                 if (lastRegionEnteredBeacon != null) {
-                    if (currentRegionEnteredBeacon != lastRegionEnteredBeacon) {
-                        Log.d("BeaconScanner", "Region changed: $currentRegionEnteredBeacon")
-                        //fire region exit event
-                        //fire region enter event
+                    if (currentRegionEnteredBeacon == null) {
+                        // region exited
+                        Log.d("BeaconScanner", "Region exited: $lastRegionEnteredBeacon")
+                    } else if (currentRegionEnteredBeacon.beacon.uuid == lastRegionEnteredBeacon.beacon.uuid) {
+                        // region did not change
+                        // if this state remains for 5 times (5 * scanPeriod), notification will be pushed
+                    } else {
+                        // region changed
+                        Log.d("BeaconScanner", "Region changed from $lastRegionEnteredBeacon to $currentRegionEnteredBeacon")
+                    }
+                } else {
+                    if (currentRegionEnteredBeacon != null) {
+                        // region entered
+                        Log.d("BeaconScanner", "Region entered: $currentRegionEnteredBeacon")
                     }
                 }
                 lastRegionEnteredBeacon = currentRegionEnteredBeacon
@@ -161,6 +171,7 @@ class AndroidBeaconScanner : BeaconScanner {
                     if (rssiThreshold == null) {
                         // somehow, this callback is called twice
                         // therefore, possibly duplicates are introduced in lastScannedBeacons
+                        // to avoid that, lastScannedBeacons is declared as a set
                         lastScannedBeacons.addAll(beacons.map {
                             it.toBeaconScanResult()
                         })
