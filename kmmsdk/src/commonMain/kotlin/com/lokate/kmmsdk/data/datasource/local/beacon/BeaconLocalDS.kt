@@ -3,6 +3,7 @@ package com.lokate.kmmsdk.data.datasource.local.beacon
 import com.lokate.kmmsdk.Database
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.domain.model.beacon.Beacon
+import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 
 class BeaconLocalDS(
     private val database: Database
@@ -21,7 +22,9 @@ class BeaconLocalDS(
             Beacon(
                 it.uuid,
                 it.major.toInt(),
-                it.minor.toInt()
+                it.minor.toInt(),
+                "null",
+                BeaconProximity.Unknown
             )
         })
     }
