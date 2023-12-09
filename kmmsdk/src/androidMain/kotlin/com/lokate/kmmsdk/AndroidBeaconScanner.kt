@@ -11,7 +11,6 @@ import com.lokate.kmmsdk.domain.beacon.wrap
 import com.lokate.kmmsdk.domain.model.beacon.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
-import com.lokate.kmmsdk.utils.extension.emptyString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +21,7 @@ import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
 import org.altbeacon.beacon.Identifier
 import org.altbeacon.beacon.MonitorNotifier
+import org.altbeacon.beacon.RangeNotifier
 import org.altbeacon.beacon.Region
 import kotlin.math.pow
 
@@ -37,7 +37,7 @@ class AndroidBeaconScanner : BeaconScanner {
     private var scanPeriodMillis: Long = DEFAULT_PERIOD_SCAN
     private var betweenScanPeriod: Long = DEFAULT_PERIOD_BETWEEEN_SCAN
 
-    private val lastScannedBeacons = mutableListOf<BeaconScanResult>()
+    private val lastScannedBeacons = mutableSetOf<BeaconScanResult>()
     private val lastScannedNonBeacons = mutableListOf<BeaconScanResult>()
 
     private val beaconRegions = mutableListOf<Region>()
@@ -74,7 +74,7 @@ class AndroidBeaconScanner : BeaconScanner {
         this.betweenScanPeriod = betweenScanPeriod
     }
 
-    override fun observeResuls(): CFlow<List<BeaconScanResult>> {
+    override fun observeResults(): CFlow<List<BeaconScanResult>> {
         return scanBeaconFlow.wrap()
     }
 
@@ -86,14 +86,14 @@ class AndroidBeaconScanner : BeaconScanner {
         throw UnsupportedOperationException("set Android Region on Android")
     }
 
-    override fun setAndroidRegions(region: List<Beacon>) {
+    override fun setAndroidRegions(beacons: List<Beacon>) {
         beaconRegions.clear()
-        beaconRegions.addAll(region.map {
+        beaconRegions.addAll(beacons.map {
             Region(
                 it.uuid,
                 Identifier.parse(it.uuid),
-                Identifier.parse(it.major.toString()),
-                Identifier.parse(it.minor.toString())
+                null,
+                null
             )
         })
     }
@@ -112,7 +112,6 @@ class AndroidBeaconScanner : BeaconScanner {
             var lastRegionEnteredBeacon: BeaconScanResult? = null
             var currentRegionEnteredBeacon: BeaconScanResult? = null
             while (isScanning) {
-
                 scanBeaconFlow.emit(lastScannedBeacons.toList())
                 currentRegionEnteredBeacon = lastScannedBeacons.maxByOrNull { it.rssi }
                 if (lastRegionEnteredBeacon != null) {
@@ -128,20 +127,19 @@ class AndroidBeaconScanner : BeaconScanner {
             }
         }
     }
-
     @SuppressLint("MissingPermission")
-    override fun start() {
+    override fun start(branchId: String) {
         if (isScanning)
             stop()
 
         isScanning = true
-        Log.d("BeaconScanner", "start scanning")
-        startEmittingBeaconsJob()
-        //startEmittingNonBeaconsJob()
 
-        provideDefaultRegionIfNecessary()
+        val beaconsToBeScanned: List<Beacon> = getBeaconsOfBranch(branchId)
+        setAndroidRegions(beaconsToBeScanned)
+
         with(manager) {
             removeAllRangeNotifiers()
+            removeAllMonitorNotifiers()
 
             beaconRegions.forEach { region ->
 
@@ -160,10 +158,9 @@ class AndroidBeaconScanner : BeaconScanner {
                 })
 
                 addRangeNotifier { beacons, a ->
-                    beacons.forEach {
-                        it.distance
-                    }
                     if (rssiThreshold == null) {
+                        // somehow, this callback is called twice
+                        // therefore, possibly duplicates are introduced in lastScannedBeacons
                         lastScannedBeacons.addAll(beacons.map {
                             it.toBeaconScanResult()
                         })
@@ -173,55 +170,33 @@ class AndroidBeaconScanner : BeaconScanner {
                     }
                 }
 
-                //startRangingBeacons(region)
                 startMonitoring(region)
                 startRangingBeacons(region)
             }
         }
+
+        startEmittingBeaconsJob()
     }
 
-    private fun provideDefaultRegionIfNecessary() {
-        if (beaconRegions.isEmpty()) {
-            beaconRegions.addAll(
-                listOf(Region("all-beacons-region", null, null, null))
-            )
-
-            //TODO: remove this hardcoded values for testing
-            setAndroidRegions(
-                listOf(
-                    Beacon(
-                        "1",
-                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                        24719,
-                        65453
-                    ),//white
-                    Beacon(
-                        "2",
-                        "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-                        1,
-                        1
-                    )//pink
-                    ,
-                    Beacon(
-                        "3",
-                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                        24719,
-                        28241
-                    ),//red
-                    Beacon(
-                        "4",
-                        "25E296BD-A76C-4013-8E90-4898977A6E1B",
-                        24719,
-                        11975
-                    )//yellow
-                )
-            )
-        }
+    private fun getBeaconsOfBranch(branchId: String): List<Beacon> {
+        // TODO: make api call
+        return listOf(
+            Beacon(
+                "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                1,
+                1
+            ) //pink
+            ,
+            Beacon(
+                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                24719,
+                28241
+            ) //red
+        )
     }
 
     private fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
         val beacon = Beacon(
-            emptyString(),
             id1.toString(),
             id2.toInt(),
             id3.toInt()
@@ -264,7 +239,7 @@ class AndroidBeaconScanner : BeaconScanner {
         beaconEmitJob?.cancel()
         nonBeaconEmitJob?.cancel()
         manager.removeAllRangeNotifiers()
-        manager.startRangingBeacons(Region("all-beacons-region", null, null, null))
+        manager.removeAllMonitorNotifiers()
     }
 
     //taken from kmmbeacons

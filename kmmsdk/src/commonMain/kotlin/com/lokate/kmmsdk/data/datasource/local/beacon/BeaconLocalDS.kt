@@ -19,7 +19,6 @@ class BeaconLocalDS(
         val a = queries.selectAllBeacons()
         return DSResult.Success(a.executeAsList().map {
             Beacon(
-                it.id.toString(),
                 it.uuid,
                 it.major.toInt(),
                 it.minor.toInt()

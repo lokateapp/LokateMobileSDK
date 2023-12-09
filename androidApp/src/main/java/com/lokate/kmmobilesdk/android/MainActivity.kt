@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         val textState = mutableStateOf("")
         bluetoothScanner = AndroidBeaconScanner()
         fun a() = run {
-            bluetoothScanner.observeResuls().watch {
+            bluetoothScanner.observeResults().watch {
                 textState.value = it.toString()
             }
         }
@@ -95,12 +95,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     GreetingView(Greeting().greet(), ::getPermissions, {
-                        bluetoothScanner.start()
+                        bluetoothScanner.start("123")
                         a()
                     }, textState)
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bluetoothScanner.stop()
     }
 }
 

@@ -24,16 +24,16 @@ interface BeaconScanner {
     fun setScanPeriod(scanPeriodMillis: Long)
     fun setBetweenScanPeriod(betweenScanPeriod:Long)
 
-    fun observeResuls(): CFlow<List<BeaconScanResult>>
+    fun observeResults(): CFlow<List<BeaconScanResult>>
 
     fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>>
 
     fun setIosRegions(regions: List<Beacon>)
-    fun setAndroidRegions(region: List<Beacon>)
+    fun setAndroidRegions(beacons: List<Beacon>)
 
     fun setRssiThreshold(threshold: Int)
     fun observeErrors(): CFlow<Exception>
-    fun start()
+    fun start(branchId: String)
     fun stop()
 }
 
