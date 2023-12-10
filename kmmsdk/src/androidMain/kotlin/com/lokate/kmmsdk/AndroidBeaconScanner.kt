@@ -238,21 +238,22 @@ class AndroidBeaconScanner : BeaconScanner {
     }
 
     // todo: remove parameter and move callback to constructor
-    private fun startEmittingBeaconsJob(regionStayCallback: (String) -> Unit) {
+    private fun startEmittingBeaconsJob(regionStayCallback: (List<String>) -> Unit) {
         beaconEmitJob?.cancel()
         beaconEmitJob = scope.launch {
             var lastRegionEnteredBeacons: Set<LokateBeacon> = setOf()
             var currentRegionEnteredBeacons: Set<LokateBeacon>;
             var stayCount = 0
+            var longStayBeacons = mutableSetOf<LokateBeacon>()
             while (isScanning) {
                 scanBeaconFlow.emit(lastScannedBeacons.toList())
                 currentRegionEnteredBeacons = filterScannedBeacons(lastScannedBeacons)
                 for (beacon in currentRegionEnteredBeacons) {
                     if (lastRegionEnteredBeacons.contains(beacon)) {
                         stayCount++
-                        if (stayCount == 3) {
+                        if (stayCount == 1 /* adjust it according to when you want to send notification*/) {
                             // staying in region for a long time
-                            regionStayCallback(beacon.campaign)
+                            longStayBeacons.add(beacon)
                             stayCount = 0
                         }
                     } else {
@@ -269,6 +270,10 @@ class AndroidBeaconScanner : BeaconScanner {
                         Log.d("BeaconScanner", "Region exited: $beacon")
                     }
                 }
+                regionStayCallback(longStayBeacons.map{
+                  it.campaign
+                })
+                longStayBeacons.clear()
                 lastRegionEnteredBeacons = currentRegionEnteredBeacons
                 lastScannedBeacons.clear()
                 kotlinx.coroutines.delay(scanPeriodMillis)
@@ -277,7 +282,7 @@ class AndroidBeaconScanner : BeaconScanner {
     }
     // todo: maybe remove parameters from start function and move them to constructor?
     @SuppressLint("MissingPermission")
-    override fun start(branchId: String, regionStayCallback: (String) -> Unit) {
+    override fun start(branchId: String, regionStayCallback: (List<String>) -> Unit) {
         if (isScanning)
             stop()
 

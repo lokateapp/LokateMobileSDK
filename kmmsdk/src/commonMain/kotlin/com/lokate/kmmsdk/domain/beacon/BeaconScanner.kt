@@ -33,7 +33,7 @@ interface BeaconScanner {
 
     fun setRssiThreshold(threshold: Int)
     fun observeErrors(): CFlow<Exception>
-    fun start(branchId: String, regionStayCallback: (String) -> Unit)
+    fun start(branchId: String, regionStayCallback: (List<String>) -> Unit)
     fun stop()
 }
 
