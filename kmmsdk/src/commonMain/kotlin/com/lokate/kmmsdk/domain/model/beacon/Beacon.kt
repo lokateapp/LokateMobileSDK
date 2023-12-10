@@ -1,6 +1,6 @@
 package com.lokate.kmmsdk.domain.model.beacon
 
-data class Beacon(
+data class LokateBeacon(
     val uuid: String,
     val major: Int,
     val minor: Int,

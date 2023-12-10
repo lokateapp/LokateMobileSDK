@@ -1,6 +1,6 @@
 package com.lokate.kmmsdk.domain.beacon
 
-import com.lokate.kmmsdk.domain.model.beacon.Beacon
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import io.ktor.utils.io.core.Closeable
 import kotlinx.coroutines.CoroutineScope
@@ -28,8 +28,8 @@ interface BeaconScanner {
 
     fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>>
 
-    fun setIosRegions(regions: List<Beacon>)
-    fun setAndroidRegions(beacons: List<Beacon>)
+    fun setIosRegions(regions: List<LokateBeacon>)
+    fun setAndroidRegions(beacons: List<LokateBeacon>)
 
     fun setRssiThreshold(threshold: Int)
     fun observeErrors(): CFlow<Exception>

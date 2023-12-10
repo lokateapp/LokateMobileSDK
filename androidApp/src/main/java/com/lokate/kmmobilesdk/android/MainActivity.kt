@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     GreetingView(Greeting().greet(), ::getPermissions, {
-                        bluetoothScanner.start("123") {campaign ->
+                        bluetoothScanner.start("1") {campaign ->
                             // push notification
                             println(campaign)
                         }
