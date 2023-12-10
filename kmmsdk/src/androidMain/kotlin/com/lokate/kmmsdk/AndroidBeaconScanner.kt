@@ -31,11 +31,22 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Body
+import retrofit2.http.POST
+import com.google.gson.annotations.SerializedName
 
+data class EventRequest(
+    @SerializedName("customerId") val customerId: String,
+    @SerializedName("beaconUID") val beaconUID: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("timestamp") val timestamp: Long
+)
 
 interface BeaconApiService {
     @GET("/mobile/activeBeacons")
     fun getActiveBeacons(@Query("branchId") branchId: String): Call<JsonArray>
+    @POST("/mobile/beaconArea")
+    fun postBeaconArea(@Body request: EventRequest): Call<Void>
 }
 
 class BeaconApiClient {
@@ -47,9 +58,7 @@ class BeaconApiClient {
     private val beaconApiService: BeaconApiService = retrofit.create(BeaconApiService::class.java)
 
     suspend fun fetchBeacons(branchId: String): List<LokateBeacon> {
-        Log.d("asdasdff", "branchId: $branchId")
         val call = beaconApiService.getActiveBeacons(branchId)
-        Log.d("asdf", "branchId: $branchId")
         val response = call.execute()
 
         if (response.isSuccessful) {
@@ -88,6 +97,10 @@ class BeaconApiClient {
         }
 
         return emptyList()
+    }
+
+    fun postBeaconArea(request: EventRequest): Call<Void> {
+        return beaconApiService.postBeaconArea(request)
     }
 }
 
@@ -176,11 +189,41 @@ class AndroidBeaconScanner : BeaconScanner {
     }
 
     private fun sendEnterEvent(beacon: LokateBeacon) {
+        val request = EventRequest(
+            customerId = "customer1",
+            beaconUID = beacon.uuid,
+            status = "ENTER",
+            timestamp = System.currentTimeMillis() / 1000   // seconds
+        )
 
+        GlobalScope.launch(Dispatchers.IO) {
+            val postResponse = beaconApiClient.postBeaconArea(request).execute()
+
+            if (postResponse.isSuccessful) {
+                println("POST request successful")
+            } else {
+                println("POST request failed: ${postResponse.code()}")
+            }
+        }
     }
 
     private fun sendExitEvent(beacon: LokateBeacon) {
+        val request = EventRequest(
+            customerId = "customer1",
+            beaconUID = beacon.uuid,
+            status = "EXIT",
+            timestamp = System.currentTimeMillis() / 1000   // seconds
+        )
 
+        GlobalScope.launch(Dispatchers.IO) {
+            val postResponse = beaconApiClient.postBeaconArea(request).execute()
+
+            if (postResponse.isSuccessful) {
+                println("POST request successful")
+            } else {
+                println("POST request failed: ${postResponse.code()}")
+            }
+        }
     }
 
     private fun filterScannedBeacons(scannedBeacons: Set<BeaconScanResult>): Set<LokateBeacon> {
@@ -209,7 +252,6 @@ class AndroidBeaconScanner : BeaconScanner {
                         stayCount++
                         if (stayCount == 3) {
                             // staying in region for a long time
-                            Log.d("asdf", "$beacon")
                             regionStayCallback(beacon.campaign)
                             stayCount = 0
                         }
