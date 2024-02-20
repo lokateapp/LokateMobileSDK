@@ -3,13 +3,11 @@ package com.lokate.kmmsdk
 import com.lokate.kmmsdk.Defaults.MINIMUM_SECONDS_BEFORE_EXIT
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.extension.emptyString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import platform.CoreLocation.CLBeacon
@@ -25,7 +23,7 @@ import platform.Foundation.NSUUID
 import platform.Foundation.timeIntervalSince1970
 import platform.darwin.NSObject
 
-class IOSBeaconScanner : BeaconScanner {
+class IOSBeaconScanner2 : BeaconScanner {
     object DefaultBeacons {
         val beacons = listOf(
             Beacon(
@@ -353,63 +351,48 @@ class IOSBeaconScanner : BeaconScanner {
         }
     }
 
+    init {
+        //handler.setBetweenScanPeriod(Defauls.DEFAULT_PERIOD_BETWEEEN_SCAN)
+        //handler.setScanPeriod(Defauls.DEFAULT_PERIOD_SCAN)
+    }
+
     override fun setScanPeriod(scanPeriodMillis: Long) {
         handler.setScanPeriod(scanPeriodMillis)
     }
 
-    override fun startScanning() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stopScanning() {
-        TODO("Not yet implemented")
-    }
-
-    override fun setRegions(regions: List<LokateBeacon>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun complete() {
-        TODO("Not yet implemented")
-    }
-
-    override fun scanResultFlow(): Flow<Set<BeaconScanResult>> {
-        TODO("Not yet implemented")
-    }
-
-    fun setBetweenScanPeriod(betweenScanPeriod: Long) {
+    override fun setBetweenScanPeriod(betweenScanPeriod: Long) {
         //handler.setBetweenScanPeriod(betweenScanPeriod)
     }
 
-    fun observeResults(): CFlow<List<BeaconScanResult>> {
+    override fun observeResults(): CFlow<List<BeaconScanResult>> {
         return handler.observeResuls()
     }
 
-    fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>> {
+    override fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>> {
         return handler.observeNonBeaconResults()
     }
 
-    fun setIosRegions(regions: List<Beacon>) {
+    override fun setIosRegions(regions: List<Beacon>) {
         handler.setIosRegions(regions)
     }
 
-    fun setAndroidRegions(region: List<Beacon>) {
+    override fun setAndroidRegions(region: List<Beacon>) {
         handler.setAndroidRegions(region)
     }
 
-    fun setRssiThreshold(threshold: Int) {
+    override fun setRssiThreshold(threshold: Int) {
         handler.setRssiThreshold(threshold)
     }
 
-    fun observeErrors(): CFlow<Exception> {
+    override fun observeErrors(): CFlow<Exception> {
         return handler.observeErrors()
     }
 
-    fun start() {
+    override fun start() {
         handler.start()
     }
 
-    fun stop() {
+    override fun stop() {
         handler.stop()
     }
 
