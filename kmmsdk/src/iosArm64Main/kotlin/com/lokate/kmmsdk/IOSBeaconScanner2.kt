@@ -1,147 +1,64 @@
 package com.lokate.kmmsdk
 
-import com.lokate.kmmsdk.Defaults.MINIMUM_SECONDS_BEFORE_EXIT
-import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
-import com.lokate.kmmsdk.utils.extension.emptyString
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import platform.CoreLocation.CLBeacon
-import platform.CoreLocation.CLBeaconIdentityConstraint
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
-import platform.CoreLocation.CLProximity
-import platform.Foundation.NSDate
-import platform.Foundation.NSError
 import platform.Foundation.NSLog
-import platform.Foundation.NSUUID
-import platform.Foundation.timeIntervalSince1970
 import platform.darwin.NSObject
 
-class IOSBeaconScanner2 : BeaconScanner {
-    object DefaultBeacons {
-        val beacons = listOf(
-            Beacon(
-                "1",
-                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                24719,
-                65453
-            ),//white
-            Beacon(
-                "2",
-                "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-                1,
-                1
-            )//pink
-            ,
-            Beacon(
-                "3",
-                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                24719,
-                28241
-            ),//red
-            Beacon(
-                "4",
-                "25E296BD-A76C-4013-8E90-4898977A6E1B",
-                24719,
-                11975
-            )
-        )//yellow)
-    }
+class IOSBeaconScanner2 : BeaconScanner2 {
 
-    internal class IOSBeaconScannerHandler : NSObject(), CLLocationManagerDelegateProtocol {
+    internal class iOSBeaconScannerHelper : NSObject(), CLLocationManagerDelegateProtocol {
 
-        private val NOT_DETERMINED = 0
-        private val RESTRICTED = 1
-        private val DENIED = 2
-        private val AUTHORIZED_ALWAYS = 3
-        private val AUTHORIZED_WHEN_IN_USE = 4
+        private val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            CLLocationManager()
+        }
+        private val mainJob = SupervisorJob()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
 
-        private var scanPeriodMillis = Defaults.DEFAULT_PERIOD_SCAN
-
-        private val _errorObservable = MutableSharedFlow<Exception>()
-        private val _beaconScanResultObservable = MutableSharedFlow<List<BeaconScanResult>>()
-        private val _inRegionObservable = MutableSharedFlow<BeaconScanResult>()
-        private val regions = mutableListOf<Beacon>()
-
-        private val manager = CLLocationManager()
+        private var regions: List<CLBeaconRegion> = listOf()
+        private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
+        private var running: Boolean = false
 
         init {
-            NSLog("IOSBeaconScannerHandler initialized")
             manager.delegate = this
+            manager.requestAlwaysAuthorization()
             manager.allowsBackgroundLocationUpdates = true
         }
 
-        private fun startRangingBeacons() {
-            NSLog("startRangingBeacons called")
+        fun startScanning() {
+            if (running) {
+                NSLog("Already running")
+                return
+            }
             if (regions.isEmpty()) {
-                NSLog("Adding default beacons")
-                regions.addAll(DefaultBeacons.beacons)
+                NSLog("No regions to scan1")
+                setRegions(listOf())
+                NSLog("added default regions")
+                //return
             }
-            beaconEmitJob?.cancel()
-            beaconEmitJob = scope.launch {
-                NSLog("Starting beacon emitting job")
-                while (true) {
-                    removeInvalidRegions()
-                    var beaconWithMaxRssi =
-                        regionedBeacons.filter { it.proximity == BeaconProximity.Immediate }
-                            .maxByOrNull { it.rssi }
-                    if (beaconWithMaxRssi == null)
-                        beaconWithMaxRssi =
-                            regionedBeacons.filter { it.proximity == BeaconProximity.Near }
-                                .maxByOrNull { it.rssi }
-                    if (beaconWithMaxRssi != null)
-                        _inRegionObservable.emit(beaconWithMaxRssi)
-                    else
-                        _inRegionObservable.emit(BeaconScanResult(
-                            Beacon(
-                                emptyString(),
-                                emptyString(),
-                                0,
-                                0
-                            ),
-                            0.0,
-                            0,
-                            0.0,
-                            BeaconProximity.Unknown,
-                            NSDate().timeIntervalSince1970.toLong(),
-                            NSDate().timeIntervalSince1970.toLong()
-                        ))
-                    NSLog("Emitting beacon: $beaconWithMaxRssi")
-                    kotlinx.coroutines.delay(scanPeriodMillis)
-                }
-            }
+
             regions.forEach {
-                NSLog("Starting ranging for beacon: UUID - ${it.uuid}, Major - ${it.major}, Minor - ${it.minor}")
-                manager.startRangingBeaconsInRegion(it.toCLBeaconRegion())
+                NSLog("Starting ranging for region: $it")
+                manager.startRangingBeaconsInRegion(it)
             }
-        }
-
-        private fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
-            NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
-            return CLBeaconRegion(
-                uUID = NSUUID(this.uuid),
-                major = this.major.toUShort(),
-                minor = this.minor.toUShort(),
-                identifier = emptyString()
-            )
-        }
-
-        private fun stopRangingBeacons(beacons: List<Beacon>) {
-            beacons.forEach {
-                NSLog("Stopping ranging for beacon: UUID - ${it.uuid}, Major - ${it.major}, Minor - ${it.minor}")
-                manager.stopRangingBeaconsInRegion(it.toCLBeaconRegion())
-            }
+            running = true
         }
 
         override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
             NSLog("locationManagerDidChangeAuthorization called")
-            startRegionOrAskPermissions()
+            NSLog("locationManagerDidChangeAuthorization ${manager.authorizationStatus}")
+            startScanning()
         }
 
         override fun locationManager(
@@ -157,12 +74,11 @@ class IOSBeaconScanner2 : BeaconScanner {
 
                 AUTHORIZED_WHEN_IN_USE, AUTHORIZED_ALWAYS -> {
                     NSLog("Permissions granted, starting ranging for regions")
-                    startRangingForRegions()
+                    startScanning()
                 }
 
                 DENIED, RESTRICTED -> {
                     NSLog("Localization permission denied")
-                    _errorObservable.tryEmit(Exception("Localization permission denied"))
                 }
 
                 else -> {
@@ -172,231 +88,99 @@ class IOSBeaconScanner2 : BeaconScanner {
             }
         }
 
-        override fun locationManager(
-            manager: CLLocationManager,
-            rangingBeaconsDidFailForRegion: CLBeaconRegion,
-            withError: NSError
-        ) {
-            NSLog("rangingBeaconsDidFailForRegion: Error - ${withError.localizedDescription}")
-        }
-
-        private fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
-            NSLog("Converting CLBeacon to BeaconScanResult: UUID - ${this.proximityUUID.UUIDString}, RSSI - ${this.rssi}")
-            return BeaconScanResult(
-                Beacon(
-                    emptyString(),
-                    this.proximityUUID.UUIDString,
-                    this.major.intValue,
-                    this.minor.intValue
-                ),
-                this.rssi.toDouble(),
-                0,
-                0.0,
-                this.proximity.toLokateProximity(),
-                NSDate().timeIntervalSince1970.toLong()
-            )
-        }
-
-        private fun CLProximity.toLokateProximity(): BeaconProximity {
-            NSLog("Converting CLProximity to LokateProximity: Proximity - $this")
-            return when (this) {
-                CLProximity.CLProximityUnknown -> BeaconProximity.Unknown
-                CLProximity.CLProximityImmediate -> BeaconProximity.Immediate
-                CLProximity.CLProximityNear -> BeaconProximity.Near
-                CLProximity.CLProximityFar -> BeaconProximity.Far
-                else -> BeaconProximity.Unknown
-            }
-        }
 
         override fun locationManager(
             manager: CLLocationManager,
             didRangeBeacons: List<*>,
             inRegion: CLBeaconRegion
         ) {
-            NSLog("locationManager didRangeBeacons in region: ${inRegion.identifier}")
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
-                    NSLog("Beacon ranged: $this")
-                    if (this.rssi < 0 && this.proximity != BeaconProximity.Unknown) {
-                        if (regionedBeacons.none { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }) {
-                            regionedBeacons.add(
-                                this.copy(
-                                    firstSeen = NSDate().timeIntervalSince1970.toLong(),
-                                    lastSeen = NSDate().timeIntervalSince1970.toLong()
-                                )
-                            )
-                        } else {
-                            val beacon =
-                                regionedBeacons.first { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }
-                            regionedBeacons.removeAll { it.beacon.uuid == this.beacon.uuid && it.beacon.major == this.beacon.major && it.beacon.minor == this.beacon.minor }
-                            regionedBeacons.add(beacon.copy(lastSeen = NSDate().timeIntervalSince1970.toLong()))
-                        }
+                    coroutineScope.launch {
+                        NSLog("Emitting beacon result eeeee ${this@with}")
+                        beaconFlow.emit(this@with)
                     }
                 }
             }
         }
-        private fun removeInvalidRegions() {
-            val currentTimeStamp = NSDate().timeIntervalSince1970.toLong()
-            regionedBeacons.filter { currentTimeStamp - it.lastSeen > MINIMUM_SECONDS_BEFORE_EXIT }
-                .forEach {
-                    NSLog("Beacon removed: $it, timestamp: $currentTimeStamp, first seen: ${it.firstSeen} last timestamp: ${it.lastSeen}")
-                    regionedBeacons.removeAll { it.beacon.uuid == it.beacon.uuid && it.beacon.major == it.beacon.major && it.beacon.minor == it.beacon.minor }
-                }
+
+        fun stopScanning() {
+            if (!running) {
+                NSLog("Not running")
+                return
+            }
+            regions.forEach {
+                manager.stopRangingBeaconsInRegion(it)
+            }
+            running = false
         }
 
-        override fun locationManager(
-            manager: CLLocationManager,
-            didFailRangingBeaconsForConstraint: CLBeaconIdentityConstraint,
-            error: NSError
-        ) {
-            NSLog("locationManager didFailRangingBeaconsForConstraint: Error - ${error.localizedDescription}")
-            regionedBeacons.removeAll { it.beacon.uuid == didFailRangingBeaconsForConstraint.UUID.UUIDString && it.beacon.major == didFailRangingBeaconsForConstraint.major?.intValue && it.beacon.minor == didFailRangingBeaconsForConstraint.minor?.intValue }
-        }
+        fun setRegions(regions: List<LokateBeacon>) {
+            if (regions.isEmpty()) {
+                this.regions = listOf(
+                    LokateBeacon(
+                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                        24719,
+                        65453,
+                        ""
+                    ),//white
+                    LokateBeacon(
 
-        private val job = SupervisorJob()
-        private val scope = CoroutineScope(Dispatchers.Main + job)
-
-        private var beaconEmitJob: Job? = null
-        private var regionedBeacons = mutableListOf<BeaconScanResult>()
-
-
-        private fun startRangingForRegions() {
-            NSLog("startRangingForRegions called")
-            startRangingBeacons()
-        }
-
-        private fun startRegionOrAskPermissions() {
-            NSLog("startRegionOrAskPermissions called")
-            NSLog("Checking location permissions")
-            NSLog("Authorization status: ${manager.authorizationStatus}")
-            when (manager.authorizationStatus) {
-                NOT_DETERMINED -> {
-                    NSLog("Requesting location permissions")
-                    manager.requestAlwaysAuthorization()
-                }
-
-                AUTHORIZED_WHEN_IN_USE, AUTHORIZED_ALWAYS -> {
-                    NSLog("Permissions granted, starting ranging for regions")
-                    startRangingForRegions()
-                }
-
-                DENIED, RESTRICTED -> {
-                    NSLog("Localization permission denied")
-                    _errorObservable.tryEmit(Exception("Localization permission denied"))
-                }
-
-                else -> {
-                    NSLog("Requesting location")
-                    manager.requestLocation()
-                }
+                        "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                        1,
+                        1,
+                        "2",
+                    )//pink
+                    ,
+                    LokateBeacon(
+                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                        24719,
+                        28241,
+                        "3",
+                    ),//White
+                    LokateBeacon(
+                        "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
+                        1,
+                        1,
+                        "3"
+                    )
+                ).map { it.toCLBeaconRegion() }//yellow)
+                //NSLog("No regions to scan")
+                //return
+            } else this.regions = regions.map {
+                it.toCLBeaconRegion()
             }
         }
 
-        fun setScanPeriod(scanPeriodMillis: Long) {
-            NSLog("setScanPeriod called")
-            this.scanPeriodMillis = scanPeriodMillis
+        fun scanResultFlow(): Flow<BeaconScanResult> {
+            return beaconFlow
         }
-
-        fun observeResuls(): CFlow<List<BeaconScanResult>> {
-            return _beaconScanResultObservable.wrap()
-        }
-
-        fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>> {
-            throw UnsupportedOperationException("Not planning to implement this")
-        }
-
-        fun setIosRegions(regions: List<Beacon>) {
-            this.regions.clear()
-            this.regions.addAll(regions)
-        }
-
-        fun setAndroidRegions(region: List<Beacon>) {
-            throw UnsupportedOperationException("set iOS Region on iOS")
-        }
-
-        fun setRssiThreshold(threshold: Int) {
-            throw UnsupportedOperationException("Cannot set RSSI threshold on iOS")
-        }
-
-        fun observeErrors(): CFlow<Exception> {
-            return _errorObservable.wrap()
-        }
-
-        fun observeRegion(): CFlow<BeaconScanResult> {
-            return _inRegionObservable.wrap()
-        }
-
-        fun start() {
-            NSLog("start called")
-            manager.requestAlwaysAuthorization()
-            startRegionOrAskPermissions()
-        }
-
-        fun stop() {
-            NSLog("stop called")
-            stopRanging()
-
-            beaconEmitJob?.cancel()
-        }
-
-        private fun stopRanging() {
-            stopRangingBeacons(regions)
-        }
-
     }
 
     companion object {
-        private val handler: IOSBeaconScannerHandler by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-            IOSBeaconScannerHandler()
+        private val helper: iOSBeaconScannerHelper by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            iOSBeaconScannerHelper()
         }
     }
 
-    init {
-        //handler.setBetweenScanPeriod(Defauls.DEFAULT_PERIOD_BETWEEEN_SCAN)
-        //handler.setScanPeriod(Defauls.DEFAULT_PERIOD_SCAN)
+    override fun startScanning() {
+        helper.startScanning()
     }
 
-    override fun setScanPeriod(scanPeriodMillis: Long) {
-        handler.setScanPeriod(scanPeriodMillis)
+    override fun stopScanning() {
+        helper.stopScanning()
     }
 
-    override fun setBetweenScanPeriod(betweenScanPeriod: Long) {
-        //handler.setBetweenScanPeriod(betweenScanPeriod)
+    override fun setRegions(regions: List<LokateBeacon>) {
+        helper.setRegions(regions)
     }
 
-    override fun observeResults(): CFlow<List<BeaconScanResult>> {
-        return handler.observeResuls()
+    @Suppress("unused")
+    fun setRegions() {
+        helper.setRegions(listOf())
     }
 
-    override fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>> {
-        return handler.observeNonBeaconResults()
-    }
-
-    override fun setIosRegions(regions: List<Beacon>) {
-        handler.setIosRegions(regions)
-    }
-
-    override fun setAndroidRegions(region: List<Beacon>) {
-        handler.setAndroidRegions(region)
-    }
-
-    override fun setRssiThreshold(threshold: Int) {
-        handler.setRssiThreshold(threshold)
-    }
-
-    override fun observeErrors(): CFlow<Exception> {
-        return handler.observeErrors()
-    }
-
-    override fun start() {
-        handler.start()
-    }
-
-    override fun stop() {
-        handler.stop()
-    }
-
-    fun observeRegion(): CFlow<BeaconScanResult> {
-        return handler.observeRegion()
+    override fun scanResultFlow(): Flow<BeaconScanResult> {
+        return helper.scanResultFlow()
     }
 }

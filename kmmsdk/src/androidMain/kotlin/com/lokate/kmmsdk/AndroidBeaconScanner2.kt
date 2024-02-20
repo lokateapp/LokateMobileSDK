@@ -1,16 +1,13 @@
 package com.lokate.kmmsdk
 
 import android.util.Log
-import com.lokate.kmmsdk.Defaults.MINIMUM_SECONDS_BEFORE_EXIT
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.toBeaconScanResult
 import com.lokate.kmmsdk.utils.toRegion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -27,20 +24,15 @@ class AndroidBeaconScanner2 : BeaconScanner2 {
                 isRegionStatePersistenceEnabled = false
             }
         }
-        private var mainJob = SupervisorJob()
-        private val coroutineScope = CoroutineScope(Dispatchers.Main + mainJob)
+        private val mainJob = SupervisorJob()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
     }
 
-    private var interval: Long = 150L
-    private var beaconEmitterJob: Job? = null
     private var running: Boolean = false
 
     private var regions = mutableListOf<Region>()
-    private val internalScanResults: MutableSet<BeaconScanResult> = mutableSetOf()
-    private val beaconFlow: MutableSharedFlow<Set<BeaconScanResult>> = MutableSharedFlow()
-    override fun setScanPeriod(interval: Long) {
-        this.interval = interval
-    }
+    //private val internalScanResults: MutableSet<BeaconScanResult> = mutableSetOf()
+    private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
 
     /*
     Temporary beacons for testing
@@ -75,7 +67,7 @@ class AndroidBeaconScanner2 : BeaconScanner2 {
     )//yellow)
 
     override fun startScanning() {
-        if (beaconEmitterJob?.isActive == true) {
+        if (running) {
             Log.e("BeaconScanner2", "Already scanning")
             return
         }
@@ -96,7 +88,10 @@ class AndroidBeaconScanner2 : BeaconScanner2 {
             addRangeNotifier { beacons, region ->
                 Log.e("BeaconScanner2", "Beacons found: $beacons")
                 beacons.forEach { beacon ->
-                    when (val current =
+                    coroutineScope.launch {
+                        beaconFlow.emit(beacon.toBeaconScanResult())
+                    }
+                    /*when (val current =
                         internalScanResults.firstOrNull { it.beaconUUID == beacon.id1.toString() && it.major == beacon.id2.toInt() && it.minor == beacon.id3.toInt() }) {
                         null -> {
                             internalScanResults.add(beacon.toBeaconScanResult())
@@ -112,42 +107,18 @@ class AndroidBeaconScanner2 : BeaconScanner2 {
                             )
                         }
                     }
+
+                     */
                 }
             }
             regions.forEach {
-
                 startRangingBeacons(it)
-            }
-            Log.e("BeaconScanner2", "Starting ranging")
-            beaconEmitterJob = coroutineScope.launch {
-                try {
-                    while (running) {
-                        internalScanResults.removeIf {
-                            it.lastSeen + MINIMUM_SECONDS_BEFORE_EXIT*1000L < System.currentTimeMillis()
-                        }
-                        Log.d("BeaconScanner2", "Emitting")
-                        beaconFlow.emit(internalScanResults)
-                        Log.d("BeaconScanner2", "Emitting ${internalScanResults.size} beacons")
-                        Log.d("BeaconScanner2", "Emitting ${internalScanResults}")
-                        delay(interval)
-                    }
-                } catch (e: Exception) {
-                    Log.e("BeaconScanner2", "Error starting ranging", e)
-                    beaconEmitterJob?.cancel()
-                    running = false
-                }
             }
         }
     }
 
-    override fun complete() {
-        stopScanning()
-        mainJob.cancel()
-        running = false
-    }
-
     override fun stopScanning() {
-        beaconEmitterJob?.cancel()
+        mainJob.cancel()
         running = false
 
     }
@@ -169,7 +140,7 @@ class AndroidBeaconScanner2 : BeaconScanner2 {
         )
     }
 
-    override fun scanResultFlow(): Flow<Set<BeaconScanResult>> {
+    override fun scanResultFlow(): Flow<BeaconScanResult> {
         return beaconFlow
     }
 }

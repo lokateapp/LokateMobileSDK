@@ -1,4 +1,6 @@
+/*
 package com.lokate.kmmsdk
+
 
 import com.lokate.kmmsdk.Defaults.MINIMUM_SECONDS_BEFORE_EXIT
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
@@ -122,16 +124,6 @@ class IOSBeaconScanner : BeaconScanner {
                 NSLog("Starting ranging for beacon: UUID - ${it.uuid}, Major - ${it.major}, Minor - ${it.minor}")
                 manager.startRangingBeaconsInRegion(it.toCLBeaconRegion())
             }
-        }
-
-        private fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
-            NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
-            return CLBeaconRegion(
-                uUID = NSUUID(this.uuid),
-                major = this.major.toUShort(),
-                minor = this.minor.toUShort(),
-                identifier = emptyString()
-            )
         }
 
         private fun stopRangingBeacons(beacons: List<Beacon>) {
@@ -389,6 +381,14 @@ class IOSBeaconScanner : BeaconScanner {
         return handler.observeNonBeaconResults()
     }
 
+    override fun setIosRegions(regions: List<LokateBeacon>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAndroidRegions(beacons: List<LokateBeacon>) {
+        TODO("Not yet implemented")
+    }
+
     fun setIosRegions(regions: List<Beacon>) {
         handler.setIosRegions(regions)
     }
@@ -405,6 +405,10 @@ class IOSBeaconScanner : BeaconScanner {
         return handler.observeErrors()
     }
 
+    override fun start(branchId: String, regionStayCallback: (List<String>) -> Unit) {
+        TODO("Not yet implemented")
+    }
+
     fun start() {
         handler.start()
     }
@@ -416,4 +420,4 @@ class IOSBeaconScanner : BeaconScanner {
     fun observeRegion(): CFlow<BeaconScanResult> {
         return handler.observeRegion()
     }
-}
+}*/

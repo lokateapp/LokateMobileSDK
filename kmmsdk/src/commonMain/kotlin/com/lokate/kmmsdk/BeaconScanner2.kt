@@ -5,11 +5,8 @@ import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.flow.Flow
 
 interface BeaconScanner2 {
-
-    fun setScanPeriod(interval: Long)
     fun startScanning()
     fun stopScanning()
     fun setRegions(regions: List<LokateBeacon>)
-    fun complete()
-    fun scanResultFlow(): Flow<Set<BeaconScanResult>>
+    fun scanResultFlow(): Flow<BeaconScanResult>
 }
