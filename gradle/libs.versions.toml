@@ -15,6 +15,7 @@ retrofit = "2.9.0"
 sqldelight = "2.0.0"
 settingsVer = "1.1.1"
 altBeacon = "2.20.3"
+napierVersion = "2.7.1"
 
 [libraries]
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
@@ -47,6 +48,9 @@ slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion
 #multiplatform shared pref
 russhwolf-settings = {module = "com.russhwolf:multiplatform-settings", version.ref = "settingsVer"}
 russhwolf-settings-no-arg = {module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "settingsVer"}
+
+#multiplatform logging
+napier = {module = "io.github.aakira:napier", version.ref = "napierVersion"}
 
 #sqldelight-common
 #sqldelight android

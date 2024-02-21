@@ -97,7 +97,7 @@ class IOSBeaconScanner2 : BeaconScanner2 {
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
                     coroutineScope.launch {
-                        NSLog("Emitting beacon result eeeee ${this@with}")
+                        //NSLog("Emitting beacon result eeeee ${this@with}")
                         beaconFlow.emit(this@with)
                     }
                 }
@@ -117,36 +117,8 @@ class IOSBeaconScanner2 : BeaconScanner2 {
 
         fun setRegions(regions: List<LokateBeacon>) {
             if (regions.isEmpty()) {
-                this.regions = listOf(
-                    LokateBeacon(
-                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                        24719,
-                        65453,
-                        ""
-                    ),//white
-                    LokateBeacon(
-
-                        "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-                        1,
-                        1,
-                        "2",
-                    )//pink
-                    ,
-                    LokateBeacon(
-                        "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                        24719,
-                        28241,
-                        "3",
-                    ),//White
-                    LokateBeacon(
-                        "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
-                        1,
-                        1,
-                        "3"
-                    )
-                ).map { it.toCLBeaconRegion() }//yellow)
-                //NSLog("No regions to scan")
-                //return
+                NSLog("No regions to scan")
+                return
             } else this.regions = regions.map {
                 it.toCLBeaconRegion()
             }
@@ -173,11 +145,6 @@ class IOSBeaconScanner2 : BeaconScanner2 {
 
     override fun setRegions(regions: List<LokateBeacon>) {
         helper.setRegions(regions)
-    }
-
-    @Suppress("unused")
-    fun setRegions() {
-        helper.setRegions(listOf())
     }
 
     override fun scanResultFlow(): Flow<BeaconScanResult> {

@@ -42,6 +42,9 @@ kotlin {
             implementation(libs.russhwolf.settings)
             implementation(libs.russhwolf.settings.no.arg)
 
+            //napier
+            implementation(libs.napier)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

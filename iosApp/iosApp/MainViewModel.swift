@@ -13,18 +13,17 @@ import SwiftUI
 
 class MainViewModel
 : ObservableObject {
-    private let beaconScanner: IOSBeaconScanner2
+    private let lokateSDK: LokateSDK
     
 
     @Published var result: String = "Not Running"
 
-    init(beaconScanner: IOSBeaconScanner2) {
-        self.beaconScanner = beaconScanner
+    init(lokateSDK: LokateSDK) {
+        self.lokateSDK = lokateSDK
     }
 
     func startScanning() {
-        self.beaconScanner.setRegions()
-        self.beaconScanner.startScanning()
+        self.lokateSDK.startScanning()
         //self.beaconScanner.scanResultFlow().collect
     }
     
