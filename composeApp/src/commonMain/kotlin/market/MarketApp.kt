@@ -1,7 +1,6 @@
 package market
 
 import Greeting
-import MyApplicationTheme
 import PermissionHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -28,38 +27,15 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import lokatecmp.composeapp.generated.resources.Res
 import lokatecmp.composeapp.generated.resources.compose_multiplatform
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
-@Preview
 fun MarketApp(permissionHandler: PermissionHandler, /* beaconScanner: BeaconScanner */) {
-    MyApplicationTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
-        ) {
-            GreetingView(
-                Greeting().greet(),
-                permissionHandler::getPermissions,
-                {
-                    // beaconScanner.setRegions(listOf())
-                }
-            )
+    GreetingView(
+        Greeting().greet(),
+        permissionHandler::getPermissions,
+        {
+            // beaconScanner.setRegions(listOf())
         }
-    }
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
-        }
-    }
+    )
 }
 
 @Composable

@@ -2,7 +2,7 @@ package com.lokate.android.demo
 
 import AndroidPermissionHandler
 import PermissionHandler
-import market.MarketApp
+import App
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         // beaconScanner = AndroidBeaconScanner()
 
         setContent {
-            MarketApp(permissionHandler)
+            App(permissionHandler)
         }
     }
 }
