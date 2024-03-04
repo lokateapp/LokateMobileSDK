@@ -1,410 +1,147 @@
 package com.lokate.kmmsdk
 
-import android.annotation.SuppressLint
 import android.util.Log
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.lokate.kmmsdk.Defaults.BEACON_LAYOUT_IBEACON
-import com.lokate.kmmsdk.Defaults.DEFAULT_PERIOD_BETWEEEN_SCAN
-import com.lokate.kmmsdk.Defaults.DEFAULT_PERIOD_SCAN
-import com.lokate.kmmsdk.data.datasource.remote.beacon.model.EventRequest
-import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
+import com.lokate.kmmsdk.domain.model.beacon.Defaults
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.toBeaconScanResult
+import com.lokate.kmmsdk.utils.toRegion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
-import org.altbeacon.beacon.Identifier
-import org.altbeacon.beacon.MonitorNotifier
 import org.altbeacon.beacon.Region
-import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
-import kotlin.math.pow
 
-
-
-interface BeaconApiService {
-    @GET("/mobile/activeBeacons")
-    fun getActiveBeacons(@Query("branchId") branchId: String): Call<JsonArray>
-    @POST("/mobile/beaconArea")
-    fun postBeaconArea(@Body request: EventRequest): Call<Void>
-}
-
-class BeaconApiClient {
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("http://172.20.10.4:5173")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val beaconApiService: BeaconApiService = retrofit.create(BeaconApiService::class.java)
-
-    suspend fun fetchBeacons(branchId: String): List<LokateBeacon> {
-        val call = beaconApiService.getActiveBeacons(branchId)
-        val response = call.execute()
-
-        if (response.isSuccessful) {
-            val jsonArray = response.body()
-            jsonArray?.let {
-                val beacons = mutableListOf<LokateBeacon>()
-                for (jsonElement in it) {
-                    if (jsonElement is JsonObject) {
-
-                        val range = jsonElement.getAsJsonPrimitive("range").asString
-                        if (range == "invalid") continue    // beacon is not active
-
-                        val minProximity = when(range) {
-                            "immediate" -> BeaconProximity.Immediate
-                            "near" -> BeaconProximity.Near
-                            "far" -> BeaconProximity.Far
-                            else -> BeaconProximity.Unknown
-                        }
-
-                        val beacon = LokateBeacon(
-                            jsonElement.getAsJsonPrimitive("id").asString,
-                            jsonElement.getAsJsonPrimitive("major").asInt,
-                            jsonElement.getAsJsonPrimitive("minor").asInt,
-                            jsonElement.getAsJsonObject("campaign").getAsJsonPrimitive("name").asString,
-                            //minProximity
-                        )
-
-                        beacons.add(beacon)
-                    }
-                }
-                return beacons
-            }
-        } else {
-            // Handle error
-            println("Error: ${response.code()}")
-        }
-
-        return emptyList()
-    }
-
-    fun postBeaconArea(request: EventRequest): Call<Void> {
-        return beaconApiService.postBeaconArea(request)
-    }
-}
-
-//TODO do not expose this class and require to use a helper class and add business logic there
 class AndroidBeaconScanner : BeaconScanner {
-
-    private val scanBeaconFlow: MutableSharedFlow<List<BeaconScanResult>> =
-        MutableSharedFlow()
-    private val scanNonBeaconFlow: MutableSharedFlow<List<BeaconScanResult>> =
-        MutableSharedFlow()
-
-    private var isScanning = false
-    private var scanPeriodMillis: Long = DEFAULT_PERIOD_SCAN
-    private var betweenScanPeriod: Long = DEFAULT_PERIOD_BETWEEEN_SCAN
-
-    private val lastScannedBeacons = mutableSetOf<BeaconScanResult>()
-    private val lastScannedNonBeacons = mutableListOf<BeaconScanResult>()
-
-    private val beaconRegions = mutableListOf<Region>()
-    private val beaconMap = mutableMapOf<String, LokateBeacon>()
-
-    private val beaconApiClient = BeaconApiClient()
-
     companion object {
         private val manager: BeaconManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             BeaconManager.getInstanceForApplication(applicationContext).apply {
-                beaconParsers.add(BeaconParser().setBeaconLayout(BEACON_LAYOUT_IBEACON))
+                beaconParsers.add(BeaconParser().setBeaconLayout(Defaults.BEACON_LAYOUT_IBEACON))
                 setEnableScheduledScanJobs(false)
                 isRegionStatePersistenceEnabled = false
             }
         }
+        private val mainJob = SupervisorJob()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
     }
 
-    init {
-        setScanPeriod(scanPeriodMillis)
-        setBetweenScanPeriod(betweenScanPeriod)
-    }
+    private var running: Boolean = false
 
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.Main + job)
+    private var regions = mutableListOf<Region>()
+    //private val internalScanResults: MutableSet<BeaconScanResult> = mutableSetOf()
+    private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
 
-    private var beaconEmitJob: Job? = null
-    private var nonBeaconEmitJob: Job? = null
+    /*
+    Temporary beacons for testing
+     */
+    private val testBeacons = listOf(
+        LokateBeacon(
+            "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+            24719,
+            65453,
+            ""
+        ),//white
+        LokateBeacon(
 
-    private var rssiThreshold: Int? = null
-
-
-    override fun setScanPeriod(scanPeriodMillis: Long) {
-        this.scanPeriodMillis = scanPeriodMillis
-    }
-
-    override fun setBetweenScanPeriod(betweenScanPeriod: Long) {
-        this.betweenScanPeriod = betweenScanPeriod
-    }
-
-    override fun observeResults(): CFlow<List<BeaconScanResult>> {
-        return scanBeaconFlow.wrap()
-    }
-
-    override fun observeNonBeaconResults(): CFlow<List<BeaconScanResult>> {
-        TODO("Not planning to implement this")
-    }
-
-    override fun setIosRegions(regions: List<LokateBeacon>) {
-        throw UnsupportedOperationException("set Android Region on Android")
-    }
-
-    override fun setAndroidRegions(beacons: List<LokateBeacon>) {
-        beaconRegions.clear()
-        beaconRegions.addAll(beacons.map {
-            Region(
-                it.uuid,
-                Identifier.parse(it.uuid),
-                null,
-                null
-            )
-        })
-    }
-
-    override fun setRssiThreshold(threshold: Int) {
-        rssiThreshold = threshold
-    }
-
-    override fun observeErrors(): CFlow<Exception> {
-        TODO("Not planning to implement this")
-    }
-
-    private fun sendEnterEvent(beacon: LokateBeacon) {
-        val request = EventRequest(
-            customerId = "customer1",
-            beaconUID = beacon.uuid,
-            status = "ENTER",
-            timestamp = System.currentTimeMillis() / 1000   // seconds
+            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+            1,
+            1,
+            "2",
+        )//pink
+        ,
+        LokateBeacon(
+            "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+            24719,
+            28241,
+            "3",
+        ),//White
+        LokateBeacon(
+            "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
+            1,
+            1,
+            "3"
         )
+    )//yellow)
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val postResponse = beaconApiClient.postBeaconArea(request).execute()
+    override fun startScanning() {
+        if (running) {
+            Log.e("BeaconScanner2", "Already scanning")
+            return
+        }
 
-            if (postResponse.isSuccessful) {
-                println("POST request successful")
-            } else {
-                println("POST request failed: ${postResponse.code()}")
+
+        if (regions.isEmpty()) {
+            //for debugging purposes
+            setRegions(listOf())
+            //Log.e("BeaconScanner2", "No regions to scan")
+            //return
+        }
+
+        Log.e("BeaconScanner2", "Starting scanning")
+        with(manager) {
+            running = true
+            removeAllRangeNotifiers()
+            removeAllMonitorNotifiers()
+            addRangeNotifier { beacons, region ->
+                Log.e("BeaconScanner2", "Beacons found: $beacons")
+                beacons.forEach { beacon ->
+                    coroutineScope.launch {
+                        beaconFlow.emit(beacon.toBeaconScanResult())
+                    }
+                    /*when (val current =
+                        internalScanResults.firstOrNull { it.beaconUUID == beacon.id1.toString() && it.major == beacon.id2.toInt() && it.minor == beacon.id3.toInt() }) {
+                        null -> {
+                            internalScanResults.add(beacon.toBeaconScanResult())
+                        }
+
+                        else -> {
+                            internalScanResults.remove(current)
+                            internalScanResults.add(
+                                beacon.toBeaconScanResult().copy(
+                                    firstSeen = current.firstSeen,
+                                    lastSeen = System.currentTimeMillis()
+                                )
+                            )
+                        }
+                    }
+
+                     */
+                }
+            }
+            regions.forEach {
+                startRangingBeacons(it)
             }
         }
     }
 
-    private fun sendExitEvent(beacon: LokateBeacon) {
-        val request = EventRequest(
-            customerId = "customer1",
-            beaconUID = beacon.uuid,
-            status = "EXIT",
-            timestamp = System.currentTimeMillis() / 1000   // seconds
+    override fun stopScanning() {
+        mainJob.cancel()
+        running = false
+
+    }
+
+    override fun setRegions(regions: List<LokateBeacon>) {
+        if (running){
+            Log.d("BeaconScanner2", "Already running!")
+            return
+        }
+        this.regions.clear()
+        this.regions.addAll(
+            // if regions is empty, use testBeacons
+            when {
+                regions.isEmpty() -> testBeacons
+                else -> regions
+            }.let { list ->
+                list.map { it.toRegion() }
+            }
         )
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val postResponse = beaconApiClient.postBeaconArea(request).execute()
-
-            if (postResponse.isSuccessful) {
-                println("POST request successful")
-            } else {
-                println("POST request failed: ${postResponse.code()}")
-            }
-        }
     }
 
-    private fun filterScannedBeacons(scannedBeacons: Set<BeaconScanResult>): Set<LokateBeacon> {
-        val filteredBeacons = mutableSetOf<LokateBeacon>()
-        for (scannedBeacon in scannedBeacons) {
-            val beacon = beaconMap[scannedBeacon.beaconUUID]
-            if (beacon != null /*&& scannedBeacon.proximity <= beacon.minProximity*/) {
-                filteredBeacons.add(beacon)
-            }
-        }
-        return filteredBeacons
+    override fun scanResultFlow(): Flow<BeaconScanResult> {
+        return beaconFlow
     }
-
-    // todo: remove parameter and move callback to constructor
-    private fun startEmittingBeaconsJob(regionStayCallback: (List<String>) -> Unit) {
-        beaconEmitJob?.cancel()
-        beaconEmitJob = scope.launch {
-            var lastRegionEnteredBeacons: Set<LokateBeacon> = setOf()
-            var currentRegionEnteredBeacons: Set<LokateBeacon>;
-            var stayCount = 0
-            var longStayBeacons = mutableSetOf<LokateBeacon>()
-            while (isScanning) {
-                scanBeaconFlow.emit(lastScannedBeacons.toList())
-                currentRegionEnteredBeacons = filterScannedBeacons(lastScannedBeacons)
-                for (beacon in currentRegionEnteredBeacons) {
-                    if (lastRegionEnteredBeacons.contains(beacon)) {
-                        stayCount++
-                        if (stayCount == 1 /* adjust it according to when you want to send notification*/) {
-                            // staying in region for a long time
-                            longStayBeacons.add(beacon)
-                            stayCount = 0
-                        }
-                    } else {
-                        // region entered
-                        sendEnterEvent(beacon)
-                        Log.d("BeaconScanner", "Region entered: $beacon")
-                    }
-                }
-                for (beacon in lastRegionEnteredBeacons) {
-                    if (!currentRegionEnteredBeacons.contains(beacon)){
-                        // region exited
-                        sendExitEvent(beacon)
-                        stayCount = 0
-                        Log.d("BeaconScanner", "Region exited: $beacon")
-                    }
-                }
-                regionStayCallback(longStayBeacons.map{
-                  it.campaign.orEmpty()
-                })
-                longStayBeacons.clear()
-                lastRegionEnteredBeacons = currentRegionEnteredBeacons
-                lastScannedBeacons.clear()
-                kotlinx.coroutines.delay(3*scanPeriodMillis)
-            }
-        }
-    }
-    // todo: maybe remove parameters from start function and move them to constructor?
-    @SuppressLint("MissingPermission")
-    override fun start(branchId: String, regionStayCallback: (List<String>) -> Unit) {
-        if (isScanning)
-            stop()
-
-        isScanning = true
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val beaconsToBeScanned: List<LokateBeacon> = getBeaconsOfBranch(branchId)
-            setAndroidRegions(beaconsToBeScanned)
-
-            with(manager) {
-                removeAllRangeNotifiers()
-                removeAllMonitorNotifiers()
-
-                beaconRegions.forEach { region ->
-
-                    addMonitorNotifier(object : MonitorNotifier {
-                        override fun didEnterRegion(region: Region) {
-                            Log.d("BeaconScanner", "didEnterRegion: $region")
-                        }
-
-                        override fun didExitRegion(region: Region) {
-                            Log.d("BeaconScanner", "didExitRegion: $region")
-                        }
-
-                        override fun didDetermineStateForRegion(state: Int, region: Region) {
-                            Log.d("BeaconScanner", "didDetermineStateForRegion: $region")
-                        }
-                    })
-
-                    addRangeNotifier { beacons, a ->
-                        if (rssiThreshold == null) {
-                            // somehow, this callback is called twice
-                            // therefore, possibly duplicates are introduced in lastScannedBeacons
-                            // to avoid that, lastScannedBeacons is declared as a set
-                            lastScannedBeacons.addAll(beacons.map {
-                                it.toBeaconScanResult()
-                            })
-                        } else {
-                            lastScannedBeacons.addAll(beacons.filter { it.rssi >= rssiThreshold!! }
-                                .map { it.toBeaconScanResult() })
-                        }
-                    }
-
-                    startMonitoring(region)
-                    startRangingBeacons(region)
-                }
-            }
-
-            startEmittingBeaconsJob(regionStayCallback)
-        }
-
-    }
-
-    private suspend fun getBeaconsOfBranch(branchId: String): List<LokateBeacon> {
-        val apiBeacons = beaconApiClient.fetchBeacons(branchId)
-        if (apiBeacons.isEmpty()) {
-            Log.d("BeaconAPI", "Returned set of beacons from api call is empty")
-        } else {
-            Log.d("BeaconAPI", "Returned beacons: $apiBeacons")
-        }
-
-        for (beacon in apiBeacons) {
-            beaconMap[beacon.uuid] = beacon
-        }
-
-        return apiBeacons
-
-//        val apiBeacons = listOf(
-//            LokateBeacon(
-//                "5d72cc30-5c61-4c09-889f-9ae750fa84ec",
-//                1,
-//                1,
-//                "deterjan",
-//                BeaconProximity.Immediate
-//            ) //pink
-//            ,
-//            LokateBeacon(
-//                "b9407f30-f5f8-466e-aff9-25556b57fe6d",
-//                24719,
-//                28241,
-//                "tavuk",
-//                BeaconProximity.Far
-//            ) //red
-//        )
-    }
-
-
-    //taken from kmmbeacons
-    private fun calculateProximity(accuracy: Double): BeaconProximity = when (accuracy) {
-        in 0.0..0.5 -> BeaconProximity.Immediate
-        in 0.5..3.0 -> BeaconProximity.Near
-        in 3.0..Double.MAX_VALUE -> BeaconProximity.Far
-        else -> BeaconProximity.Unknown
-
-    }
-
-
-    private fun startEmittingNonBeaconsJob() {
-        nonBeaconEmitJob?.cancel()
-        nonBeaconEmitJob = scope.launch {
-            while (isScanning) {
-                scanNonBeaconFlow.emit(lastScannedNonBeacons.toList())
-                lastScannedNonBeacons.clear()
-                kotlinx.coroutines.delay(scanPeriodMillis)
-            }
-        }
-    }
-
-    override fun stop() {
-        isScanning = false
-        beaconEmitJob?.cancel()
-        nonBeaconEmitJob?.cancel()
-        manager.removeAllRangeNotifiers()
-        manager.removeAllMonitorNotifiers()
-    }
-
-    //taken from kmmbeacons
-    private fun calculateAccuracy(txPower: Int, rssi: Double): Double {
-        if (rssi == 0.0) {
-            return -1.0 // if we cannot determine accuracy, return -1.
-        }
-
-        val ratio = rssi * 1.0 / txPower
-        return if (ratio < 1.0) {
-            ratio.pow(10.0)
-        } else {
-            val accuracy = 0.89976 * ratio.pow(7.7095) + 0.111
-            accuracy
-        }
-    }
-
 }
