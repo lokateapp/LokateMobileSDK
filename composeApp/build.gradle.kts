@@ -78,3 +78,7 @@ android {
         debugImplementation(libs.compose.ui.tooling)
     }
 }
+
+task("testClasses").doLast {
+    println("This is a dummy testClasses task")
+}
