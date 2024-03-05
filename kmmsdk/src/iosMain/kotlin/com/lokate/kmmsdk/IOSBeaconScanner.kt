@@ -120,7 +120,7 @@ class IOSBeaconScanner : BeaconScanner {
                 NSLog("No regions to scan")
                 return
             } else this.regions = regions.map {
-                com.lokate.kmmsdk.toCLBeaconRegion()
+                it.toCLBeaconRegion()
             }
         }
 
@@ -150,4 +150,8 @@ class IOSBeaconScanner : BeaconScanner {
     override fun scanResultFlow(): Flow<BeaconScanResult> {
         return helper.scanResultFlow()
     }
+}
+
+actual fun getBeaconScanner(): BeaconScanner {
+    return IOSBeaconScanner()
 }

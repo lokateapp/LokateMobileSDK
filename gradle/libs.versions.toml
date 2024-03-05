@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.0"
+agp = "8.2.0"   # should not be upgraded
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
@@ -20,11 +20,12 @@ kotlinxCoroutinesCore = "1.7.3"
 lifecycleViewmodelKtx = "2.6.2"
 loggerVersion = "1.7.26"
 ktorVersion = "2.3.5"
-retrofit = "2.9.0"
+permissionsCompose = "0.17.0"
 sqldelight = "2.0.0"
 settingsVer = "1.1.1"
 altBeacon = "2.20.3"
 napierVersion = "2.7.1"
+activityKtx = "1.8.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -40,7 +41,6 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
@@ -57,7 +57,7 @@ ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "k
 #ktor ios
 ktor-client-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorVersion" }
 
-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissionsCompose" }
 slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion" }
 
 #multiplatform shared pref
@@ -75,6 +75,7 @@ sqldelight-driver-native= {module="app.cash.sqldelight:native-driver", version.r
 
 #altbeacon-android
 altbeacon-android = {module="org.altbeacon:android-beacon-library", version.ref = "altBeacon"}
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 
 class LokateSDK {
-    private val scanner = getScanner()
+    private val beaconScanner = getBeaconScanner()
 
     private val activeBeacons = mutableSetOf<BeaconScanResult>()
     private var results: Flow<List<BeaconScanResult>>? = null
@@ -52,13 +52,17 @@ class LokateSDK {
         )
     )
 
-    fun startScanning() {
-        scanner.setRegions(testBeacons)
-        scanner.startScanning()
+    fun getScanResultFlow(): Flow<BeaconScanResult> {
+        return beaconScanner.scanResultFlow()
+    }
 
-        val scannerFlow = scanner.scanResultFlow()
-        val newComer = scannerFlow.filter { it !in activeBeacons }
-        val alreadyIn = scannerFlow.filter { it in activeBeacons }.transform {
+    fun startScanning() {
+        beaconScanner.setRegions(testBeacons)
+        beaconScanner.startScanning()
+
+        val beaconScannerFlow = beaconScanner.scanResultFlow()
+        val newComer = beaconScannerFlow.filter { it !in activeBeacons }
+        val alreadyIn = beaconScannerFlow.filter { it in activeBeacons }.transform {
             emit(activeBeacons.find { it.beaconUUID == it.beaconUUID && it.major == it.major && it.minor == it.minor }?.copy(lastSeen = getTimeMillis()))
         }
         // in the last 3 seconds, if the beacon is not in the list, it is considered gone
@@ -73,12 +77,12 @@ class LokateSDK {
         lokateScope.launch {
             beaconFlowHandler(newComer, alreadyIn, gone)
         }
-        //scanner.start()
-        //results = scanner.observeResults()
+        //beaconScanner.start()
+        //results = beaconScanner.observeResults()
     }
 
     private suspend fun beaconFlowHandler(
-        scannerFlow: Flow<BeaconScanResult>,
+        beaconScannerFlow: Flow<BeaconScanResult>,
         alreadyIn: Flow<BeaconScanResult?>,
         gone: Flow<BeaconScanResult>
     ){
@@ -92,7 +96,7 @@ class LokateSDK {
             }
         }
         // then look for the beacons that are new
-        scannerFlow.collect {
+        beaconScannerFlow.collect {
             activeBeacons.add(it)
             //send enter event
             Napier.d("Beacon is new $it")
@@ -103,8 +107,8 @@ class LokateSDK {
             //send exit event
             Napier.d("Beacon is gone $it")
         }
-        /*val newComer = scannerFlow.filter { it !in activeBeacons }
-        val alreadyIn = scannerFlow.filter { it in activeBeacons }.transform {
+        /*val newComer = beaconScannerFlow.filter { it !in activeBeacons }
+        val alreadyIn = beaconScannerFlow.filter { it in activeBeacons }.transform {
             emit(activeBeacons.find { it.beaconUUID == it.beaconUUID && it.major == it.major && it.minor == it.minor }?.copy(lastSeen = getTimeMillis()))
         }
         // in the last 3 seconds, if the beacon is not in the list, it is considered gone
@@ -148,8 +152,8 @@ class LokateSDK {
     }
 
     fun stopScanning() {
-        //scanner.stop()
-        scanner.stopScanning()
+        //beaconScanner.stop()
+        beaconScanner.stopScanning()
 
     }
 

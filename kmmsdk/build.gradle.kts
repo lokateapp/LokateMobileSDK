@@ -27,22 +27,19 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            //put your multiplatform dependencies here
-            //coroutines
+            // coroutines
             implementation(libs.kotlinx.coroutines.core)
-            //ktor
+            // ktor
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.serialization)
-            //ktor logger
+            // ktor logger
             implementation(libs.slf4j.logger)
-            //shared pref
+            // shared pref
             implementation(libs.russhwolf.settings)
             implementation(libs.russhwolf.settings.no.arg)
-
-            //napier
+            // napier
             implementation(libs.napier)
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -52,7 +49,6 @@ kotlin {
             implementation(libs.sqldelight.driver.android)
             implementation(libs.altbeacon.android)
             implementation(libs.androidx.startup)
-            implementation(libs.converter.gson)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.ios)

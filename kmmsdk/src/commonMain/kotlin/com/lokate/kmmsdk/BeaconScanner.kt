@@ -10,3 +10,5 @@ interface BeaconScanner {
     fun setRegions(regions: List<LokateBeacon>)
     fun scanResultFlow(): Flow<BeaconScanResult>
 }
+
+expect fun getBeaconScanner(): BeaconScanner

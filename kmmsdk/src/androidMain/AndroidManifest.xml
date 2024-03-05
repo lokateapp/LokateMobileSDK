@@ -3,10 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lokate.kmmsdk">
 
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-
     <application>
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -14,10 +10,9 @@
             android:exported="false"
             tools:node="merge">
             <meta-data
-                android:name="com.lokate.kmmsdk.KmmSdkInitializer"
+                android:name="com.lokate.kmmsdk.LokateSDKInitializer"
                 android:value="androidx.startup" />
         </provider>
-
     </application>
 
 </manifest>

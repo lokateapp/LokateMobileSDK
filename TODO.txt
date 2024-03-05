@@ -1,0 +1,7 @@
+- connect sdk with mobile be
+- move permission handling logic from compose multiplatform demo to the library (kmmsdk)
+- implement estimote sdk's for the library
+- separete demo applications (composeApp) and library (kmmsdk) into separate repos
+- rename kmmsdk -> lokatesdk
+- publish kmmsdk onto remote maven repository
+- implement deterministic test suite for kmmsdk

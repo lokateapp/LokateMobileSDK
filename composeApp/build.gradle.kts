@@ -27,11 +27,6 @@ kotlin {
     }
     
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.compose.ui.tooling.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(project(mapOf("path" to ":kmmsdk")))
-        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -39,10 +34,13 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.permissions.compose)
             implementation(project(mapOf("path" to ":kmmsdk")))
         }
-        iosMain.dependencies {
-            implementation(project(mapOf("path" to ":kmmsdk")))
+        androidMain.dependencies {
+            implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.appcompat)
         }
     }
 }
@@ -80,4 +78,3 @@ android {
         debugImplementation(libs.compose.ui.tooling)
     }
 }
-
