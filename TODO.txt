@@ -1,3 +1,6 @@
+- remove ios permission handling logic from library (for now), which requires separating scanning logic from permission taking
+- test ios on real phone (simulator has bluetooth scanning always denied)
+- handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.)
 - connect sdk with mobile be
 - move permission handling logic from compose multiplatform demo to the library (kmmsdk)
 - implement estimote sdk's for the library
