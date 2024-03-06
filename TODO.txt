@@ -1,8 +1,8 @@
-- remove ios permission handling logic from library (for now), which requires separating scanning logic from permission taking
+- connect sdk with mobile be using the multiplatform repositories
 - test ios on real phone (simulator has bluetooth scanning always denied)
-- handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.)
-- connect sdk with mobile be
-- move permission handling logic from compose multiplatform demo to the library (kmmsdk)
+- remove ios permission handling logic from library (for now), which requires separating scanning logic from permission taking / remove authorization request
+- handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.) / demoApp - LokateSDK can check the authorization status.
+- Make LokateSDK more modular to support different BLE protocols
 - implement estimote sdk's for the library
 - separete demo applications (composeApp) and library (kmmsdk) into separate repos
 - rename kmmsdk -> lokatesdk
