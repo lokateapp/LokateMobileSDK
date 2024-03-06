@@ -3,8 +3,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
-    //alias(libs.plugins.kotlinAndroid)
-
 }
 
 kotlin {
@@ -17,9 +15,9 @@ kotlin {
     }
     
     listOf(
-        //iosX64(),
+        iosX64(),
         iosArm64(),
-        //iosSimulatorArm64()
+        iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
             baseName = "kmmsdk"
@@ -29,36 +27,29 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            //put your multiplatform dependencies here
-            //coroutines
+            // coroutines
             implementation(libs.kotlinx.coroutines.core)
-            //ktor
+            // ktor
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.serialization)
-            //ktor logger
+            // ktor logger
             implementation(libs.slf4j.logger)
-            //shared pref
+            // shared pref
             implementation(libs.russhwolf.settings)
             implementation(libs.russhwolf.settings.no.arg)
-
-            //napier
+            // napier
             implementation(libs.napier)
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
             implementation(libs.sqldelight.driver.android)
             implementation(libs.altbeacon.android)
             implementation(libs.androidx.startup)
-            implementation(libs.retrofit)
-            implementation(libs.converter.gson)
         }
-
         iosMain.dependencies {
             implementation(libs.ktor.client.ios)
             implementation(libs.sqldelight.driver.native)
@@ -68,14 +59,15 @@ kotlin {
 
 android {
     namespace = "com.lokate.kmmsdk"
-    compileSdk = 34
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+
     defaultConfig {
-        minSdk = 24
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
 
 dependencies {
-    implementation(libs.core.ktx)
+    implementation(libs.androidx.core.ktx)
 }
 
 sqldelight{
