@@ -4,7 +4,7 @@
 - handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.) / demoApp - LokateSDK can check the authorization status.
 - Make LokateSDK more modular to support different BLE protocols
 - implement estimote sdk's for the library
-- separete demo applications (composeApp) and library (kmmsdk) into separate repos
+- seperate demo applications (composeApp) and library (kmmsdk) into separate repos
 - rename kmmsdk -> lokatesdk
 - publish kmmsdk onto remote maven repository
 - implement deterministic test suite for kmmsdk
