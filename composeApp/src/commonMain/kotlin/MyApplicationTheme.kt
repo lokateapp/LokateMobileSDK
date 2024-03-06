@@ -16,36 +16,40 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colors = if (darkTheme) {
-        darkColors(
-            primary = Color(0xFFBB86FC),
-            secondary = Color(0xFF03DAC5),
+    val colors =
+        if (darkTheme) {
+            darkColors(
+                primary = Color(0xFFBB86FC),
+                secondary = Color(0xFF03DAC5),
+            )
+        } else {
+            lightColors(
+                primary = Color(0xFF6200EE),
+                secondary = Color(0xFF03DAC5),
+            )
+        }
+    val typography =
+        Typography(
+            body1 =
+                TextStyle(
+                    fontFamily = FontFamily.Default,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                ),
         )
-    } else {
-        lightColors(
-            primary = Color(0xFF6200EE),
-            secondary = Color(0xFF03DAC5),
+    val shapes =
+        Shapes(
+            small = RoundedCornerShape(4.dp),
+            medium = RoundedCornerShape(4.dp),
+            large = RoundedCornerShape(0.dp),
         )
-    }
-    val typography = Typography(
-        body1 = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp
-        )
-    )
-    val shapes = Shapes(
-        small = RoundedCornerShape(4.dp),
-        medium = RoundedCornerShape(4.dp),
-        large = RoundedCornerShape(0.dp)
-    )
 
     MaterialTheme(
         colors = colors,
         typography = typography,
         shapes = shapes,
-        content = content
+        content = content,
     )
 }

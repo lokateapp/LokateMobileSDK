@@ -20,21 +20,23 @@ fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
         major = id2.toInt(),
         minor = id3.toInt(),
         firstSeen = System.currentTimeMillis(),
-        lastSeen = System.currentTimeMillis()
+        lastSeen = System.currentTimeMillis(),
     )
 }
 
+// taken from kmmbeacons
+fun calculateProximity(accuracy: Double): BeaconProximity =
+    when (accuracy) {
+        in 0.0..0.5 -> BeaconProximity.Immediate
+        in 0.5..3.0 -> BeaconProximity.Near
+        in 3.0..Double.MAX_VALUE -> BeaconProximity.Far
+        else -> BeaconProximity.Unknown
+    }
 
-//taken from kmmbeacons
-fun calculateProximity(accuracy: Double): BeaconProximity = when (accuracy) {
-    in 0.0..0.5 -> BeaconProximity.Immediate
-    in 0.5..3.0 -> BeaconProximity.Near
-    in 3.0..Double.MAX_VALUE -> BeaconProximity.Far
-    else -> BeaconProximity.Unknown
-
-}
-
-fun calculateAccuracy(txPower: Int, rssi: Double): Double {
+fun calculateAccuracy(
+    txPower: Int,
+    rssi: Double,
+): Double {
     if (rssi == 0.0) {
         return -1.0 // if we cannot determine accuracy, return -1.
     }
@@ -48,11 +50,12 @@ fun calculateAccuracy(txPower: Int, rssi: Double): Double {
     }
 }
 
-fun LokateBeacon.toRegion() = Region(
-    this.uuid,
-    Identifier.parse(this.uuid),
-    null,
-    null
-    //Identifier.fromInt(this.major ?: 0),
-    //Identifier.fromInt(this.minor ?: 0)
-)
+fun LokateBeacon.toRegion() =
+    Region(
+        this.uuid,
+        Identifier.parse(this.uuid),
+        null,
+        null,
+        // Identifier.fromInt(this.major ?: 0),
+        // Identifier.fromInt(this.minor ?: 0)
+    )

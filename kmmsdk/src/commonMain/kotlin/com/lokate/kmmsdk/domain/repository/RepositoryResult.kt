@@ -5,6 +5,6 @@ sealed class RepositoryResult<out T> {
 
     data class Error(
         val message: String?,
-        val errorMessage: String?
+        val errorMessage: String?,
     ) : RepositoryResult<Nothing>()
 }

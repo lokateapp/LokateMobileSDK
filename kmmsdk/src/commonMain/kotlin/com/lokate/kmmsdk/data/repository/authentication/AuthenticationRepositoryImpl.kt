@@ -11,16 +11,18 @@ import com.lokate.kmmsdk.utils.extension.emptyString
 
 class AuthenticationRepositoryImpl(
     private val remoteDS: AuthenticationRemoteDS,
-    private val localDS: AuthenticationLocalDS
+    private val localDS: AuthenticationLocalDS,
 ) : AuthenticationRepository {
     override suspend fun getAppToken(): RepositoryResult<String> {
         return localDS.getAppToken().let {
             when (it) {
                 is DSResult.Error<*> -> RepositoryResult.Error(it.message, it.errorType.toString())
-                is DSResult.Success<*> -> if (it.data is String)
-                    RepositoryResult.Success(it.data)
-                else
-                    RepositoryResult.Error(emptyString(), emptyString())
+                is DSResult.Success<*> ->
+                    if (it.data is String) {
+                        RepositoryResult.Success(it.data)
+                    } else {
+                        RepositoryResult.Error(emptyString(), emptyString())
+                    }
             }
         }
     }
@@ -29,8 +31,9 @@ class AuthenticationRepositoryImpl(
         localDS.getAppAuthentication(appToken).let {
             when (it) {
                 is DSResult.Success<*> -> {
-                    if (it.data is AuthenticationResponse && it.data.valid)
+                    if (it.data is AuthenticationResponse && it.data.valid) {
                         return RepositoryResult.Success(true)
+                    }
                 }
 
                 else -> {}
@@ -44,14 +47,14 @@ class AuthenticationRepositoryImpl(
                             if (it.errorType.code == 401) {
                                 return RepositoryResult.Error(
                                     "Authentication failed!",
-                                    "Invalid app token"
+                                    "Invalid app token",
                                 )
                             }
                         }
 
                         else -> return RepositoryResult.Error(
                             "Authentication failed!",
-                            "Connection Error"
+                            "Connection Error",
                         )
                     }
                 }
@@ -77,10 +80,11 @@ class AuthenticationRepositoryImpl(
     override suspend fun setUserID(userId: String): RepositoryResult<Boolean> {
         return localDS.setUserId(userId).let {
             when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(
-                    "Set user failed!",
-                    "This shouldn't be happening"
-                )
+                is DSResult.Error<*> ->
+                    RepositoryResult.Error(
+                        "Set user failed!",
+                        "This shouldn't be happening",
+                    )
 
                 is DSResult.Success<*> -> RepositoryResult.Success(true)
             }

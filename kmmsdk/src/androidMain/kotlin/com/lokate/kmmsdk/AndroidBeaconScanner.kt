@@ -32,44 +32,51 @@ class AndroidBeaconScanner : BeaconScanner {
     private var running: Boolean = false
 
     private var regions = mutableListOf<Region>()
-    //private val internalScanResults: MutableSet<BeaconScanResult> = mutableSetOf()
+
+    // private val internalScanResults: MutableSet<BeaconScanResult> = mutableSetOf()
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
 
     /*
     Temporary beacons for testing
      */
-    private val testBeacons = listOf(
-        LokateBeacon(
-            "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-            24719,
-            65453,
-            "0"
-        ), // white
-        LokateBeacon(
-            "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-            24719,
-            28241,
-            "1",
-        ), // White
-        LokateBeacon(
-            "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
-            1,
-            1,
-            "2"
-        ), // yellow
-        LokateBeacon(
-            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-            1,
-            1,
-            "3",
-        ), // pink
-        LokateBeacon(
-            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-            1,
-            2,
-            "4"
-        ) // red
-    )
+    private val testBeacons =
+        listOf(
+            LokateBeacon(
+                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                24719,
+                65453,
+                "0",
+            ),
+            // white
+            LokateBeacon(
+                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
+                24719,
+                28241,
+                "1",
+            ),
+            // White
+            LokateBeacon(
+                "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
+                1,
+                1,
+                "2",
+            ),
+            // yellow
+            LokateBeacon(
+                "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                1,
+                1,
+                "3",
+            ),
+            // pink
+            LokateBeacon(
+                "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                1,
+                2,
+                "4",
+            ),
+            // red
+        )
 
     override fun startScanning() {
         if (running) {
@@ -77,12 +84,11 @@ class AndroidBeaconScanner : BeaconScanner {
             return
         }
 
-
         if (regions.isEmpty()) {
-            //for debugging purposes
+            // for debugging purposes
             setRegions(listOf())
-            //Log.e("BeaconScanner2", "No regions to scan")
-            //return
+            // Log.e("BeaconScanner2", "No regions to scan")
+            // return
         }
 
         Log.e("BeaconScanner2", "Starting scanning")
@@ -125,11 +131,10 @@ class AndroidBeaconScanner : BeaconScanner {
     override fun stopScanning() {
         mainJob.cancel()
         running = false
-
     }
 
     override fun setRegions(regions: List<LokateBeacon>) {
-        if (running){
+        if (running) {
             Log.d("BeaconScanner2", "Already running!")
             return
         }
@@ -141,7 +146,7 @@ class AndroidBeaconScanner : BeaconScanner {
                 else -> regions
             }.let { list ->
                 list.map { it.toRegion() }
-            }
+            },
         )
     }
 

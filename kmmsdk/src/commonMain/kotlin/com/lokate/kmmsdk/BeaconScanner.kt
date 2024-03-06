@@ -6,8 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface BeaconScanner {
     fun startScanning()
+
     fun stopScanning()
+
     fun setRegions(regions: List<LokateBeacon>)
+
     fun scanResultFlow(): Flow<BeaconScanResult>
 }
 

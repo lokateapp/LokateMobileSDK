@@ -7,27 +7,29 @@ import com.lokate.kmmsdk.domain.model.authentication.AuthenticationRequest
 
 class AuthenticationRemoteDS(private val api: AuthenticationAPI) : AuthenticationDS {
     override suspend fun getAppAuthentication(appToken: String): DSResult {
-        return api.getAuthenticate(AuthenticationRequest(appToken)).let{
+        return api.getAuthenticate(AuthenticationRequest(appToken)).let {
             when (it) {
-                is ApiResponse.Error.GenericError -> DSResult.Error(
-                    it.errorMessage.orEmpty(),
-                    it
-                )
+                is ApiResponse.Error.GenericError ->
+                    DSResult.Error(
+                        it.errorMessage.orEmpty(),
+                        it,
+                    )
 
-                is ApiResponse.Error.HttpError -> DSResult.Error(
-                    "${it.code}" + it.errorBody,
-                    it
-                )
+                is ApiResponse.Error.HttpError ->
+                    DSResult.Error(
+                        "${it.code}" + it.errorBody,
+                        it,
+                    )
 
-                is ApiResponse.Error.SerializationError -> DSResult.Error(
-                    it.errorMessage.orEmpty(),
-                    it
-                )
+                is ApiResponse.Error.SerializationError ->
+                    DSResult.Error(
+                        it.errorMessage.orEmpty(),
+                        it,
+                    )
 
                 is ApiResponse.Success -> DSResult.Success(it.body)
             }
         }
-
     }
 
     override suspend fun setUserId(userId: String): DSResult {

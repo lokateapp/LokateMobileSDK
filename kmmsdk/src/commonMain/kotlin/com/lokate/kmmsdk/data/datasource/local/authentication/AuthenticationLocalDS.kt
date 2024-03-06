@@ -5,19 +5,19 @@ import com.lokate.kmmsdk.data.datasource.interfaces.authentication.Authenticatio
 import com.lokate.kmmsdk.utils.extension.emptyString
 import com.russhwolf.settings.Settings
 
-class AuthenticationLocalDS(private val authenticationSettings: Settings):AuthenticationDS {
+class AuthenticationLocalDS(private val authenticationSettings: Settings) : AuthenticationDS {
     override suspend fun getAppAuthentication(appToken: String): DSResult {
         return authenticationSettings.getString("auth_token", defaultValue = "").let {
-            when(it){
+            when (it) {
                 "" -> DSResult.Error("No auth token found", Error())
                 else -> DSResult.Success(it)
             }
         }
     }
 
-    internal suspend fun getAppToken(): DSResult{
+    internal suspend fun getAppToken(): DSResult {
         return authenticationSettings.getString("auth_token", emptyString()).let {
-            when(it){
+            when (it) {
                 emptyString() -> DSResult.Error("No auth token found", Error())
                 else -> DSResult.Success(it)
             }
