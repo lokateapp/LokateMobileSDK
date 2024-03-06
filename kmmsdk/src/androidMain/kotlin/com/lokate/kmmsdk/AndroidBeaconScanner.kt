@@ -2,17 +2,19 @@ package com.lokate.kmmsdk
 
 import android.annotation.SuppressLint
 import android.util.Log
-import com.lokate.kmmsdk.domain.beacon.BeaconScanner
-import com.lokate.kmmsdk.domain.beacon.CFlow
-import com.lokate.kmmsdk.domain.beacon.Defaults.BEACON_LAYOUT_IBEACON
-import com.lokate.kmmsdk.domain.beacon.Defaults.DEFAULT_PERIOD_BETWEEEN_SCAN
-import com.lokate.kmmsdk.domain.beacon.Defaults.DEFAULT_PERIOD_SCAN
-import com.lokate.kmmsdk.domain.beacon.wrap
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.lokate.kmmsdk.Defaults.BEACON_LAYOUT_IBEACON
+import com.lokate.kmmsdk.Defaults.DEFAULT_PERIOD_BETWEEEN_SCAN
+import com.lokate.kmmsdk.Defaults.DEFAULT_PERIOD_SCAN
+import com.lokate.kmmsdk.data.datasource.remote.beacon.model.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import com.lokate.kmmsdk.utils.toBeaconScanResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,25 +24,16 @@ import org.altbeacon.beacon.BeaconParser
 import org.altbeacon.beacon.Identifier
 import org.altbeacon.beacon.MonitorNotifier
 import org.altbeacon.beacon.Region
-import kotlin.math.pow
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import kotlinx.coroutines.GlobalScope
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
-import com.google.gson.annotations.SerializedName
+import retrofit2.http.Query
+import kotlin.math.pow
 
-data class EventRequest(
-    @SerializedName("customerId") val customerId: String,
-    @SerializedName("beaconUID") val beaconUID: String,
-    @SerializedName("status") val status: String,
-    @SerializedName("timestamp") val timestamp: Long
-)
+
 
 interface BeaconApiService {
     @GET("/mobile/activeBeacons")
@@ -51,7 +44,7 @@ interface BeaconApiService {
 
 class BeaconApiClient {
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.1.42:5173")
+        .baseUrl("http://172.20.10.4:5173")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -83,7 +76,7 @@ class BeaconApiClient {
                             jsonElement.getAsJsonPrimitive("major").asInt,
                             jsonElement.getAsJsonPrimitive("minor").asInt,
                             jsonElement.getAsJsonObject("campaign").getAsJsonPrimitive("name").asString,
-                            minProximity
+                            //minProximity
                         )
 
                         beacons.add(beacon)
@@ -230,7 +223,7 @@ class AndroidBeaconScanner : BeaconScanner {
         val filteredBeacons = mutableSetOf<LokateBeacon>()
         for (scannedBeacon in scannedBeacons) {
             val beacon = beaconMap[scannedBeacon.beaconUUID]
-            if (beacon != null && scannedBeacon.proximity <= beacon.minProximity) {
+            if (beacon != null /*&& scannedBeacon.proximity <= beacon.minProximity*/) {
                 filteredBeacons.add(beacon)
             }
         }
@@ -271,12 +264,12 @@ class AndroidBeaconScanner : BeaconScanner {
                     }
                 }
                 regionStayCallback(longStayBeacons.map{
-                  it.campaign
+                  it.campaign.orEmpty()
                 })
                 longStayBeacons.clear()
                 lastRegionEnteredBeacons = currentRegionEnteredBeacons
                 lastScannedBeacons.clear()
-                kotlinx.coroutines.delay(scanPeriodMillis)
+                kotlinx.coroutines.delay(3*scanPeriodMillis)
             }
         }
     }
@@ -367,19 +360,6 @@ class AndroidBeaconScanner : BeaconScanner {
 //                BeaconProximity.Far
 //            ) //red
 //        )
-    }
-
-    private fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
-        val beaconUUID = id1.toString()
-        val accuracy = calculateAccuracy(txPower, rssi.toDouble())
-        val proximity = calculateProximity(accuracy)
-        return BeaconScanResult(
-            beaconUUID = beaconUUID,
-            rssi = rssi.toDouble(),
-            txPower = txPower,
-            accuracy = accuracy,
-            proximity = proximity
-        )
     }
 
 

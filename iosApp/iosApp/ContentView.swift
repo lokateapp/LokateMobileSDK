@@ -2,7 +2,7 @@ import SwiftUI
 import kmmsdk
 
 struct ContentView: View {
-    @StateObject private var viewModel = MainViewModel(beaconScanner: kmmsdk.IOSBeaconScanner())
+    @StateObject private var viewModel = MainViewModel(lokateSDK: kmmsdk.LokateSDK())
 
     var body: some View {
         VStack {

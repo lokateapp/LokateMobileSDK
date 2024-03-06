@@ -7,34 +7,29 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lokate.kmmobilesdk.Greeting
-import com.lokate.kmmsdk.AndroidBeaconScanner
+import com.lokate.kmmsdk.AndroidBeaconScanner2
 import com.lokate.kmmsdk.utils.extension.emptyString
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var bluetoothScanner: AndroidBeaconScanner
+    private lateinit var bluetoothScanner: AndroidBeaconScanner2
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun getPermissionsS(afterGranted: () -> Unit = {}) {
@@ -91,18 +86,24 @@ class MainActivity : ComponentActivity() {
 
         //very very bad practice, we should move it to a viewmodel
         val textState = mutableStateOf("")
-        bluetoothScanner = AndroidBeaconScanner()
+        bluetoothScanner = AndroidBeaconScanner2()
+        /*
         fun a() = run {
+
             bluetoothScanner.observeResults().watch {
                 textState.value = it.toString()
             }
         }
+         */
         setContent {
             MyApplicationTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     GreetingView(Greeting().greet(), ::getPermissions, {
+                        bluetoothScanner.setRegions(listOf())
+                    }, textState)
+                    /*GreetingView(Greeting().greet(), ::getPermissions, {
                         bluetoothScanner.start("1") {campaigns: List<String> ->
                             textState.value = if (campaigns.isNotEmpty()) {
                                 "You are in the range of following campaigns:\n" +
@@ -112,6 +113,8 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }, textState)
+
+                     */
                 }
             }
         }
@@ -119,7 +122,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        bluetoothScanner.stop()
+        bluetoothScanner.stopScanning()
     }
 }
 

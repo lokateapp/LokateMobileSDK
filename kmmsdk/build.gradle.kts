@@ -17,9 +17,9 @@ kotlin {
     }
     
     listOf(
-        iosX64(),
+        //iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        //iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
             baseName = "kmmsdk"
@@ -41,6 +41,9 @@ kotlin {
             //shared pref
             implementation(libs.russhwolf.settings)
             implementation(libs.russhwolf.settings.no.arg)
+
+            //napier
+            implementation(libs.napier)
 
         }
         commonTest.dependencies {

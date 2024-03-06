@@ -1,7 +1,7 @@
-package com.lokate.kmmsdk.domain.beacon
+package com.lokate.kmmsdk
 
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import io.ktor.utils.io.core.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +37,7 @@ interface BeaconScanner {
     fun stop()
 }
 
+internal expect fun getScanner(): BeaconScanner2
 
 fun <T> Flow<T>.wrap(): CFlow<T> = CFlow(this)
 
