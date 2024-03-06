@@ -15,23 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lokate.kmmsdk.LokateSDK
+import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun MarketApp() {
-//     val lokateSDK = LokateSDK()
-//     val scanResultState by lokateSDK.getScanResultFlow().collectAsState(initial = "No scan result")
+     val lokateSDK = LokateSDK()
 
     GreetingView(
-//        scanResultState.toString()
-        "s" +
-                "scannn"
+        lokateSDK,
     )
 }
 
 @Composable
 fun GreetingView(
-    scanResultState: String,
+    lokateSDK: LokateSDK
 ) {
+    val scanResultState by lokateSDK.getScanResultFlow().collectAsState(initial = "No scan result")
 
     Column(
         modifier = Modifier
@@ -51,7 +51,7 @@ fun GreetingView(
 
         // Middle section with text field
         Text(
-            text = scanResultState,
+            text = scanResultState.toString(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(240.dp)
@@ -63,7 +63,7 @@ fun GreetingView(
         // Bottom section with button
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { }
+            onClick = { lokateSDK.startScanning() }
         ) {
             Text(text = "Start Scanning")
         }

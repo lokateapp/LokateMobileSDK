@@ -29,7 +29,8 @@ suspend fun checkPermissions(permissionsController: PermissionsController): Bool
     return RequiredPermissions.all { permission -> permissionsController.isPermissionGranted(permission) }
 }
 
-// TODO: handle denied expections properly (redirect user to settings etc.)
+// TODO: handle denied exceptions properly (redirect user to settings etc.)
+// should also check if bluetooth is open
 suspend fun askPermission(permissionsController: PermissionsController, permission: Permission) {
     try {
         permissionsController.providePermission(permission)

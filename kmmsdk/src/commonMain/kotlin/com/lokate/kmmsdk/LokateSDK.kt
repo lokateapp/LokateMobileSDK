@@ -28,28 +28,26 @@ class LokateSDK {
             "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
             24719,
             65453,
-            ""
-        ),//white
-        LokateBeacon(
-
-            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
-            1,
-            1,
-            "2",
-        )//pink
-        ,
+            "1"
+        ), // ?
         LokateBeacon(
             "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
             24719,
             28241,
-            "3",
-        ),//White
+            "2",
+        ), // ?
         LokateBeacon(
-            "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
+            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
             1,
             1,
-            "3"
-        )
+            "3",
+        ), // pink
+        LokateBeacon(
+            "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+            1,
+            2,
+            "4"
+        ) // red
     )
 
     fun getScanResultFlow(): Flow<BeaconScanResult> {
@@ -154,9 +152,5 @@ class LokateSDK {
     fun stopScanning() {
         //beaconScanner.stop()
         beaconScanner.stopScanning()
-
     }
-
-
-
 }

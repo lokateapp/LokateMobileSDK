@@ -88,7 +88,6 @@ class IOSBeaconScanner : BeaconScanner {
             }
         }
 
-
         override fun locationManager(
             manager: CLLocationManager,
             didRangeBeacons: List<*>,
