@@ -5,7 +5,7 @@ import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 
 class BeaconLocalDS(
-    private val database: Database
+    private val database: Database,
 ) {
     private val queries = database.beaconDatabaseQueries
 
@@ -17,15 +17,17 @@ class BeaconLocalDS(
 
     suspend fun getBeacons(): DSResult {
         val a = queries.selectAllBeacons()
-        return DSResult.Success(a.executeAsList().map {
-            LokateBeacon(
-                it.uuid,
-                it.major.toInt(),
-                it.minor.toInt(),
-                "null",
-                //BeaconProximity.Unknown
-            )
-        })
+        return DSResult.Success(
+            a.executeAsList().map {
+                LokateBeacon(
+                    it.uuid,
+                    it.major.toInt(),
+                    it.minor.toInt(),
+                    "null",
+                    // BeaconProximity.Unknown
+                )
+            },
+        )
     }
 
     suspend fun removeBeacons() {

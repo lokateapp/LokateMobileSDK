@@ -4,5 +4,5 @@ data class EventRequest(
     val customerId: String,
     val beaconUID: String,
     val status: String,
-    val timestamp: Long
+    val timestamp: Long,
 )

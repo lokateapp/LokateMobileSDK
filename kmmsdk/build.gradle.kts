@@ -13,11 +13,11 @@ kotlin {
             }
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach {
         it.binaries.framework {
             baseName = "kmmsdk"
@@ -70,9 +70,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 }
 
-sqldelight{
-    databases{
-        create("Database"){
+sqldelight {
+    databases {
+        create("Database") {
             packageName.set("com.lokate.kmmsdk")
         }
     }

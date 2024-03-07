@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthenticationResponse(
-    val valid: Boolean
+    val valid: Boolean,
 )

@@ -10,16 +10,17 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object LokateHTTPClient {
-
     private val _instance by lazy {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
+                json(
+                    Json {
+                        prettyPrint = true
+                        isLenient = true
+                        ignoreUnknownKeys = true
+                    },
+                )
             }
             HttpResponseValidator {
                 validateResponse {
@@ -28,7 +29,7 @@ object LokateHTTPClient {
                         throw HttpExceptions(
                             response = it,
                             failureReason = failReason,
-                            cachedResponseText = it.bodyAsText()
+                            cachedResponseText = it.bodyAsText(),
                         )
                     }
                 }

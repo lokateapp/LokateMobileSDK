@@ -9,10 +9,11 @@ class BeaconRemoteDS(private val api: BeaconAPI) {
             when (it) {
                 is ApiResponse.Error.GenericError -> DSResult.Error(it.errorMessage.orEmpty(), it)
                 is ApiResponse.Error.HttpError -> DSResult.Error("${it.code} + ${it.errorBody}", it)
-                is ApiResponse.Error.SerializationError -> DSResult.Error(
-                    it.errorMessage.orEmpty(),
-                    it
-                )
+                is ApiResponse.Error.SerializationError ->
+                    DSResult.Error(
+                        it.errorMessage.orEmpty(),
+                        it,
+                    )
 
                 is ApiResponse.Success -> DSResult.Success(it.body)
             }

@@ -2,24 +2,27 @@ package com.lokate.kmmsdk.data.datasource.local.authentication
 
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.authentication.AuthenticationDS
-import com.lokate.kmmsdk.utils.extension.emptyString
+import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 import com.russhwolf.settings.Settings
 
-class AuthenticationLocalDS(private val authenticationSettings: Settings):AuthenticationDS {
-    override suspend fun getAppAuthentication(appToken: String): DSResult {
-        return authenticationSettings.getString("auth_token", defaultValue = "").let {
-            when(it){
-                "" -> DSResult.Error("No auth token found", Error())
+class AuthenticationLocalDS(private val authenticationSettings: Settings) : AuthenticationDS {
+    suspend fun getAppToken(): DSResult {
+        return authenticationSettings.getString("auth_token", EMPTY_STRING).let {
+            when (it.isEmpty()) {
+                true -> DSResult.Error("No auth token found", Error())
                 else -> DSResult.Success(it)
             }
         }
     }
 
-    internal suspend fun getAppToken(): DSResult{
-        return authenticationSettings.getString("auth_token", emptyString()).let {
-            when(it){
-                emptyString() -> DSResult.Error("No auth token found", Error())
-                else -> DSResult.Success(it)
+    override suspend fun getAppAuthentication(appToken: String): DSResult {
+        return authenticationSettings.getString("auth_token", EMPTY_STRING).let {
+            when (it.isEmpty()) {
+                true -> DSResult.Error("No auth token found", Error())
+                (it == appToken) -> DSResult.Success(it)
+                else -> {
+                    DSResult.Error("Invalid auth token", Error())
+                }
             }
         }
     }

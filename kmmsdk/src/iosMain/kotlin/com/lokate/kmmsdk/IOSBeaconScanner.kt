@@ -17,9 +17,7 @@ import platform.Foundation.NSLog
 import platform.darwin.NSObject
 
 class IOSBeaconScanner : BeaconScanner {
-
-    internal class iOSBeaconScannerHelper : NSObject(), CLLocationManagerDelegateProtocol {
-
+    internal class IOSBeaconScannerHelper : NSObject(), CLLocationManagerDelegateProtocol {
         private val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             CLLocationManager()
         }
@@ -45,7 +43,7 @@ class IOSBeaconScanner : BeaconScanner {
                 NSLog("No regions to scan1")
                 setRegions(listOf())
                 NSLog("added default regions")
-                //return
+                // return
             }
 
             regions.forEach {
@@ -63,7 +61,7 @@ class IOSBeaconScanner : BeaconScanner {
 
         override fun locationManager(
             manager: CLLocationManager,
-            didChangeAuthorizationStatus: Int
+            didChangeAuthorizationStatus: Int,
         ) {
             NSLog("locationManager didChangeAuthorizationStatus: Status - $didChangeAuthorizationStatus")
             when (didChangeAuthorizationStatus) {
@@ -91,12 +89,12 @@ class IOSBeaconScanner : BeaconScanner {
         override fun locationManager(
             manager: CLLocationManager,
             didRangeBeacons: List<*>,
-            inRegion: CLBeaconRegion
+            inRegion: CLBeaconRegion,
         ) {
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
                     coroutineScope.launch {
-                        //NSLog("Emitting beacon result eeeee ${this@with}")
+                        // NSLog("Emitting beacon result eeeee ${this@with}")
                         beaconFlow.emit(this@with)
                     }
                 }
@@ -118,8 +116,11 @@ class IOSBeaconScanner : BeaconScanner {
             if (regions.isEmpty()) {
                 NSLog("No regions to scan")
                 return
-            } else this.regions = regions.map {
-                it.toCLBeaconRegion()
+            } else {
+                this.regions =
+                    regions.map {
+                        it.toCLBeaconRegion()
+                    }
             }
         }
 
@@ -129,8 +130,8 @@ class IOSBeaconScanner : BeaconScanner {
     }
 
     companion object {
-        private val helper: iOSBeaconScannerHelper by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-            iOSBeaconScannerHelper()
+        private val helper: IOSBeaconScannerHelper by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            IOSBeaconScannerHelper()
         }
     }
 
