@@ -25,7 +25,7 @@ permissionsCompose = "0.17.0"
 sqldelight = "2.0.0"
 settingsVer = "1.1.1"
 altBeacon = "2.20.3"
-napierVersion = "2.7.1"
+lighthouseVer = "1.4.2"
 activityKtx = "1.8.2"
 gradleKtlint = "12.1.0"
 detekt = "1.23.5"
@@ -65,20 +65,20 @@ permissions-compose = { module = "dev.icerock.moko:permissions-compose", version
 slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion" }
 
 #multiplatform shared pref
-russhwolf-settings = {module = "com.russhwolf:multiplatform-settings", version.ref = "settingsVer"}
-russhwolf-settings-no-arg = {module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "settingsVer"}
+russhwolf-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "settingsVer" }
+russhwolf-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "settingsVer" }
 
 #multiplatform logging
-napier = {module = "io.github.aakira:napier", version.ref = "napierVersion"}
+lighthouse-log = { module = "org.lighthousegames:logging", version.ref = "lighthouseVer" }
 
 #sqldelight-common
 #sqldelight android
-sqldelight-driver-android = {module="app.cash.sqldelight:android-driver", version.ref = "sqldelight"}
+sqldelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 #sqldelight native
-sqldelight-driver-native= {module="app.cash.sqldelight:native-driver", version.ref = "sqldelight"}
+sqldelight-driver-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 
 #altbeacon-android
-altbeacon-android = {module="org.altbeacon:android-beacon-library", version.ref = "altBeacon"}
+altbeacon-android = { module = "org.altbeacon:android-beacon-library", version.ref = "altBeacon" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 
 #ktlint-rules
@@ -94,6 +94,6 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-sqldelight = {id = "app.cash.sqldelight", version.ref = "sqldelight"}
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 gradleKtlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "gradleKtlint" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
