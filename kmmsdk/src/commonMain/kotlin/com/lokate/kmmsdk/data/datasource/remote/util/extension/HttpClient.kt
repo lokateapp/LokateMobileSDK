@@ -10,14 +10,7 @@ import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.SerializationException
 
-class HttpExceptions(
-    response: HttpResponse,
-    failureReason: String?,
-    cachedResponseText: String,
-) : ResponseException(response, cachedResponseText) {
-    override val message: String = "Status: ${response.status}." + " Failure: $failureReason"
-}
-
+@Suppress("TooGenericExceptionCaught", "MaxLineLength")
 suspend inline fun <reified T, reified E> HttpClient.lokateRequest(block: HttpRequestBuilder.() -> Unit): ApiResponse<T, E> =
     try {
         val response = request(block)
@@ -39,3 +32,11 @@ suspend inline fun <reified T, reified E> HttpClient.lokateRequest(block: HttpRe
     } catch (exception: Exception) {
         ApiResponse.Error.GenericError(exception.message, null)
     }
+
+class HttpExceptions(
+    response: HttpResponse,
+    failureReason: String?,
+    cachedResponseText: String,
+) : ResponseException(response, cachedResponseText) {
+    override val message: String = "Status: ${response.status}." + " Failure: $failureReason"
+}

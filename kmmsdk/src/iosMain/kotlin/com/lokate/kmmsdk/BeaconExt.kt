@@ -3,7 +3,7 @@ package com.lokate.kmmsdk
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
-import com.lokate.kmmsdk.utils.extension.emptyString
+import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLProximity
@@ -15,7 +15,7 @@ fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
         uUID = NSUUID(this.uuid),
         major = (this.major ?: 0).toUShort(),
         minor = (this.minor ?: 0).toUShort(),
-        identifier = emptyString(),
+        identifier = EMPTY_STRING,
     )
 }
 
@@ -49,6 +49,6 @@ fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
         uUID = NSUUID(this.uuid),
         major = this.major.toUShort(),
         minor = this.minor.toUShort(),
-        identifier = emptyString(),
+        identifier = EMPTY_STRING,
     )
 }

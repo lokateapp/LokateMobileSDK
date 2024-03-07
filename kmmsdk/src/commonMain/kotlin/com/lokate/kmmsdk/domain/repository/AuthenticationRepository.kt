@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk.domain.model.repository
+package com.lokate.kmmsdk.domain.repository
 
 interface AuthenticationRepository {
     suspend fun getAppToken(): RepositoryResult<String>

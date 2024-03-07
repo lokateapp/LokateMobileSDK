@@ -4,16 +4,17 @@ import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
 import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
-import com.lokate.kmmsdk.domain.model.repository.AuthenticationRepository
-import com.lokate.kmmsdk.domain.model.repository.RepositoryResult
+import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
-import com.lokate.kmmsdk.utils.extension.emptyString
+import com.lokate.kmmsdk.domain.repository.RepositoryResult
+import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 
 class BeaconRepositoryImpl(
     private val authenticationRepository: AuthenticationRepository,
     private val remoteDS: BeaconRemoteDS,
     private val localDS: BeaconLocalDS,
 ) : BeaconRepository {
+    @Suppress("UNCHECKED_CAST")
     override suspend fun fetchBeacons(): RepositoryResult<List<LokateBeacon>> {
         val appToken = authenticationRepository.getAppToken()
         if (appToken !is RepositoryResult.Success) {
@@ -21,12 +22,12 @@ class BeaconRepositoryImpl(
         }
         return remoteDS.fetchBeacons(appToken.body).let {
             when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(emptyString(), emptyString())
+                is DSResult.Error<*> -> RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
                 is DSResult.Success<*> ->
                     if (it.data is List<*>) {
                         RepositoryResult.Success(it.data as List<LokateBeacon>)
                     } else {
-                        RepositoryResult.Error(emptyString(), emptyString())
+                        RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
                     }
             }
         }
@@ -44,15 +45,16 @@ class BeaconRepositoryImpl(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override suspend fun getBeaconsFromDb(): RepositoryResult<List<LokateBeacon>> {
         return localDS.getBeacons().let {
             when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(emptyString(), emptyString())
+                is DSResult.Error<*> -> RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
                 is DSResult.Success<*> ->
                     if (it.data is List<*>) {
                         RepositoryResult.Success(it.data as List<LokateBeacon>)
                     } else {
-                        RepositoryResult.Error(emptyString(), emptyString())
+                        RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
                     }
             }
         }

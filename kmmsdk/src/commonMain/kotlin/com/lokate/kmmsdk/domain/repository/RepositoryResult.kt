@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk.domain.model.repository
+package com.lokate.kmmsdk.domain.repository
 
 sealed class RepositoryResult<out T> {
     data class Success<T>(val body: T) : RepositoryResult<T>()

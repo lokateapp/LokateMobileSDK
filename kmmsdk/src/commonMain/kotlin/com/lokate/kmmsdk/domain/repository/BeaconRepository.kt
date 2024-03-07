@@ -1,7 +1,6 @@
 package com.lokate.kmmsdk.domain.repository
 
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
-import com.lokate.kmmsdk.domain.model.repository.RepositoryResult
 
 interface BeaconRepository {
     suspend fun fetchBeacons(): RepositoryResult<List<LokateBeacon>>

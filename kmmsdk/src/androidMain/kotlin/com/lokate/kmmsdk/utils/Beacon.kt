@@ -25,6 +25,7 @@ fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
 }
 
 // taken from kmmbeacons
+@Suppress("MagicNumber")
 fun calculateProximity(accuracy: Double): BeaconProximity =
     when (accuracy) {
         in 0.0..0.5 -> BeaconProximity.Immediate
@@ -33,6 +34,7 @@ fun calculateProximity(accuracy: Double): BeaconProximity =
         else -> BeaconProximity.Unknown
     }
 
+@Suppress("MagicNumber")
 fun calculateAccuracy(
     txPower: Int,
     rssi: Double,
