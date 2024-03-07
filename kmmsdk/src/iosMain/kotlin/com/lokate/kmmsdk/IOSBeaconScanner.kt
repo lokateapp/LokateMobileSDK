@@ -41,9 +41,7 @@ class IOSBeaconScanner : BeaconScanner {
             }
             if (regions.isEmpty()) {
                 NSLog("No regions to scan1")
-                setRegions(listOf())
-                NSLog("added default regions")
-                // return
+                return
             }
 
             regions.forEach {
