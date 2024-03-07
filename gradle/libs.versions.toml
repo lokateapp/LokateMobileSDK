@@ -29,6 +29,7 @@ napierVersion = "2.7.1"
 activityKtx = "1.8.2"
 gradleKtlint = "12.1.0"
 detekt = "1.23.5"
+detekt-rules = "0.0.26"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -82,6 +83,8 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 
 #ktlint-rules
 ktlint-rules-twitter = { module = "com.twitter.compose.rules:ktlint", version.ref = "ktlint-rules" }
+
+detekt-rules-twitter = { module = "com.twitter.compose.rules:detekt", version.ref = "detekt-rules" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

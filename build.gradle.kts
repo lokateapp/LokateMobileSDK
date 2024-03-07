@@ -12,7 +12,7 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
-subprojects {
+allprojects {
     apply {
         plugin(rootProject.libs.plugins.detekt.get().pluginId)
         plugin(rootProject.libs.plugins.gradleKtlint.get().pluginId)
@@ -31,24 +31,27 @@ subprojects {
             ),
         )
         filter {
+            exclude("**/build/**")
             exclude("**/generated/**")
             exclude("**/MainViewController.kt") // exclude MainViewController.kt from ktlint since it's a generated file
             include("**/kotlin/**")
         }
     }
-
     detekt {
-        buildUponDefaultConfig = true
-        config.setFrom(file("config/detekt/detekt.yml"))
+        allRules = true
     }
 }
 
-tasks.register("detektAll") {
-    allprojects {
-        this@register.dependsOn(tasks.withType<Detekt>())
-    }
+tasks.withType<Detekt> {
+    setSource(files(project.projectDir))
+    config = files("config/detekt/detekt.yml")
+    exclude("**/build/**")
+    exclude("**/generated/**")
+    exclude("**/MainViewController.kt")
+    include("**/kotlin/**")
 }
 
 dependencies {
     ktlintRuleset(libs.ktlint.rules.twitter)
+    detektPlugins(libs.detekt.rules.twitter)
 }
