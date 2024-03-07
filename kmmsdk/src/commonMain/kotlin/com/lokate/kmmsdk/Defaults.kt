@@ -1,5 +1,6 @@
 package com.lokate.kmmsdk
 
+import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 
 @Suppress("MagicNumber")
@@ -14,6 +15,7 @@ object Defaults {
                 24719,
                 65453,
                 "1",
+                BeaconProximity.Far.ordinal
             ),
             LokateBeacon(
                 // ?
@@ -21,6 +23,7 @@ object Defaults {
                 24719,
                 28241,
                 "2",
+                BeaconProximity.Far.ordinal
             ),
             LokateBeacon(
                 // pink
@@ -28,6 +31,7 @@ object Defaults {
                 1,
                 1,
                 "3",
+                BeaconProximity.Far.ordinal
             ),
             LokateBeacon(
                 // red
@@ -35,6 +39,7 @@ object Defaults {
                 1,
                 2,
                 "4",
+                BeaconProximity.Far.ordinal
             ),
         )
 }

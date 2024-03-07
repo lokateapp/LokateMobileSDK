@@ -1,88 +1,56 @@
 package com.lokate.kmmsdk.data.repository
 
-import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
-import com.lokate.kmmsdk.data.datasource.remote.ApiResponse
 import com.lokate.kmmsdk.data.datasource.remote.authentication.AuthenticationRemoteDS
-import com.lokate.kmmsdk.domain.model.authentication.AuthenticationResponse
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
-import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
-import io.ktor.http.HttpStatusCode
+import com.lokate.kmmsdk.domain.repository.toRepositoryResult
 
 class AuthenticationRepositoryImpl(
     private val remoteDS: AuthenticationRemoteDS,
     private val localDS: AuthenticationLocalDS,
 ) : AuthenticationRepository {
-    override suspend fun getAppToken(): RepositoryResult<String> {
-        return localDS.getAppToken().let {
-            when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(it.message, it.errorType.toString())
-                is DSResult.Success<*> ->
-                    if (it.data is String) {
-                        RepositoryResult.Success(it.data)
-                    } else {
-                        RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
-                    }
-            }
-        }
-    }
+    override suspend fun getAppToken(): RepositoryResult<String> =
+        localDS.getAppToken().toRepositoryResult()
 
-    private suspend fun getLocalAuthentication(appToken: String): RepositoryResult<Boolean> {
-        return localDS.getAppAuthentication(appToken).let {
-            when (it) {
-                is DSResult.Success<*> -> {
-                    if (it.data is AuthenticationResponse && it.data.valid) {
-                        return RepositoryResult.Success(true)
-                    }
-                }
-                else -> {}
+
+    private suspend fun getLocalAuthentication(appToken: String): RepositoryResult<Boolean> =
+        when (val result = localDS.getAppAuthentication(appToken).toRepositoryResult()) {
+            is RepositoryResult.Success -> {
+                if (result.body.valid) RepositoryResult.Success(true)
+                else RepositoryResult.Error("Authentication failed!", Any())
             }
-            RepositoryResult.Error("Authentication failed!", "Unknown Error")
+
+            is RepositoryResult.Error -> RepositoryResult.Error(result.message, result.errorType)
         }
-    }
 
     @Suppress("NestedBlockDepth")
     private suspend fun getRemoteAuthentication(appToken: String): RepositoryResult<Boolean> {
-        return remoteDS.getAppAuthentication(appToken).let {
-            when (it) {
-                is DSResult.Error<*> -> {
-                    when (it.errorType) {
-                        is ApiResponse.Error.HttpError<*> -> {
-                            if (it.errorType.code == HttpStatusCode.Unauthorized.value) {
-                                RepositoryResult.Error(
-                                    "Authentication failed!",
-                                    "Invalid app token",
-                                )
-                            }
-                        }
+        return when (val remoteAuthentication =
+            remoteDS.getAppAuthentication(appToken).toRepositoryResult()) {
+            is RepositoryResult.Error -> RepositoryResult.Error(
+                remoteAuthentication.message,
+                remoteAuthentication.errorType
+            )
 
-                        else ->
-                            RepositoryResult.Error(
-                                "Unknown Error!",
-                                "Unknown Error",
-                            )
-                    }
-                }
-
-                is DSResult.Success<*> -> {
-                    if (it.data is AuthenticationResponse) {
-                        if (it.data.valid) {
-                            setAuthentication(appToken)
-                        }
-                        RepositoryResult.Success(true)
-                    }
+            is RepositoryResult.Success -> {
+                when (remoteAuthentication.body.valid) {
+                    true -> setAuthentication(appToken)
+                    else -> RepositoryResult.Error("Authentication failed!", Any())
                 }
             }
-            RepositoryResult.Error("Unknown Error", "Unknown Error")
         }
     }
 
     override suspend fun getAuthenticate(appToken: String): RepositoryResult<Boolean> {
         return when {
-            getLocalAuthentication(appToken) is RepositoryResult.Success -> getLocalAuthentication(appToken)
-            getRemoteAuthentication(appToken) is RepositoryResult.Success -> getRemoteAuthentication(appToken)
-            else -> RepositoryResult.Error("Authentication failed!", "Unknown Error")
+            getLocalAuthentication(appToken) is RepositoryResult.Success ->
+                getLocalAuthentication(appToken)
+
+            getRemoteAuthentication(appToken) is RepositoryResult.Success ->
+                getRemoteAuthentication(appToken)
+
+            else -> RepositoryResult.Error("Authentication failed!", Exception())
         }
     }
 
@@ -91,17 +59,6 @@ class AuthenticationRepositoryImpl(
         return RepositoryResult.Success(true)
     }
 
-    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> {
-        return localDS.setUserId(userId).let {
-            when (it) {
-                is DSResult.Error<*> ->
-                    RepositoryResult.Error(
-                        "Set user failed!",
-                        "This shouldn't be happening",
-                    )
-
-                is DSResult.Success<*> -> RepositoryResult.Success(true)
-            }
-        }
-    }
+    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> =
+        localDS.setUserId(userId).toRepositoryResult()
 }

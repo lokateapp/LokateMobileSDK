@@ -3,6 +3,7 @@ CREATE TABLE Beacon(
     uuid TEXT NOT NULL,
     major INTEGER NOT NULL,
     minor INTEGER NOT NULL,
+    range INTEGER NOT NULL,
     UNIQUE(uuid, major, minor)
 );
 
@@ -10,8 +11,12 @@ removeAllBeacons:
 DELETE FROM Beacon;
 
 insertBeacon:
-INSERT INTO Beacon(uuid,major,minor)
-VALUES (?,?,?);
+INSERT INTO Beacon(uuid,major,minor, range)
+VALUES (?,?,?,?);
+
+updateOrInsertBeacon:
+INSERT OR REPLACE INTO Beacon(uuid,major,minor, range)
+VALUES (?,?,?,?);
 
 selectAllBeacons:
 SELECT Beacon.*

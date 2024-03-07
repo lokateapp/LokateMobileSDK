@@ -1,62 +1,42 @@
 package com.lokate.kmmsdk.data.repository
 
-import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
 import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
-import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
+import com.lokate.kmmsdk.domain.repository.toRepositoryResult
 
 class BeaconRepositoryImpl(
     private val authenticationRepository: AuthenticationRepository,
     private val remoteDS: BeaconRemoteDS,
     private val localDS: BeaconLocalDS,
 ) : BeaconRepository {
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun fetchBeacons(): RepositoryResult<List<LokateBeacon>> {
+
+    override suspend fun fetchBeacons(branchId: String): RepositoryResult<List<ActiveBeacon>> {
         val appToken = authenticationRepository.getAppToken()
         if (appToken !is RepositoryResult.Success) {
             return RepositoryResult.Error("Couldn't fetch!", "No auth token!")
         }
-        return remoteDS.fetchBeacons(appToken.body).let {
-            when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
-                is DSResult.Success<*> ->
-                    if (it.data is List<*>) {
-                        RepositoryResult.Success(it.data as List<LokateBeacon>)
-                    } else {
-                        RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
-                    }
-            }
+
+        val remoteBeacons = remoteDS.fetchBeacons(branchId).toRepositoryResult()
+        if (remoteBeacons is RepositoryResult.Success) {
+            localDS.updateOrInsertBeacon(remoteBeacons.body)
+            return remoteBeacons
+        }
+
+        val localBeacons = localDS.fetchBeacons(branchId).toRepositoryResult()
+        return if (localBeacons is RepositoryResult.Success) {
+            localBeacons
+        } else {
+            RepositoryResult.Error("Couldn't fetch!", "No beacons!")
         }
     }
 
-    override suspend fun deleteBeacons(): RepositoryResult<Boolean> {
-        return localDS.removeBeacons().let {
-            RepositoryResult.Success(true)
-        }
-    }
+    override suspend fun deleteBeacons(): RepositoryResult<Boolean> =
+        localDS.removeBeacons().toRepositoryResult()
 
-    override suspend fun addBeacons(beacons: List<LokateBeacon>): RepositoryResult<Boolean> {
-        return localDS.addBeacon(beacons).let {
-            RepositoryResult.Success(true)
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override suspend fun getBeaconsFromDb(): RepositoryResult<List<LokateBeacon>> {
-        return localDS.getBeacons().let {
-            when (it) {
-                is DSResult.Error<*> -> RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
-                is DSResult.Success<*> ->
-                    if (it.data is List<*>) {
-                        RepositoryResult.Success(it.data as List<LokateBeacon>)
-                    } else {
-                        RepositoryResult.Error(EMPTY_STRING, EMPTY_STRING)
-                    }
-            }
-        }
-    }
+    override suspend fun addBeacons(beacons: List<ActiveBeacon>): RepositoryResult<Boolean> =
+        localDS.updateOrInsertBeacon(beacons).toRepositoryResult()
 }

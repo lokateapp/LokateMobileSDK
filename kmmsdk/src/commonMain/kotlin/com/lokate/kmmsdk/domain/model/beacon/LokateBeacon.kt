@@ -5,5 +5,6 @@ data class LokateBeacon(
     val major: Int?,
     val minor: Int?,
     val campaign: String?,
+    val proximityType: Int?
     // @Serializable val minProximity: BeaconProximity
 )

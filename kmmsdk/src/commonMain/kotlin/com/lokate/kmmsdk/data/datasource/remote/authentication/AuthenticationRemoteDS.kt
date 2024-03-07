@@ -2,37 +2,15 @@ package com.lokate.kmmsdk.data.datasource.remote.authentication
 
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.authentication.AuthenticationDS
-import com.lokate.kmmsdk.data.datasource.remote.ApiResponse
+import com.lokate.kmmsdk.data.datasource.toDSResult
 import com.lokate.kmmsdk.domain.model.authentication.AuthenticationRequest
+import com.lokate.kmmsdk.domain.model.authentication.AuthenticationResponse
 
 class AuthenticationRemoteDS(private val api: AuthenticationAPI) : AuthenticationDS {
-    override suspend fun getAppAuthentication(appToken: String): DSResult {
-        return api.getAuthenticate(AuthenticationRequest(appToken)).let {
-            when (it) {
-                is ApiResponse.Error.GenericError ->
-                    DSResult.Error(
-                        it.errorMessage.orEmpty(),
-                        it,
-                    )
+    override suspend fun getAppAuthentication(appToken: String): DSResult<AuthenticationResponse> =
+        api.getAuthenticate(AuthenticationRequest(appToken)).toDSResult()
 
-                is ApiResponse.Error.HttpError ->
-                    DSResult.Error(
-                        "${it.code}" + it.errorBody,
-                        it,
-                    )
-
-                is ApiResponse.Error.SerializationError ->
-                    DSResult.Error(
-                        it.errorMessage.orEmpty(),
-                        it,
-                    )
-
-                is ApiResponse.Success -> DSResult.Success(it.body)
-            }
-        }
-    }
-
-    override suspend fun setUserId(userId: String): DSResult {
+    override suspend fun setUserId(userId: String): DSResult<Boolean> {
         throw UnsupportedOperationException("userId cannot be set through remote ds")
     }
 }
