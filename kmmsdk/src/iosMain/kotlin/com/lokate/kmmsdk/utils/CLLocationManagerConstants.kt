@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk
+package com.lokate.kmmsdk.utils
 
 const val NOT_DETERMINED = 0
 const val RESTRICTED = 1
