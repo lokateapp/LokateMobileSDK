@@ -3,7 +3,7 @@ package com.lokate.kmmsdk.data.datasource.remote.beacon
 import com.lokate.kmmsdk.data.datasource.remote.ApiResponse
 import com.lokate.kmmsdk.data.datasource.remote.base.BaseAPI
 import com.lokate.kmmsdk.data.datasource.remote.beacon.model.EventRequest
-import com.lokate.kmmsdk.data.datasource.remote.util.extension.lokateRequest
+import com.lokate.kmmsdk.data.datasource.remote.base.lokateRequest
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpMethod

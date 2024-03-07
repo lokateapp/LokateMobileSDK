@@ -1,7 +1,7 @@
 package com.lokate.kmmsdk.data.datasource.remote.authentication
 
 import com.lokate.kmmsdk.data.datasource.remote.base.BaseAPI
-import com.lokate.kmmsdk.data.datasource.remote.util.extension.lokateRequest
+import com.lokate.kmmsdk.data.datasource.remote.base.lokateRequest
 import com.lokate.kmmsdk.domain.model.authentication.AuthenticationRequest
 import com.lokate.kmmsdk.domain.model.authentication.AuthenticationResponse
 import com.lokate.kmmsdk.data.datasource.remote.ApiResponse

@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk.data.repository.beacon
+package com.lokate.kmmsdk.data.repository
 
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS

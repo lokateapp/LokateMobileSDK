@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk.data.datasource.remote.util.extension
+package com.lokate.kmmsdk.data.datasource.remote.base
 
 import com.lokate.kmmsdk.data.datasource.remote.ApiResponse
 import io.ktor.client.HttpClient
