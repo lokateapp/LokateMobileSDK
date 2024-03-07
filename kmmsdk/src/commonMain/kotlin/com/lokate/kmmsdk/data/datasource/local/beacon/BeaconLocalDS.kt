@@ -13,28 +13,31 @@ class BeaconLocalDS(
 ) : BeaconDS {
     private val queries = database.beaconDatabaseQueries
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun fetchBeacons(branchId: String): DSResult<List<ActiveBeacon>> {
         return try {
             queries.selectAllBeacons().executeAsList().let {
-                DSResult.Success(it.map {
-                    ActiveBeacon(
-                        userId = it.uuid,
-                        major = it.major.toString(),
-                        minor = it.minor.toString(),
-                        range = BeaconRange.fromInt(it.range.toInt()),
-                        branchId = EMPTY_STRING,
-                        radius = 0,
-                        name = EMPTY_STRING,
-                        campaign = Campaign(
-                            EMPTY_STRING,
-                            EMPTY_STRING,
-                            EMPTY_STRING,
-                            EMPTY_STRING,
-                            EMPTY_STRING
-                        ),
-                        id = EMPTY_STRING
-                    )
-                }
+                DSResult.Success(
+                    it.map {
+                        ActiveBeacon(
+                            userId = it.uuid,
+                            major = it.major.toString(),
+                            minor = it.minor.toString(),
+                            range = BeaconRange.fromInt(it.range.toInt()),
+                            branchId = EMPTY_STRING,
+                            radius = 0,
+                            name = EMPTY_STRING,
+                            campaign =
+                                Campaign(
+                                    EMPTY_STRING,
+                                    EMPTY_STRING,
+                                    EMPTY_STRING,
+                                    EMPTY_STRING,
+                                    EMPTY_STRING,
+                                ),
+                            id = EMPTY_STRING,
+                        )
+                    },
                 )
             }
         } catch (e: Exception) {
@@ -42,6 +45,7 @@ class BeaconLocalDS(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun updateOrInsertBeacon(beacons: List<ActiveBeacon>): DSResult<Boolean> {
         return try {
             queries.transaction {
@@ -50,17 +54,17 @@ class BeaconLocalDS(
                         uuid = it.userId,
                         major = it.major.toLong(),
                         minor = it.minor.toLong(),
-                        range = it.range.ordinal.toLong()
+                        range = it.range.ordinal.toLong(),
                     )
                 }
             }
             DSResult.Success(true)
         } catch (e: Exception) {
-            e.printStackTrace()
             DSResult.Error(e.message, e)
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun removeBeacons(): DSResult<Boolean> {
         return try {
             queries.transaction {
@@ -68,7 +72,6 @@ class BeaconLocalDS(
             }
             DSResult.Success(true)
         } catch (e: Exception) {
-            e.printStackTrace()
             DSResult.Error(e.message, e)
         }
     }

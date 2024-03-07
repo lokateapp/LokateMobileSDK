@@ -25,6 +25,7 @@ class AuthenticationLocalDS(private val authenticationSettings: Settings) : Auth
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun setUserId(userId: String): DSResult<Boolean> {
         return try {
             authenticationSettings.putString("user_id", userId)
@@ -34,6 +35,7 @@ class AuthenticationLocalDS(private val authenticationSettings: Settings) : Auth
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     fun setAuthentication(authToken: String): DSResult<Boolean> {
         return try {
             authenticationSettings.putString("auth_token", authToken)

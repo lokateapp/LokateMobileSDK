@@ -27,7 +27,7 @@ internal val RequiredPermissions =
     arrayOf(
         Permission.LOCATION,
         Permission.COARSE_LOCATION,
-        //Permission.BLUETOOTH_SCAN,
+        // Permission.BLUETOOTH_SCAN,
     )
 
 suspend fun checkPermissions(permissionsController: PermissionsController): Boolean {
@@ -69,7 +69,6 @@ fun App() {
         }
     }
 
-
     MyApplicationTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -79,7 +78,7 @@ fun App() {
                 MarketApp()
             } else {
                 Column(Modifier.fillMaxHeight()) {
-                    Box(Modifier.fillMaxHeight(0.3f)){
+                    Box(Modifier.fillMaxHeight(0.3f)) {
                         PermissionScreen(permissionsController, coroutineScope, hasPermissions)
                     }
                     Text(text.value)

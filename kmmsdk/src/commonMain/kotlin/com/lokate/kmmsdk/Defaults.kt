@@ -6,6 +6,7 @@ import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 @Suppress("MagicNumber")
 object Defaults {
     const val DEFAULT_TIMEOUT_BEFORE_GONE = 3000L
+    const val GONE_CHECK_INTERVAL = 5000L
     const val BEACON_LAYOUT_IBEACON = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25,i:0-56"
     val DEFAULT_BEACONS =
         listOf(
@@ -15,7 +16,7 @@ object Defaults {
                 24719,
                 65453,
                 "1",
-                BeaconProximity.Far.ordinal
+                BeaconProximity.Far.ordinal,
             ),
             LokateBeacon(
                 // ?
@@ -23,7 +24,7 @@ object Defaults {
                 24719,
                 28241,
                 "2",
-                BeaconProximity.Far.ordinal
+                BeaconProximity.Far.ordinal,
             ),
             LokateBeacon(
                 // pink
@@ -31,7 +32,7 @@ object Defaults {
                 1,
                 1,
                 "3",
-                BeaconProximity.Far.ordinal
+                BeaconProximity.Far.ordinal,
             ),
             LokateBeacon(
                 // red
@@ -39,7 +40,7 @@ object Defaults {
                 1,
                 2,
                 "4",
-                BeaconProximity.Far.ordinal
+                BeaconProximity.Far.ordinal,
             ),
         )
 }

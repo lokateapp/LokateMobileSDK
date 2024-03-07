@@ -1,6 +1,7 @@
 package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.Defaults.DEFAULT_BEACONS
+import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +17,6 @@ import kotlinx.coroutines.launch
 import org.lighthousegames.logging.logging
 
 class LokateSDK {
-
     companion object {
         val log = logging("LokateSDK")
     }
@@ -41,10 +41,14 @@ class LokateSDK {
         beaconScanner.setRegions(DEFAULT_BEACONS)
         beaconScanner.startScanning()
 
-        scanResultHandler(beaconScannerFlow = beaconScanner.scanResultFlow().transform { scan ->
-            if (scan.accuracy != null && scan.accuracy > -1.0)
-                emit(scan)
-        })
+        scanResultHandler(
+            beaconScannerFlow =
+                beaconScanner.scanResultFlow().transform { scan ->
+                    if (scan.accuracy != null && scan.accuracy > -1.0) {
+                        emit(scan)
+                    }
+                },
+        )
         checkGone()
         flowEmitter()
         // beaconScanner.start()
@@ -54,7 +58,7 @@ class LokateSDK {
     private fun checkGone() {
         lokateScope.launch {
             while (true) {
-                delay(5000)
+                delay(GONE_CHECK_INTERVAL)
                 log.d { "Checking for gone beacons" }
                 activeBeacons.forEach {
                     if (it.seen < getTimeMillis() - Defaults.DEFAULT_TIMEOUT_BEFORE_GONE) {
@@ -84,12 +88,14 @@ class LokateSDK {
         }
     }
 
-    private fun scanResultHandler(
-        beaconScannerFlow: Flow<BeaconScanResult>,
-    ) {
+    private fun scanResultHandler(beaconScannerFlow: Flow<BeaconScanResult>) {
         lokateScope.launch {
             beaconScannerFlow.collect { scan ->
-                activeBeacons.firstOrNull { it.beaconUUID == it.beaconUUID && it.major == it.major && it.minor == it.minor }
+                activeBeacons.firstOrNull {
+                    it.beaconUUID == it.beaconUUID &&
+                        it.major == it.major &&
+                        it.minor == it.minor
+                }
                     ?.let {
                         alreadyIn.emit(it.copy(seen = getTimeMillis()))
                     } ?: newComer.emit(scan).also { activeBeacons.add(scan) }

@@ -13,7 +13,6 @@ class BeaconRepositoryImpl(
     private val remoteDS: BeaconRemoteDS,
     private val localDS: BeaconLocalDS,
 ) : BeaconRepository {
-
     override suspend fun fetchBeacons(branchId: String): RepositoryResult<List<ActiveBeacon>> {
         val appToken = authenticationRepository.getAppToken()
         if (appToken !is RepositoryResult.Success) {
@@ -34,8 +33,7 @@ class BeaconRepositoryImpl(
         }
     }
 
-    override suspend fun deleteBeacons(): RepositoryResult<Boolean> =
-        localDS.removeBeacons().toRepositoryResult()
+    override suspend fun deleteBeacons(): RepositoryResult<Boolean> = localDS.removeBeacons().toRepositoryResult()
 
     override suspend fun addBeacons(beacons: List<ActiveBeacon>): RepositoryResult<Boolean> =
         localDS.updateOrInsertBeacon(beacons).toRepositoryResult()

@@ -10,15 +10,16 @@ class AuthenticationRepositoryImpl(
     private val remoteDS: AuthenticationRemoteDS,
     private val localDS: AuthenticationLocalDS,
 ) : AuthenticationRepository {
-    override suspend fun getAppToken(): RepositoryResult<String> =
-        localDS.getAppToken().toRepositoryResult()
-
+    override suspend fun getAppToken(): RepositoryResult<String> = localDS.getAppToken().toRepositoryResult()
 
     private suspend fun getLocalAuthentication(appToken: String): RepositoryResult<Boolean> =
         when (val result = localDS.getAppAuthentication(appToken).toRepositoryResult()) {
             is RepositoryResult.Success -> {
-                if (result.body.valid) RepositoryResult.Success(true)
-                else RepositoryResult.Error("Authentication failed!", Any())
+                if (result.body.valid) {
+                    RepositoryResult.Success(true)
+                } else {
+                    RepositoryResult.Error("Authentication failed!", Any())
+                }
             }
 
             is RepositoryResult.Error -> RepositoryResult.Error(result.message, result.errorType)
@@ -26,12 +27,15 @@ class AuthenticationRepositoryImpl(
 
     @Suppress("NestedBlockDepth")
     private suspend fun getRemoteAuthentication(appToken: String): RepositoryResult<Boolean> {
-        return when (val remoteAuthentication =
-            remoteDS.getAppAuthentication(appToken).toRepositoryResult()) {
-            is RepositoryResult.Error -> RepositoryResult.Error(
-                remoteAuthentication.message,
-                remoteAuthentication.errorType
-            )
+        return when (
+            val remoteAuthentication =
+                remoteDS.getAppAuthentication(appToken).toRepositoryResult()
+        ) {
+            is RepositoryResult.Error ->
+                RepositoryResult.Error(
+                    remoteAuthentication.message,
+                    remoteAuthentication.errorType,
+                )
 
             is RepositoryResult.Success -> {
                 when (remoteAuthentication.body.valid) {
@@ -50,7 +54,7 @@ class AuthenticationRepositoryImpl(
             getRemoteAuthentication(appToken) is RepositoryResult.Success ->
                 getRemoteAuthentication(appToken)
 
-            else -> RepositoryResult.Error("Authentication failed!", Exception())
+            else -> RepositoryResult.Error("Authentication failed!", Any())
         }
     }
 
@@ -59,6 +63,5 @@ class AuthenticationRepositoryImpl(
         return RepositoryResult.Success(true)
     }
 
-    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> =
-        localDS.setUserId(userId).toRepositoryResult()
+    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> = localDS.setUserId(userId).toRepositoryResult()
 }

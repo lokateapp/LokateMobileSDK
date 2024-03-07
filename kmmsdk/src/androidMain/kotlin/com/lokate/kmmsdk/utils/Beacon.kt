@@ -19,7 +19,7 @@ fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
         proximity = proximity,
         major = id2.toInt(),
         minor = id3.toInt(),
-        seen = System.currentTimeMillis()
+        seen = System.currentTimeMillis(),
     )
 }
 

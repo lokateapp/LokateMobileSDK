@@ -7,7 +7,7 @@ sealed class RepositoryResult<out T> {
 
     data class Error(
         val message: String,
-        val errorType: Any
+        val errorType: Any,
     ) : RepositoryResult<Nothing>()
 }
 
