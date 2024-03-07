@@ -1,9 +1,11 @@
-package com.lokate.kmmsdk
+package com.lokate.kmmsdk.utils
 
+import com.lokate.kmmsdk.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
+import io.ktor.util.date.getTimeMillis
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLProximity
@@ -40,6 +42,7 @@ fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
         proximity = this.proximity.toLokateProximity(),
         major = this.major.intValue,
         minor = this.minor.intValue,
+        seen = getTimeMillis(),
     )
 }
 
