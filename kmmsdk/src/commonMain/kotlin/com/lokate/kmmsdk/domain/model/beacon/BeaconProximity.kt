@@ -4,5 +4,5 @@ enum class BeaconProximity {
     Immediate,
     Near,
     Far,
-    Unknown
+    Unknown,
 }

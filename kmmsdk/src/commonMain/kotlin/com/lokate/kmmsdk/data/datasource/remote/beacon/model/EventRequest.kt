@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk.domain.model.beacon
+package com.lokate.kmmsdk.data.datasource.remote.beacon.model
 
 data class EventRequest(
     val customerId: String,

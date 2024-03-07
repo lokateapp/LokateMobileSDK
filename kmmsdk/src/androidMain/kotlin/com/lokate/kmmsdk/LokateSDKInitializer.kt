@@ -7,7 +7,8 @@ internal lateinit var applicationContext: Context
     private set
 
 object LokateSDKContext
-class LokateSDKInitializer: Initializer<LokateSDKContext> {
+
+class LokateSDKInitializer : Initializer<LokateSDKContext> {
     override fun create(context: Context): LokateSDKContext {
         applicationContext = context.applicationContext
         return LokateSDKContext

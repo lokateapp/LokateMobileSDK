@@ -9,5 +9,5 @@ data class BeaconScanResult(
     val accuracy: Double?,
     val proximity: BeaconProximity,
     val firstSeen: Long = 0,
-    val lastSeen: Long = 0
+    val lastSeen: Long = 0,
 )
