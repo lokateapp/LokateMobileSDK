@@ -2,6 +2,13 @@ package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import com.lokate.kmmsdk.utils.AUTHORIZED_ALWAYS
+import com.lokate.kmmsdk.utils.AUTHORIZED_WHEN_IN_USE
+import com.lokate.kmmsdk.utils.DENIED
+import com.lokate.kmmsdk.utils.NOT_DETERMINED
+import com.lokate.kmmsdk.utils.RESTRICTED
+import com.lokate.kmmsdk.utils.toBeaconScanResult
+import com.lokate.kmmsdk.utils.toCLBeaconRegion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
