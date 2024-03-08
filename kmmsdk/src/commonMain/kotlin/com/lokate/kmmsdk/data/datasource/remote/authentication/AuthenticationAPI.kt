@@ -14,7 +14,7 @@ class AuthenticationAPI : BaseAPI {
         client.lokateRequest {
             url {
                 method = HttpMethod.Get
-                port = 5173
+                port = defPort
                 host = baseUrl
                 path(getPath("authenticate/${authenticationRequest.appToken}"))
             }

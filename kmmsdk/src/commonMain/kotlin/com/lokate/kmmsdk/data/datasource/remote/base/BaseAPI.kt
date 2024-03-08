@@ -14,6 +14,9 @@ interface BaseAPI {
     val baseUrl: String
         get() = SERVICE
 
+    val defPort: Int
+        get() = 5173
+
     fun getPath(path: String): String {
         return "$MOBILE_PATH/$path"
     }

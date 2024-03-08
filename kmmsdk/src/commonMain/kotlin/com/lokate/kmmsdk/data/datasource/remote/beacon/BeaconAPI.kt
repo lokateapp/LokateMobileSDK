@@ -17,7 +17,7 @@ class BeaconAPI : BaseAPI {
             url {
                 method = HttpMethod.Get
                 host = baseUrl
-                port = 5173
+                port = defPort
                 path(getPath("activeBeacons"))
                 parameters.append("branchId", branchId)
             }
@@ -28,7 +28,7 @@ class BeaconAPI : BaseAPI {
             url {
                 method = HttpMethod.Post
                 host = baseUrl
-                port = 5173
+                port = defPort
                 path(getPath("beaconArea"))
                 contentType(ContentType.Application.Json)
                 setBody(event)
