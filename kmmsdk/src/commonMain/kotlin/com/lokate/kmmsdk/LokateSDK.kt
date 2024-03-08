@@ -36,17 +36,19 @@ class LokateSDK {
         val log = logging("LokateSDK")
     }
 
-    //move to DI
+    // move to DI
     private val beaconScanner = getBeaconScanner()
-    private val authenticationRepository = AuthenticationRepositoryImpl(
-        AuthenticationRemoteDS(AuthenticationAPI()),
-        AuthenticationLocalDS(Settings())
-    )
-    private val beaconRepository = BeaconRepositoryImpl(
-        authenticationRepository = authenticationRepository,
-        remoteDS = BeaconRemoteDS(BeaconAPI()),
-        localDS = BeaconLocalDS(getDatabase())
-    )
+    private val authenticationRepository =
+        AuthenticationRepositoryImpl(
+            AuthenticationRemoteDS(AuthenticationAPI()),
+            AuthenticationLocalDS(Settings()),
+        )
+    private val beaconRepository =
+        BeaconRepositoryImpl(
+            authenticationRepository = authenticationRepository,
+            remoteDS = BeaconRemoteDS(BeaconAPI()),
+            localDS = BeaconLocalDS(getDatabase()),
+        )
 
     private val branchBeacons = mutableListOf<ActiveBeacon>()
 
@@ -74,10 +76,11 @@ class LokateSDK {
     }
 
     fun fetchActiveBeacons(branchId: String) {
-        val branch = branchId.ifEmpty {
-            log.e { "Branch ID is empty" }
-            "1b224840-de56-41a2-92e0-959193b0035e"
-        }
+        val branch =
+            branchId.ifEmpty {
+                log.e { "Branch ID is empty" }
+                "1b224840-de56-41a2-92e0-959193b0035e"
+            }
         lokateScope.launch {
             beaconRepository.fetchBeacons(branch).let {
                 if (it is RepositoryResult.Success) {
@@ -119,17 +122,18 @@ class LokateSDK {
 
         scanResultHandler(
             beaconScannerFlow =
-            beaconScanner.scanResultFlow().transform { scan ->
-                val beacon = branchBeacons.firstOrNull {
-                    it.id.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major.toString() &&
-                            it.minor == scan.minor.toString()
-                }
-                val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
-                if (scan.accuracy != null && scan.accuracy > -1.0 && comparison) {
-                    emit(scan)
-                }
-            },
+                beaconScanner.scanResultFlow().transform { scan ->
+                    val beacon =
+                        branchBeacons.firstOrNull {
+                            it.id.lowercase() == scan.beaconUUID.lowercase() &&
+                                it.major == scan.major.toString() &&
+                                it.minor == scan.minor.toString()
+                        }
+                    val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
+                    if (scan.accuracy != null && scan.accuracy > -1.0 && comparison) {
+                        emit(scan)
+                    }
+                },
         )
         checkGone()
         flowEmitter()
@@ -163,8 +167,8 @@ class LokateSDK {
                         it.major.toString(),
                         it.minor.toString(),
                         EventStatus.ENTER,
-                        it.seen
-                    )
+                        it.seen,
+                    ),
                 ).also { log.d { "Send newcomer in: $it" } }
             }
         }
@@ -178,8 +182,8 @@ class LokateSDK {
                         it.major.toString(),
                         it.minor.toString(),
                         EventStatus.STAY,
-                        it.seen
-                    )
+                        it.seen,
+                    ),
                 ).also { log.d { "Send already in: $it" } }
             }
         }
@@ -193,8 +197,8 @@ class LokateSDK {
                         it.major.toString(),
                         it.minor.toString(),
                         EventStatus.EXIT,
-                        it.seen
-                    )
+                        it.seen,
+                    ),
                 ).also { log.d { "Send gone: $it" } }
             }
         }
@@ -205,8 +209,8 @@ class LokateSDK {
             beaconScannerFlow.collect { scan ->
                 activeBeacons.firstOrNull {
                     it.beaconUUID == it.beaconUUID &&
-                            it.major == it.major &&
-                            it.minor == it.minor
+                        it.major == it.major &&
+                        it.minor == it.minor
                 }
                     ?.let {
                         alreadyIn.emit(it.copy(seen = getTimeMillis()))

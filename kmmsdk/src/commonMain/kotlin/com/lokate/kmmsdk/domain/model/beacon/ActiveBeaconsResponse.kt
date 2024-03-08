@@ -37,7 +37,10 @@ enum class BeaconProximity {
     Far,
 
     @SerialName("unknown")
-    Unknown;
+    Unknown,
+
+    ;
+
     companion object {
         fun fromString(value: String): BeaconProximity =
             when (value.lowercase()) {

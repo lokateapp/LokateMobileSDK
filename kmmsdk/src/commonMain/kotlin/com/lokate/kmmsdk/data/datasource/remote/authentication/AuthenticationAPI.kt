@@ -9,7 +9,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.path
 
 class AuthenticationAPI : BaseAPI {
-
     suspend fun getAuthenticate(authenticationRequest: AuthenticationRequest): ApiResponse<AuthenticationResponse, Any> =
         client.lokateRequest {
             url {

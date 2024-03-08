@@ -10,8 +10,7 @@ class AuthenticationRepositoryImpl(
     private val remoteDS: AuthenticationRemoteDS,
     private val localDS: AuthenticationLocalDS,
 ) : AuthenticationRepository {
-    override suspend fun getAppToken(): RepositoryResult<String> =
-        localDS.getAppToken().toRepositoryResult()
+    override suspend fun getAppToken(): RepositoryResult<String> = localDS.getAppToken().toRepositoryResult()
 
     private suspend fun getLocalAuthentication(appToken: String): RepositoryResult<Boolean> =
         when (val result = localDS.getAppAuthentication(appToken).toRepositoryResult()) {
@@ -59,9 +58,7 @@ class AuthenticationRepositoryImpl(
         }
     }
 
-    override suspend fun setAppToken(appToken: String): RepositoryResult<Boolean> =
-        localDS.setAuthentication(appToken).toRepositoryResult()
+    override suspend fun setAppToken(appToken: String): RepositoryResult<Boolean> = localDS.setAuthentication(appToken).toRepositoryResult()
 
-    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> =
-        localDS.setUserId(userId).toRepositoryResult()
+    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> = localDS.setUserId(userId).toRepositoryResult()
 }

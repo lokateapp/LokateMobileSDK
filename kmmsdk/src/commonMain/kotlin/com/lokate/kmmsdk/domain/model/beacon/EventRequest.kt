@@ -22,5 +22,5 @@ enum class EventStatus {
     EXIT,
 
     @SerialName("STAY")
-    STAY;
+    STAY,
 }
