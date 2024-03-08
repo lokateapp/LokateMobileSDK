@@ -6,7 +6,9 @@ import com.lokate.kmmsdk.data.datasource.remote.base.lokateRequest
 import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.contentType
 import io.ktor.http.path
 
 class BeaconAPI : BaseAPI {
@@ -14,19 +16,22 @@ class BeaconAPI : BaseAPI {
         client.lokateRequest {
             url {
                 method = HttpMethod.Get
-                host = this@BeaconAPI.path
-                path("activeBeacons")
+                host = baseUrl
+                port = 5173
+                path(getPath("activeBeacons"))
                 parameters.append("branchId", branchId)
             }
         }
 
-    suspend fun postBeaconArea(request: EventRequest): ApiResponse<Any, Any> =
+    suspend fun sendBeaconEvent(event: EventRequest): ApiResponse<String, Any> =
         client.lokateRequest {
             url {
                 method = HttpMethod.Post
-                host = this@BeaconAPI.path
-                path("beaconArea")
-                setBody(request)
+                host = baseUrl
+                port = 5173
+                path(getPath("beaconArea"))
+                contentType(ContentType.Application.Json)
+                setBody(event)
             }
         }
 }

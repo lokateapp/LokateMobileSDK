@@ -9,16 +9,14 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.path
 
 class AuthenticationAPI : BaseAPI {
-    companion object {
-        const val SERVICE = "127.0.0.1:3000"
-    }
 
     suspend fun getAuthenticate(authenticationRequest: AuthenticationRequest): ApiResponse<AuthenticationResponse, Any> =
         client.lokateRequest {
             url {
                 method = HttpMethod.Get
-                this.host = SERVICE
-                path("authenticate/${authenticationRequest.appToken}")
+                port = 5173
+                host = baseUrl
+                path(getPath("authenticate/${authenticationRequest.appToken}"))
             }
         }
 }
