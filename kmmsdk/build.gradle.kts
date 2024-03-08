@@ -49,6 +49,7 @@ kotlin {
             implementation(libs.sqldelight.driver.android)
             implementation(libs.altbeacon.android)
             implementation(libs.androidx.startup)
+            implementation(libs.proximity.sdk)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.ios)
