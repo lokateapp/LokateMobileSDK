@@ -3,6 +3,7 @@ package com.lokate.kmmsdk.data.repository
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
 import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
 import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
+import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
@@ -26,7 +27,7 @@ class BeaconRepositoryImpl(
         }
 
         val localBeacons = localDS.fetchBeacons(branchId).toRepositoryResult()
-        return if (localBeacons is RepositoryResult.Success) {
+        return if (localBeacons is RepositoryResult.Success && localBeacons.body.isNotEmpty()) {
             localBeacons
         } else {
             RepositoryResult.Error("Couldn't fetch!", "No beacons!")
@@ -37,4 +38,8 @@ class BeaconRepositoryImpl(
 
     override suspend fun addBeacons(beacons: List<ActiveBeacon>): RepositoryResult<Boolean> =
         localDS.updateOrInsertBeacon(beacons).toRepositoryResult()
+
+    override suspend fun sendBeaconEvent(beaconEventRequest: EventRequest): RepositoryResult<Boolean> {
+        return remoteDS.sendBeaconEvent(beaconEventRequest).toRepositoryResult()
+    }
 }
