@@ -8,21 +8,17 @@ import com.estimote.proximity_sdk.api.ProximityZone
 import com.estimote.proximity_sdk.api.ProximityZoneBuilder
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
-import com.lokate.kmmsdk.utils.toRegion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.altbeacon.beacon.Region
 
-class AndroidEstimoteBeaconScanner : BeaconScanner { // TODO: pass credentials by constructor
-    companion object {
-        private val cloudCredentials = EstimoteCloudCredentials("", "")
-        private val proximityObserver = ProximityObserverBuilder(applicationContext, cloudCredentials)
-            .withBalancedPowerMode()
-            .withTelemetryReportingDisabled()
-            .withEstimoteSecureMonitoringDisabled()
-            .onError { error -> Log.e("AndroidEstimoteBeaconScanner", "Error: ${error.message}") }
-            .build()
-    }
+class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner {
+    private val cloudCredentials = EstimoteCloudCredentials(appId, appToken)
+    private val proximityObserver = ProximityObserverBuilder(applicationContext, cloudCredentials)
+        .withLowLatencyPowerMode()
+        .withTelemetryReportingDisabled()
+        .withEstimoteSecureMonitoringDisabled()
+        .onError { error -> Log.e("AndroidEstimoteBeaconScanner", "Error: ${error.message}") }
+        .build()
 
     private var running: Boolean = false
     private val regions = mutableListOf<ProximityZone>()    // TODO: decide common naming for different libraries: region or zone
@@ -90,5 +86,4 @@ class AndroidEstimoteBeaconScanner : BeaconScanner { // TODO: pass credentials b
     override fun scanResultFlow(): Flow<BeaconScanResult> {
         return beaconFlow
     }
-
 }

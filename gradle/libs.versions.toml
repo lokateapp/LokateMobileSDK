@@ -10,6 +10,7 @@ androidx-core-ktx = "1.12.0"
 androidx-espresso-core = "3.5.1"
 androidx-material = "1.11.0"
 androidx-test-junit = "1.1.5"
+buildkonfigGradlePlugin = "0.15.1"
 compose = "1.6.2"
 compose-plugin = "1.6.0"
 compose-compiler = "1.5.10"
@@ -23,6 +24,7 @@ loggerVersion = "1.7.26"
 ktorVersion = "2.3.5"
 permissionsCompose = "0.17.0"
 proximitySdk = "1.0.8"
+secretsGradlePlugin = "2.0.1"
 sqldelight = "2.0.0"
 settingsVer = "1.1.1"
 altBeacon = "2.20.3"
@@ -33,6 +35,7 @@ detekt = "1.23.5"
 detekt-rules = "0.0.26"
 
 [libraries]
+buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -64,6 +67,7 @@ ktor-client-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorVe
 
 permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissionsCompose" }
 proximity-sdk = { module = "com.estimote:proximity-sdk", version.ref = "proximitySdk" }
+secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion" }
 
 #multiplatform shared pref

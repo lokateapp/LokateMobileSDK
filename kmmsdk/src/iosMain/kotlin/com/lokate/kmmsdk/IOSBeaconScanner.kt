@@ -156,7 +156,3 @@ class IOSBeaconScanner : BeaconScanner {
         return helper.scanResultFlow()
     }
 }
-
-actual fun getBeaconScanner(): BeaconScanner {
-    return IOSBeaconScanner()
-}

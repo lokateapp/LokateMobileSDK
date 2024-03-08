@@ -40,15 +40,26 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LokateSDK {
+class LokateSDK private constructor(scannerType: BeaconScannerType) {
+    sealed class BeaconScannerType {
+        data object IBeacon : BeaconScannerType()
+        data class EstimoteMonitoring(val appId: String, val appToken: String) : BeaconScannerType()
+    }
+
     companion object {
         val log = logging("LokateSDK")
+        fun createForIBeacon(): LokateSDK {
+            return LokateSDK(BeaconScannerType.IBeacon)
+        }
+        fun createForEstimoteMonitoring(appId: String, appToken: String): LokateSDK {
+            return LokateSDK(BeaconScannerType.EstimoteMonitoring(appId, appToken))
+        }
     }
 
     private var isActive = false
 
     // move to DI
-    private val beaconScanner = getBeaconScanner()
+    private val beaconScanner = getBeaconScanner(scannerType)
     private val authenticationRepository: AuthenticationRepository =
         AuthenticationRepositoryImpl(
             AuthenticationRemoteDS(AuthenticationAPI()),

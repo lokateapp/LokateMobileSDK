@@ -85,7 +85,3 @@ class AndroidBeaconScanner : BeaconScanner {
         return beaconFlow
     }
 }
-
-actual fun getBeaconScanner(): BeaconScanner {
-    return AndroidEstimoteBeaconScanner()
-}

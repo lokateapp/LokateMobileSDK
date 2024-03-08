@@ -1,7 +1,11 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    id("com.codingfeline.buildkonfig") version "0.15.1"
 }
 
 kotlin {
@@ -79,4 +83,23 @@ android {
 
 task("testClasses").doLast {
     println("This is a dummy testClasses task")
+}
+
+buildkonfig {
+    packageName = "com.lokate.demo"
+
+    // default config is required
+    defaultConfigs {
+        val appID: String = gradleLocalProperties(rootDir).getProperty("ESTIMOTE_CLOUD_APP_ID")
+        require(appID.isNotEmpty()) {
+            "Register your api key from developer and place it in local.properties as `ESTIMOTE_CLOUD_APP_ID`"
+        }
+        buildConfigField(STRING, "ESTIMOTE_CLOUD_APP_ID", appID)
+
+        val appToken: String = gradleLocalProperties(rootDir).getProperty("ESTIMOTE_CLOUD_APP_TOKEN")
+        require(appToken.isNotEmpty()) {
+            "Register your api key from developer and place it in local.properties as `ESTIMOTE_CLOUD_APP_TOKEN`"
+        }
+        buildConfigField(STRING, "ESTIMOTE_CLOUD_APP_TOKEN", appToken)
+    }
 }
