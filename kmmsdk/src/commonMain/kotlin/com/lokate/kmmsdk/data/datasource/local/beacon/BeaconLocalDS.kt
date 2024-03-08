@@ -4,8 +4,9 @@ import com.lokate.kmmsdk.Database
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.beacon.BeaconDS
 import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
-import com.lokate.kmmsdk.domain.model.beacon.BeaconRange
+import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.Campaign
+import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 
 class BeaconLocalDS(
@@ -23,7 +24,7 @@ class BeaconLocalDS(
                             userId = it.uuid,
                             major = it.major.toString(),
                             minor = it.minor.toString(),
-                            range = BeaconRange.fromInt(it.range.toInt()),
+                            range = BeaconProximity.fromInt(it.range.toInt()),
                             branchId = EMPTY_STRING,
                             radius = 0,
                             name = EMPTY_STRING,
@@ -43,6 +44,10 @@ class BeaconLocalDS(
         } catch (e: Exception) {
             DSResult.Error(e.message, e)
         }
+    }
+
+    override suspend fun sendBeaconEvent(beaconEventRequest: EventRequest): DSResult<Boolean> {
+        throw NotImplementedError("LocalDS doesn't support this operation!")
     }
 
     @Suppress("TooGenericExceptionCaught")

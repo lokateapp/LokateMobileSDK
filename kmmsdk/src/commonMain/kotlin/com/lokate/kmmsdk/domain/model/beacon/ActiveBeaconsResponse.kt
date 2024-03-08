@@ -13,7 +13,7 @@ data class ActiveBeacon(
     val major: String,
     val minor: String,
     val campaign: Campaign,
-    val range: BeaconRange,
+    val range: BeaconProximity,
 )
 
 @Serializable
@@ -26,37 +26,34 @@ data class Campaign(
 )
 
 @Serializable
-enum class BeaconRange {
+enum class BeaconProximity {
     @SerialName("immediate")
-    IMMEDIATE,
+    Immediate,
 
     @SerialName("near")
-    NEAR,
+    Near,
 
     @SerialName("far")
-    FAR,
+    Far,
 
     @SerialName("unknown")
-    UNKNOWN,
-
-    ;
-
+    Unknown;
     companion object {
-        fun fromString(value: String): BeaconRange =
+        fun fromString(value: String): BeaconProximity =
             when (value.lowercase()) {
-                "immediate" -> IMMEDIATE
-                "near" -> NEAR
-                "far" -> FAR
-                "unknown" -> UNKNOWN
+                "immediate" -> Immediate
+                "near" -> Near
+                "far" -> Far
+                "unknown" -> Unknown
                 else -> throw IllegalArgumentException("Unknown range: $value")
             }
 
-        fun fromInt(value: Int): BeaconRange =
+        fun fromInt(value: Int): BeaconProximity =
             when (value) {
-                0 -> IMMEDIATE
-                1 -> NEAR
-                2 -> FAR
-                else -> UNKNOWN
+                0 -> Immediate
+                1 -> Near
+                2 -> Far
+                else -> Unknown
             }
     }
 }
