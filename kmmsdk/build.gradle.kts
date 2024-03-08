@@ -45,10 +45,11 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         androidMain.dependencies {
+            implementation(libs.androidx.startup)
+            implementation(libs.androidx.core.ktx)
             implementation(libs.ktor.client.android)
             implementation(libs.sqldelight.driver.android)
             implementation(libs.altbeacon.android)
-            implementation(libs.androidx.startup)
             implementation(libs.proximity.sdk)
         }
         iosMain.dependencies {
@@ -65,10 +66,6 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
-}
-
-dependencies {
-    implementation(libs.androidx.core.ktx)
 }
 
 sqldelight {

@@ -13,6 +13,12 @@
                 android:name="com.lokate.kmmsdk.LokateSDKInitializer"
                 android:value="androidx.startup" />
         </provider>
+        <receiver android:name="com.estimote.proximity_sdk.api.TriggerBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.estimote.proximity_trigger" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

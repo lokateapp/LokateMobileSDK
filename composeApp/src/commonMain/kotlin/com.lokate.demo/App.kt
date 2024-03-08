@@ -1,3 +1,5 @@
+package com.lokate.demo
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,7 +23,7 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import market.MarketApp
+import com.lokate.demo.market.MarketApp
 
 internal val RequiredPermissions =
     arrayOf(
