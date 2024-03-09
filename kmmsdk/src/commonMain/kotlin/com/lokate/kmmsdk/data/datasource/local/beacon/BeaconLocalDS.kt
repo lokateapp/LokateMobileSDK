@@ -4,8 +4,6 @@ import com.lokate.kmmsdk.Database
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.beacon.BeaconDS
 import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
-import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
-import com.lokate.kmmsdk.domain.model.beacon.Campaign
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 
@@ -21,22 +19,11 @@ class BeaconLocalDS(
                 DSResult.Success(
                     it.map {
                         ActiveBeacon(
-                            userId = it.uuid,
+                            uuid = it.uuid,
                             major = it.major.toString(),
                             minor = it.minor.toString(),
-                            range = BeaconProximity.fromInt(it.range.toInt()),
-                            branchId = EMPTY_STRING,
-                            radius = 0,
-                            name = EMPTY_STRING,
-                            campaign =
-                                Campaign(
-                                    EMPTY_STRING,
-                                    EMPTY_STRING,
-                                    EMPTY_STRING,
-                                    EMPTY_STRING,
-                                    EMPTY_STRING,
-                                ),
-                            id = EMPTY_STRING,
+                            radius = it.radius,
+                            campaignName = EMPTY_STRING
                         )
                     },
                 )
@@ -56,10 +43,10 @@ class BeaconLocalDS(
             queries.transaction {
                 beacons.forEach {
                     queries.insertBeacon(
-                        uuid = it.userId,
+                        uuid = it.uuid,
                         major = it.major.toLong(),
                         minor = it.minor.toLong(),
-                        range = it.range.ordinal.toLong(),
+                        radius = it.radius
                     )
                 }
             }

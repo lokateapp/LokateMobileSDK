@@ -6,10 +6,18 @@ import com.estimote.proximity_sdk.api.ProximityObserver
 import com.estimote.proximity_sdk.api.ProximityObserverBuilder
 import com.estimote.proximity_sdk.api.ProximityZone
 import com.estimote.proximity_sdk.api.ProximityZoneBuilder
+import com.estimote.proximity_sdk.api.ProximityZoneContext
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import io.ktor.util.date.getTimeMillis
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
+
 
 class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner {
     private val cloudCredentials = EstimoteCloudCredentials(appId, appToken)
@@ -17,37 +25,55 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
         .withLowLatencyPowerMode()
         .withTelemetryReportingDisabled()
         .withEstimoteSecureMonitoringDisabled()
-        .onError { error -> Log.e("AndroidEstimoteBeaconScanner", "Error: ${error.message}") }
+        .withAnalyticsReportingDisabled()   // we will use our own analytics
+        .onError {
+            error -> Log.e("AndroidEstimoteBeaconScanner", "Error: ${error.message}")
+            stopScanning()
+        }
         .build()
+    private var observationHandler: ProximityObserver.Handler? = null
+
+    companion object {
+        private val mainJob = SupervisorJob()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+    }
 
     private var running: Boolean = false
-    private val regions = mutableListOf<ProximityZone>()    // TODO: decide common naming for different libraries: region or zone
-    private var observationHandler: ProximityObserver.Handler? = null
+
+    private val regions = mutableListOf<ProximityZone>()
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
+
+    private val scanResults = mutableSetOf<BeaconScanResult>()
+
     override fun startScanning() {
-        Log.d("AndroidEstimoteBeaconScanner", "starting scanning")
         if (running) {
             Log.e("AndroidEstimoteBeaconScanner", "Already scanning")
             return
         }
-
         if (regions.isEmpty()) {
             setRegions(listOf())
         }
 
-        Log.e("AndroidEstimoteBeaconScanner", "Starting scanning")
+        Log.d("AndroidEstimoteBeaconScanner", "Starting scanning")
 
-        observationHandler = proximityObserver.startObserving(this.regions)
-    }
-
-    override fun stopScanning() {
-        if (running) {
-            observationHandler!!.stop()
+        observationHandler = with(proximityObserver) {
+            running = true
+            flowEmitter()
+            startObserving(regions)
         }
     }
 
+    override fun stopScanning() {
+        if (!running) {
+            Log.e("AndroidEstimoteBeaconScanner", "Not scanning anyways")
+            return
+        }
+        observationHandler!!.stop()
+        mainJob.cancel()
+        running = false
+    }
+
     override fun setRegions(regions: List<LokateBeacon>) {
-        Log.d("AndroidEstimoteBeaconScanner", "setting regions")
         if (running) {
             Log.d("AndroidEstimoteBeaconScanner", "Already running!")
             return
@@ -56,34 +82,58 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
             Log.d("AndroidEstimoteBeaconScanner", "No regions to scan")
             return
         }
-        this.regions.clear()
-        // this.regions.addAll(regions.map {
-        //     ProximityZoneBuilder()
-        //         // .forTag(it.campaign!!)
-        //         .forTag("test1")
-        //         // .inCustomRange(it.proximityRange!!.toDouble())
-        //         .inCustomRange(3.5)
-        //         .onEnter { Log.d("AndroidEstimoteBeaconScanner" , "Enter test1") }
-        //         .onExit { Log.d("AndroidEstimoteBeaconScanner", "Exit test1") }
-        //         .build()
-        // })
 
-        this.regions.add(
-            ProximityZoneBuilder()
-                .forTag("test1").inCustomRange(1.0)
-                .onEnter { Log.d("AndroidEstimoteBeaconScanner" , "Enter test1") }
-                .onExit { Log.d("AndroidEstimoteBeaconScanner", "Exit test1") }
-                .build())
-        this.regions.add(
-            ProximityZoneBuilder()
-                .forTag("test2").inCustomRange(1.0)
-                .onEnter { Log.d("AndroidEstimoteBeaconScanner" , "Enter test2") }
-                .onExit {
-                    Log.d("AndroidEstimoteBeaconScanner", "Exit test2") }
-                .build())
+        Log.d("AndroidEstimoteBeaconScanner", "Setting regions")
+
+        this.regions.clear()
+        this.regions.addAll(regions
+            .map { beacon ->
+                ProximityZoneBuilder()
+                    .forTag(beacon.uuid + ':' + beacon.major + ':' + beacon.minor)
+                    .inCustomRange(beacon.proximityRange ?: 1.5)
+                    .onEnter { handleEnter(it) }
+                    .onExit { handleExit(it) }
+                    .build()
+        })
     }
 
     override fun scanResultFlow(): Flow<BeaconScanResult> {
         return beaconFlow
+    }
+
+    private fun flowEmitter() {
+        coroutineScope.launch {
+            while (true){
+                delay(Defaults.DEFAULT_SCAN_PERIOD)
+                Log.i("AndroidEstimoteBeaconScanner", "Beacons found: ${scanResults.map { it.minor }}")
+                scanResults.forEach {
+                    beaconFlow.emit(it.copy(seen = System.currentTimeMillis()))
+                }
+            }
+        }
+    }
+
+    private fun handleEnter(regionContext: ProximityZoneContext) {
+        val (beaconUUID, major, minor) = regionContext.tag.split(":")
+
+        scanResults.add(
+            BeaconScanResult(
+                beaconUUID = beaconUUID,
+                major = major.toInt(),
+                minor = minor.toInt(),
+                rssi = 0.0,     // not relevant (handled inside EstimoteSDK)
+                txPower = 0,    // not relevant (handled inside EstimoteSDK)
+                accuracy = 0.0, // definitely inside proximity range, so passes the if check in LokateSDK
+                seen = System.currentTimeMillis()
+            )
+        )
+    }
+
+    private fun handleExit(regionContext: ProximityZoneContext) {
+        val (beaconUUID, major, minor) = regionContext.tag.split(":")
+
+        scanResults.removeIf {
+            it.beaconUUID.lowercase() == beaconUUID.lowercase() && it.major == major.toInt() && it.minor == minor.toInt()
+        }
     }
 }

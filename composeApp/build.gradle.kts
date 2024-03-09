@@ -92,13 +92,13 @@ buildkonfig {
     defaultConfigs {
         val appID: String = gradleLocalProperties(rootDir).getProperty("ESTIMOTE_CLOUD_APP_ID")
         require(appID.isNotEmpty()) {
-            "Register your api key from developer and place it in local.properties as `ESTIMOTE_CLOUD_APP_ID`"
+            "Place your Estimote app id to local.properties as `ESTIMOTE_CLOUD_APP_ID`"
         }
         buildConfigField(STRING, "ESTIMOTE_CLOUD_APP_ID", appID)
 
         val appToken: String = gradleLocalProperties(rootDir).getProperty("ESTIMOTE_CLOUD_APP_TOKEN")
         require(appToken.isNotEmpty()) {
-            "Register your api key from developer and place it in local.properties as `ESTIMOTE_CLOUD_APP_TOKEN`"
+            "Place your Estimote app token to local.properties as `ESTIMOTE_CLOUD_APP_TOKEN`"
         }
         buildConfigField(STRING, "ESTIMOTE_CLOUD_APP_TOKEN", appToken)
     }

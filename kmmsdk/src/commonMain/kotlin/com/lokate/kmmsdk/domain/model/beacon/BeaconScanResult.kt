@@ -5,7 +5,7 @@ data class BeaconScanResult(
     val major: Int,
     val minor: Int,
     val rssi: Double,
-    val accuracy: Double,
-    val proximity: BeaconProximity,
+    val txPower: Int,
+    val accuracy: Double,  // accuracy is equivalent to distance
     val seen: Long,
 )

@@ -21,8 +21,8 @@ import com.lokate.kmmsdk.LokateSDK
 
 @Composable
 fun MarketApp() {
-    val lokateSDK = LokateSDK.createForEstimoteMonitoring(BuildKonfig.ESTIMOTE_CLOUD_APP_ID, BuildKonfig.ESTIMOTE_CLOUD_APP_TOKEN)
-    // val lokateSDK = LokateSDK.createForIBeacon()
+    // val lokateSDK = LokateSDK.createForEstimoteMonitoring(BuildKonfig.ESTIMOTE_CLOUD_APP_ID, BuildKonfig.ESTIMOTE_CLOUD_APP_TOKEN)
+    val lokateSDK = LokateSDK.createForIBeacon()
 
     GreetingView(
         lokateSDK,

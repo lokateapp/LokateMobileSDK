@@ -139,7 +139,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 log.e { "Beacon fetch result arrived!, $it" }
                 when (it) {
                     is RepositoryResult.Success -> {
-                        if (it.body.isNotEmpty() && it.body.any { it.id != EMPTY_STRING }) {
+                        if (it.body.isNotEmpty() && it.body.any { it.uuid != EMPTY_STRING }) {
                             branchBeacons.clear()
                             branchBeacons.addAll(it.body)
                         }
@@ -215,16 +215,16 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             for (scan in channel) {
                 val beacon =
                     branchBeacons.firstOrNull {
-                        it.id.lowercase() == scan.beaconUUID.lowercase() &&
+                        it.uuid.lowercase() == scan.beaconUUID.lowercase() &&
                             it.major == scan.major.toString() &&
                             it.minor == scan.minor.toString()
                     }
                 when {
-                    scan.accuracy <= -1.0 -> log.d { "This shouldn't happen" }
+                    scan.accuracy < 0 -> log.d { "This shouldn't happen" }
                     beacon == null -> log.d { "Beacon not in branch: $scan, branch beacons: $branchBeacons" }
-                    beacon.range < scan.proximity -> {
+                    beacon.radius < scan.accuracy -> {
                         log.d { "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.range}, current: ${scan.proximity}" }
+                                " setted: ${beacon.radius}, current: ${scan.accuracy}" }
                     }
 
                     else -> {
