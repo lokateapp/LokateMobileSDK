@@ -1,26 +1,33 @@
 package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.utils.DENIED
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreLocation.CLLocation
 import platform.CoreLocation.CLLocationManager
+import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.CoreLocation.kCLLocationAccuracyBest
-import platform.CoreLocation.requestWhenInUseAuthorization
+import platform.Foundation.NSError
+import platform.darwin.NSObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@OptIn(ExperimentalForeignApi::class)
 actual suspend fun getCurrentGeolocation(): Pair<Double, Double> =
     suspendCancellableCoroutine { continuation ->
         val locationManager = CLLocationManager()
         locationManager.delegate =
-            object : CLLocationManagerDelegateProtocol {
+            object : NSObject(), CLLocationManagerDelegateProtocol {
                 override fun locationManager(
                     manager: CLLocationManager,
                     didUpdateLocations: List<*>,
                 ) {
                     val location = didUpdateLocations.firstOrNull() as? CLLocation
                     if (location != null) {
-                        continuation.resume(Pair(location.coordinate.latitude, location.coordinate.longitude))
+                        location.coordinate.useContents {
+                            continuation.resume(Pair(latitude, longitude))
+                        }
                     } else {
                         continuation.resumeWithException(IllegalStateException("Failed to get current location"))
                     }
@@ -35,7 +42,7 @@ actual suspend fun getCurrentGeolocation(): Pair<Double, Double> =
             }
 
         if (CLLocationManager.authorizationStatus() == DENIED) {
-            continuation.resumeWithException(SecurityException("Location permissions not granted"))
+            continuation.resumeWithException(UnsupportedOperationException("Location permissions not granted"))
             return@suspendCancellableCoroutine
         }
 
