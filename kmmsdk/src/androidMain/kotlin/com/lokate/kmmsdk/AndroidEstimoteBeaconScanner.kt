@@ -89,8 +89,8 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
         this.regions.addAll(regions
             .map { beacon ->
                 ProximityZoneBuilder()
-                    .forTag(beacon.uuid + ':' + beacon.major + ':' + beacon.minor)
-                    .inCustomRange(beacon.proximityRange ?: 1.5)
+                    .forTag(beacon.uuid.uppercase() + ':' + beacon.major + ':' + beacon.minor)
+                    .inCustomRange(beacon.proximityRange)
                     .onEnter { handleEnter(it) }
                     .onExit { handleExit(it) }
                     .build()
