@@ -50,10 +50,15 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
 
     companion object {
         val log = logging("LokateSDK")
+
         fun createForIBeacon(): LokateSDK {
             return LokateSDK(BeaconScannerType.IBeacon)
         }
-        fun createForEstimoteMonitoring(appId: String, appToken: String): LokateSDK {
+
+        fun createForEstimoteMonitoring(
+            appId: String,
+            appToken: String,
+        ): LokateSDK {
             return LokateSDK(BeaconScannerType.EstimoteMonitoring(appId, appToken))
         }
     }

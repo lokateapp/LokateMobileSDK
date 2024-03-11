@@ -12,7 +12,10 @@ import io.ktor.http.contentType
 import io.ktor.http.path
 
 class BeaconAPI : BaseAPI {
-    suspend fun getActiveBeacons(latitude: Double, longitude: Double): ApiResponse<List<ActiveBeacon>, Any> =
+    suspend fun getActiveBeacons(
+        latitude: Double,
+        longitude: Double,
+    ): ApiResponse<List<ActiveBeacon>, Any> =
         client.lokateRequest {
             url {
                 method = HttpMethod.Get

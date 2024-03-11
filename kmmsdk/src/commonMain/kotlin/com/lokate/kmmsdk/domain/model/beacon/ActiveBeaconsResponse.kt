@@ -9,23 +9,14 @@ data class ActiveBeacon(
     val minor: Int,
     val radius: Double,
     val campaignName: String,
-) {
-    fun toLokateBeacon(): LokateBeacon =
-        LokateBeacon(
-            uuid = this.proximityUUID,
-            major = this.major,
-            minor = this.minor,
-            campaign = this.campaignName,
-            radius = this.radius,
-        )
-}
+)
 
-fun LokateBeacon.toActiveBeacon(): ActiveBeacon {
-    return ActiveBeacon(
-        proximityUUID = this.uuid,
-        major = this.major ?: 0,
-        minor = this.minor ?: 0,
-        campaignName = this.campaign,
-        radius = this.radius,
+fun ActiveBeacon.toLokateBeacon(): LokateBeacon {
+    return LokateBeacon(
+        uuid = this.proximityUUID,
+        major = this.major,
+        minor = this.minor,
+        radius = radius,
+        campaign = this.campaignName,
     )
 }

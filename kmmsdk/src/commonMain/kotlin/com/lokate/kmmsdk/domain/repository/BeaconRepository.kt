@@ -4,7 +4,10 @@ import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 
 interface BeaconRepository {
-    suspend fun fetchBeacons(latitude: Double, longitude: Double): RepositoryResult<List<ActiveBeacon>>
+    suspend fun fetchBeacons(
+        latitude: Double,
+        longitude: Double,
+    ): RepositoryResult<List<ActiveBeacon>>
 
     suspend fun deleteBeacons(): RepositoryResult<Boolean>
 

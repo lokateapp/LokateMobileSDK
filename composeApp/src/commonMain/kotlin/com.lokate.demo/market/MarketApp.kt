@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.lokate.demo.BuildKonfig
 import com.lokate.kmmsdk.LokateSDK
 
 @Composable

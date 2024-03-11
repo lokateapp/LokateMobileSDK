@@ -18,7 +18,7 @@ object Defaults {
                 24719,
                 65453,
                 100.0,
-                "white"
+                "white",
             ),
             LokateBeacon(
                 // yellow
@@ -26,7 +26,7 @@ object Defaults {
                 1,
                 1,
                 100.0,
-                "yellow"
+                "yellow",
             ),
             LokateBeacon(
                 // pink
@@ -34,7 +34,7 @@ object Defaults {
                 1,
                 1,
                 0.5,
-                "pink"
+                "pink",
             ),
             LokateBeacon(
                 // red

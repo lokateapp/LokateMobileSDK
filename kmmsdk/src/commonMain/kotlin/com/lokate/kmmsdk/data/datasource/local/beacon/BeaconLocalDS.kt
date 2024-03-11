@@ -13,7 +13,10 @@ class BeaconLocalDS(
     private val queries = database.beaconDatabaseQueries
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun fetchBeacons(latitude: Double, longitude: Double): DSResult<List<ActiveBeacon>> {
+    override suspend fun fetchBeacons(
+        latitude: Double,
+        longitude: Double,
+    ): DSResult<List<ActiveBeacon>> {
         return try {
             queries.selectAllBeacons().executeAsList().let {
                 DSResult.Success(
@@ -23,7 +26,7 @@ class BeaconLocalDS(
                             major = it.major.toInt(),
                             minor = it.minor.toInt(),
                             radius = it.radius,
-                            campaignName = EMPTY_STRING
+                            campaignName = EMPTY_STRING,
                         )
                     },
                 )
@@ -46,7 +49,7 @@ class BeaconLocalDS(
                         uuid = it.proximityUUID,
                         major = it.major.toLong(),
                         minor = it.minor.toLong(),
-                        radius = it.radius
+                        radius = it.radius,
                     )
                 }
             }
