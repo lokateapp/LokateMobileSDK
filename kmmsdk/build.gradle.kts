@@ -40,6 +40,8 @@ kotlin {
             implementation(libs.russhwolf.settings.no.arg)
             // lighthouse logging
             implementation(libs.lighthouse.log)
+            // geolocation
+            implementation(libs.play.services.location)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

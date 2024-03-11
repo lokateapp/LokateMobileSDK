@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lokate.kmmsdk">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application>
         <provider
             android:name="androidx.startup.InitializationProvider"

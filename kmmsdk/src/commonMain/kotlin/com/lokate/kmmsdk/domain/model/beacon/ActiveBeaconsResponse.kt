@@ -1,21 +1,20 @@
 package com.lokate.kmmsdk.domain.model.beacon
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ActiveBeacon(
-    val uuid: String,
-    val major: String,
-    val minor: String,
+    val proximityUUID: String,
+    val major: Int,
+    val minor: Int,
     val radius: Double,
     val campaignName: String,
 ) {
     fun toLokateBeacon(): LokateBeacon =
         LokateBeacon(
-            uuid = this.uuid,
-            major = this.major.toIntOrNull() ?: 0,
-            minor = minor.toIntOrNull() ?: 0,
+            uuid = this.proximityUUID,
+            major = this.major,
+            minor = this.minor,
             campaign = this.campaignName,
             radius = this.radius,
         )
@@ -23,9 +22,9 @@ data class ActiveBeacon(
 
 fun LokateBeacon.toActiveBeacon(): ActiveBeacon {
     return ActiveBeacon(
-        uuid = this.uuid,
-        major = this.major.toString(),
-        minor = this.minor.toString(),
+        proximityUUID = this.uuid,
+        major = this.major ?: 0,
+        minor = this.minor ?: 0,
         campaignName = this.campaign,
         radius = this.radius,
     )

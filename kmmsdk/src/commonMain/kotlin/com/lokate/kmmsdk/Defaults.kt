@@ -17,32 +17,32 @@ object Defaults {
                 "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
                 24719,
                 65453,
-                "white",
-                100.0
+                100.0,
+                "white"
             ),
             LokateBeacon(
                 // yellow
                 "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
                 1,
                 1,
-                "yellow",
-                100.0
+                100.0,
+                "yellow"
             ),
             LokateBeacon(
                 // pink
                 "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
                 1,
                 1,
-                "pink",
-                0.5
+                0.5,
+                "pink"
             ),
             LokateBeacon(
                 // red
                 "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
                 1,
                 2,
+                100.0,
                 "red",
-                100.0
             ),
         )
 }

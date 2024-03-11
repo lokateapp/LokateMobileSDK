@@ -5,7 +5,7 @@ import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 
 interface BeaconDS {
-    suspend fun fetchBeacons(branchId: String): DSResult<List<ActiveBeacon>>
+    suspend fun fetchBeacons(latitude: Double, longitude: Double): DSResult<List<ActiveBeacon>>
 
     suspend fun sendBeaconEvent(beaconEventRequest: EventRequest): DSResult<Boolean>
 }

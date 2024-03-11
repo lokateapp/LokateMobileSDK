@@ -13,15 +13,15 @@ class BeaconLocalDS(
     private val queries = database.beaconDatabaseQueries
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun fetchBeacons(branchId: String): DSResult<List<ActiveBeacon>> {
+    override suspend fun fetchBeacons(latitude: Double, longitude: Double): DSResult<List<ActiveBeacon>> {
         return try {
             queries.selectAllBeacons().executeAsList().let {
                 DSResult.Success(
                     it.map {
                         ActiveBeacon(
-                            uuid = it.uuid,
-                            major = it.major.toString(),
-                            minor = it.minor.toString(),
+                            proximityUUID = it.uuid,
+                            major = it.major.toInt(),
+                            minor = it.minor.toInt(),
                             radius = it.radius,
                             campaignName = EMPTY_STRING
                         )
@@ -43,7 +43,7 @@ class BeaconLocalDS(
             queries.transaction {
                 beacons.forEach {
                     queries.insertBeacon(
-                        uuid = it.uuid,
+                        uuid = it.proximityUUID,
                         major = it.major.toLong(),
                         minor = it.minor.toLong(),
                         radius = it.radius

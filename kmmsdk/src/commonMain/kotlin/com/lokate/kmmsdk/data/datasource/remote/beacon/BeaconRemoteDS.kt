@@ -8,9 +8,8 @@ import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 
 class BeaconRemoteDS(private val api: BeaconAPI) : BeaconDS {
-    override suspend fun fetchBeacons(branchId: String): DSResult<List<ActiveBeacon>> {
-        println()
-        val a = api.getActiveBeacons(branchId)
+    override suspend fun fetchBeacons(latitude: Double, longitude: Double): DSResult<List<ActiveBeacon>> {
+        val a = api.getActiveBeacons(latitude, longitude)
         return a.toDSResult()
     }
 

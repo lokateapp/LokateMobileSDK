@@ -12,7 +12,6 @@ import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconAPI
 import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
 import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
 import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
-import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
@@ -20,10 +19,13 @@ import com.lokate.kmmsdk.domain.model.beacon.toActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.toEventRequest
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
+import com.lokate.kmmsdk.domain.model.beacon.toLokateBeacon
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
 import com.lokate.kmmsdk.utils.collection.ConcurrentSetWithSpecialEquals
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 import com.russhwolf.settings.Settings
+import io.ktor.util.collections.ConcurrentSet
 import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +74,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             localDS = BeaconLocalDS(getDatabase()),
         )
 
-    private val branchBeacons = mutableListOf<ActiveBeacon>()
+    private val branchBeacons = mutableListOf<LokateBeacon>()
 
     private var customerId = "umut"
 
@@ -118,45 +120,33 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         }
     }
 
-    private fun fetchBranchBeacons(branchId: String) {
+    private fun fetchBranchBeacons(afterFetch: () -> Unit) {
         if (isActive) {
             log.e { "Already scanning, stop scanning and get beacons again" }
             return
         }
-        val branch =
-            branchId.ifEmpty {
-                log.e { "Branch ID is empty" }
-                "1b224840-de56-41a2-92e0-959193b0035e"
-            }
-        if (branchBeacons.isEmpty()) {
-            log.e { "No beacons to scan" }
-            // debug purposes
-            addDefaultBeacons()
-        }
         lokateScopeNetworkDB.launch {
-            log.d { "Fetching beacons for branch: $branch" }
-            beaconRepository.fetchBeacons(branch).let {
-                log.e { "Beacon fetch result arrived!, $it" }
-                when (it) {
-                    is RepositoryResult.Success -> {
-                        if (it.body.isNotEmpty() && it.body.any { it.uuid != EMPTY_STRING }) {
-                            branchBeacons.clear()
-                            branchBeacons.addAll(it.body)
-                        }
-                        log.d { "Branch beacons: $branchBeacons" }
-                    }
+            val (latitude, longitude) = try {
+                getCurrentGeolocation()
+            } catch (e: Exception) {
+                log.e { "Failed to get current location: ${e.message}" }
+                Pair(0.0, 0.0)
+            }
+            log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
+            when (val result = beaconRepository.fetchBeacons(latitude, longitude)) {
+                is RepositoryResult.Success -> {
+                    branchBeacons.addAll(result.body.map { it.toLokateBeacon() })
+                    log.d { "Branch beacons: $branchBeacons" }
+                }
 
-                    is RepositoryResult.Error -> {
-                        log.e { "Error fetching beacons: ${it.message}" }
-                    }
+                is RepositoryResult.Error -> log.e {
+                    branchBeacons.addAll(DEFAULT_BEACONS)
+                    "Failed to fetch beacons: ${result.message}"
                 }
             }
-        }
-    }
 
-    private fun addDefaultBeacons() {
-        log.e { "Adding default branch beacons" }
-        branchBeacons.addAll(Defaults.DEFAULT_BEACONS.map { it.toActiveBeacon() })
+            afterFetch()
+        }
     }
 
     private fun checkAppToken() {
@@ -190,7 +180,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             return
         }
 
-        fetchBranchBeacons(EMPTY_STRING)
+        fetchBranchBeacons {
+            beaconScanner.setRegions(branchBeacons)
+            beaconScanner.startScanning()
+        }
 
         if (branchBeacons.isEmpty()) {
             log.e { "No beacons to scan" }
@@ -198,10 +191,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         } else {
             log.d { "Beacons to scan: $branchBeacons" }
             beaconScanner.setRegions(
-                branchBeacons.map {
-                    it.toLokateBeacon()
-                        .copy(major = null, minor = null) // to scan all beacons. we can change this
-                },
+                branchBeacons
             )
         }
         beaconScanner.startScanning()
@@ -216,8 +206,8 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.uuid.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major.toString() &&
-                            it.minor == scan.minor.toString()
+                            it.major == scan.major &&
+                            it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -265,11 +255,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
 
     private suspend fun sendEvent(eventPipeline: ReceiveChannel<EventRequest>) {
         for (event in eventPipeline) {
-            log.d { "Send event (${event.status}): ${event.beaconUID}" }
+            log.d { "Send event (${event.status}): ${event.beaconUUID}" }
             lokateScopeNetworkDB.launch {
                 withTimeoutOrNull(EVENT_REQUEST_TIMEOUT) {
                     return@withTimeoutOrNull beaconRepository.sendBeaconEvent(event).also {
-                        log.d { "event sent: (${event.status}): ${event.beaconUID}" }
+                        log.d { "event sent: (${event.status}): ${event.beaconUUID}" }
                     }
                 } ?: log.e { "Timeout while sending event" }
             }
@@ -309,3 +299,5 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         eventChannel.close()
     }
 }
+
+expect suspend fun getCurrentGeolocation(): Pair<Double, Double>

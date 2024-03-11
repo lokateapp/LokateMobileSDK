@@ -23,6 +23,7 @@ lifecycleViewmodelKtx = "2.6.2"
 loggerVersion = "1.7.26"
 ktorVersion = "2.3.5"
 permissionsCompose = "0.17.0"
+playServicesLocation = "18.0.0"
 proximitySdk = "1.0.8"
 secretsGradlePlugin = "2.0.1"
 sqldelight = "2.0.0"
@@ -66,6 +67,7 @@ ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "k
 ktor-client-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorVersion" }
 
 permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissionsCompose" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 proximity-sdk = { module = "com.estimote:proximity-sdk", version.ref = "proximitySdk" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 slf4j-logger = { module = "org.slf4j:slf4j-simple", version.ref = "loggerVersion" }

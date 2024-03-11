@@ -14,19 +14,19 @@ class BeaconRepositoryImpl(
     private val remoteDS: BeaconRemoteDS,
     private val localDS: BeaconLocalDS,
 ) : BeaconRepository {
-    override suspend fun fetchBeacons(branchId: String): RepositoryResult<List<ActiveBeacon>> {
+    override suspend fun fetchBeacons(latitude: Double, longitude: Double): RepositoryResult<List<ActiveBeacon>> {
         val appToken = authenticationRepository.getAppToken()
         if (appToken !is RepositoryResult.Success) {
             return RepositoryResult.Error("Couldn't fetch!", "No auth token!")
         }
 
-        val remoteBeacons = remoteDS.fetchBeacons(branchId).toRepositoryResult()
+        val remoteBeacons = remoteDS.fetchBeacons(latitude, longitude).toRepositoryResult()
         if (remoteBeacons is RepositoryResult.Success) {
             localDS.updateOrInsertBeacon(remoteBeacons.body)
             return remoteBeacons
         }
 
-        val localBeacons = localDS.fetchBeacons(branchId).toRepositoryResult()
+        val localBeacons = localDS.fetchBeacons(latitude, longitude).toRepositoryResult()
         return if (localBeacons is RepositoryResult.Success && localBeacons.body.isNotEmpty()) {
             localBeacons
         } else {
