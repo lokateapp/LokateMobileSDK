@@ -144,9 +144,9 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                     log.d { "Branch beacons: $branchBeacons" }
                 }
 
-                is RepositoryResult.Error -> log.e {
+                is RepositoryResult.Error -> {
                     branchBeacons.addAll(DEFAULT_BEACONS)
-                    "Failed to fetch beacons: ${result.message}"
+                    log.e {"Failed to fetch beacons: ${result.message}"}
                 }
             }
 
