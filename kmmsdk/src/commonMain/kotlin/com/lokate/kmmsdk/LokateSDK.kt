@@ -130,13 +130,13 @@ class LokateSDK {
                                 it.minor == scan.minor.toString()
                         }
                     val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
-                    if (scan.accuracy != null && scan.accuracy > -1.0 && comparison) {
+                    if (scan.accuracy > -1.0 && comparison) {
                         emit(scan)
                     }
                 },
         )
         checkGone()
-        flowEmitter()
+        sendEvents()
         // beaconScanner.start()
         // results = beaconScanner.observeResults()
     }
@@ -156,7 +156,7 @@ class LokateSDK {
         }
     }
 
-    private fun flowEmitter() {
+    private fun sendEvents() {
         lokateScope.launch {
             newComer.collect {
                 log.d { "Newcomer: $it" }
