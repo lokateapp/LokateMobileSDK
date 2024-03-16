@@ -2,6 +2,7 @@ package com.lokate.kmmsdk.utils.collection
 
 import io.ktor.util.collections.ConcurrentSet
 
+@Suppress("TooManyFunctions")
 class ConcurrentSetWithSpecialEquals<Key : Any>(
     val equals: (Key, Key) -> Boolean,
 ) : MutableSet<Key> {

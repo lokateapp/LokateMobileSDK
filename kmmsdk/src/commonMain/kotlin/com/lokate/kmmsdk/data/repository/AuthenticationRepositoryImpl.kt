@@ -58,7 +58,9 @@ class AuthenticationRepositoryImpl(
         }
     }
 
-    override suspend fun setAppToken(appToken: String): RepositoryResult<Boolean> = localDS.setAuthentication(appToken).toRepositoryResult()
+    override suspend fun setAppToken(appToken: String): RepositoryResult<Boolean> =
+        localDS.setAuthentication(appToken).toRepositoryResult()
 
-    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> = localDS.setUserId(userId).toRepositoryResult()
+    override suspend fun setUserID(userId: String): RepositoryResult<Boolean> =
+        localDS.setUserId(userId).toRepositoryResult()
 }
