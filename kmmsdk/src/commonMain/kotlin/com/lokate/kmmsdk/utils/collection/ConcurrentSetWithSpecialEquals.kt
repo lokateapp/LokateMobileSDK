@@ -3,7 +3,7 @@ package com.lokate.kmmsdk.utils.collection
 import io.ktor.util.collections.ConcurrentSet
 
 class ConcurrentSetWithSpecialEquals <Key: Any>(
-    val equal: (Key, Key)-> Boolean,
+    val equals: (Key, Key)-> Boolean,
 ) : MutableSet<Key> {
     private val delegate = ConcurrentSet<Key>()
 
@@ -14,12 +14,8 @@ class ConcurrentSetWithSpecialEquals <Key: Any>(
     }
 
     private fun updateOrAdd(key: Key): Boolean {
-        return if (delegate.any { equal(it, key) }) {
-            removeIf { equal(it, key) }
-            delegate.add(key)
-        } else {
-            delegate.add(key)
-        }
+        removeIf { equals(it, key) }
+        return delegate.add(key)
     }
 
     override fun addAll(elements: Collection<Key>): Boolean {
