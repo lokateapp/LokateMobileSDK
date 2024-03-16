@@ -14,7 +14,15 @@ data class ActiveBeacon(
     val minor: String,
     val campaign: Campaign,
     val range: BeaconProximity,
-)
+) {
+    fun toLokateBeacon(): LokateBeacon = LokateBeacon(
+        uuid = this.id,
+        major = this.major.toIntOrNull() ?: 0,
+        minor = minor.toIntOrNull() ?: 0,
+        campaign = this.campaign.name,
+        proximityType = this.range.ordinal,
+    )
+}
 
 @Serializable
 data class Campaign(
