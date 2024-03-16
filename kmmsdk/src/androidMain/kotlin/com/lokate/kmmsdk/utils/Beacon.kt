@@ -14,12 +14,11 @@ fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
     return BeaconScanResult(
         beaconUUID = beaconUUID,
         rssi = rssi.toDouble(),
-        txPower = txPower,
         accuracy = accuracy,
         proximity = proximity,
         major = id2.toInt(),
         minor = id3.toInt(),
-        seen = System.currentTimeMillis(),
+        seen = lastCycleDetectionTimestamp
     )
 }
 

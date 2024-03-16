@@ -5,11 +5,11 @@ import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
-import io.ktor.util.date.getTimeMillis
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLProximity
 import platform.Foundation.NSUUID
+import platform.Foundation.timeIntervalSince1970
 
 fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
     // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
@@ -35,14 +35,13 @@ fun CLProximity.toLokateProximity(): BeaconProximity {
 fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
     // NSLog("Converting CLBeacon to BeaconScanResult: UUID - ${this.proximityUUID.UUIDString}, RSSI - ${this.rssi}")
     return BeaconScanResult(
-        beaconUUID = this.proximityUUID.UUIDString,
-        rssi = this.rssi.toDouble(),
-        txPower = 0,
-        accuracy = this.accuracy,
-        proximity = this.proximity.toLokateProximity(),
-        major = this.major.intValue,
-        minor = this.minor.intValue,
-        seen = getTimeMillis(),
+        beaconUUID = proximityUUID.UUIDString,
+        rssi = rssi.toDouble(),
+        accuracy = accuracy,
+        proximity = proximity.toLokateProximity(),
+        major = major.intValue,
+        minor = minor.intValue,
+        seen = (timestamp.timeIntervalSince1970 * 1000L).toLong(),
     )
 }
 
