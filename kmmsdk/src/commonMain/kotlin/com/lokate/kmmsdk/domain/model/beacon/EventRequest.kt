@@ -24,3 +24,12 @@ enum class EventStatus {
     @SerialName("STAY")
     STAY,
 }
+
+fun BeaconScanResult.toEventRequest(customerId: String, status: EventStatus) = EventRequest(
+    customerId,
+    beaconUUID,
+    major.toString(),
+    minor.toString(),
+    status,
+    seen,
+)
