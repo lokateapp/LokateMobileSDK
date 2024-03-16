@@ -62,6 +62,9 @@ class LokateSDK {
     private val gone = MutableSharedFlow<BeaconScanResult>()
     private var appTokenSet: Boolean = false
 
+    /*
+    * it is being used but I believe we should not expose as it comes from the scanner
+    */
     fun getScanResultFlow(): Flow<BeaconScanResult> {
         return beaconScanner.scanResultFlow()
     }
@@ -75,7 +78,7 @@ class LokateSDK {
         }
     }
 
-    fun fetchActiveBeacons(branchId: String) {
+    private fun fetchActiveBeacons(branchId: String) {
         val branch =
             branchId.ifEmpty {
                 log.e { "Branch ID is empty" }
@@ -106,6 +109,9 @@ class LokateSDK {
         // check if app token is set
         checkAppToken()
 
+        /*
+        this is a temporary solution to set the app token for debugging purposes
+        * */
         if (!appTokenSet) {
             log.e { "App token not set" }
             // use default token
@@ -208,12 +214,12 @@ class LokateSDK {
         lokateScope.launch {
             beaconScannerFlow.collect { scan ->
                 activeBeacons.firstOrNull {
-                    it.beaconUUID == it.beaconUUID &&
-                        it.major == it.major &&
-                        it.minor == it.minor
+                    it.beaconUUID == scan.beaconUUID &&
+                        it.major == scan.major &&
+                        it.minor == scan.minor
                 }
                     ?.let {
-                        alreadyIn.emit(it.copy(seen = getTimeMillis()))
+                        alreadyIn.emit(scan)
                     } ?: newComer.emit(scan).also { activeBeacons.add(scan) }
             }
         }
