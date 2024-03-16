@@ -2,8 +2,8 @@ package com.lokate.kmmsdk.utils.collection
 
 import io.ktor.util.collections.ConcurrentSet
 
-class ConcurrentSetWithSpecialEquals <Key: Any>(
-    val equals: (Key, Key)-> Boolean,
+class ConcurrentSetWithSpecialEquals<Key : Any>(
+    val equals: (Key, Key) -> Boolean,
 ) : MutableSet<Key> {
     private val delegate = ConcurrentSet<Key>()
 
@@ -35,26 +35,17 @@ class ConcurrentSetWithSpecialEquals <Key: Any>(
         delegate.clear()
     }
 
-    override fun isEmpty(): Boolean =
-        delegate.isEmpty()
+    override fun isEmpty(): Boolean = delegate.isEmpty()
 
-    override fun containsAll(elements: Collection<Key>): Boolean =
-        elements.all { delegate.contains(it) }
+    override fun containsAll(elements: Collection<Key>): Boolean = elements.all { delegate.contains(it) }
 
+    override fun contains(element: Key): Boolean = delegate.contains(element)
 
-    override fun contains(element: Key): Boolean =
-        delegate.contains(element)
+    override fun iterator(): MutableIterator<Key> = delegate.iterator()
 
+    override fun retainAll(elements: Collection<Key>): Boolean = delegate.retainAll(elements.toSet())
 
-    override fun iterator(): MutableIterator<Key> =
-        delegate.iterator()
+    override fun removeAll(elements: Collection<Key>): Boolean = delegate.removeAll(elements.toSet())
 
-    override fun retainAll(elements: Collection<Key>): Boolean =
-        delegate.retainAll(elements.toSet())
-
-    override fun removeAll(elements: Collection<Key>): Boolean =
-        delegate.removeAll(elements.toSet())
-
-    override fun remove(element: Key): Boolean =
-        delegate.remove(element)
+    override fun remove(element: Key): Boolean = delegate.remove(element)
 }

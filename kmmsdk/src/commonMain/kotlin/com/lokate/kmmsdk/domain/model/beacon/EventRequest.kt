@@ -25,7 +25,10 @@ enum class EventStatus {
     STAY,
 }
 
-fun BeaconScanResult.toEventRequest(customerId: String, status: EventStatus) = EventRequest(
+fun BeaconScanResult.toEventRequest(
+    customerId: String,
+    status: EventStatus,
+) = EventRequest(
     customerId,
     beaconUUID,
     major.toString(),
