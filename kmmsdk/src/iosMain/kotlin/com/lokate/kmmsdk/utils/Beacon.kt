@@ -1,6 +1,5 @@
 package com.lokate.kmmsdk.utils
 
-import com.lokate.kmmsdk.Beacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
@@ -42,15 +41,5 @@ fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
         major = major.intValue,
         minor = minor.intValue,
         seen = (timestamp.timeIntervalSince1970 * 1000L).toLong(),
-    )
-}
-
-fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
-    // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
-    return CLBeaconRegion(
-        uUID = NSUUID(this.uuid),
-        major = this.major.toUShort(),
-        minor = this.minor.toUShort(),
-        identifier = EMPTY_STRING,
     )
 }
