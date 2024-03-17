@@ -61,8 +61,8 @@ class LokateSDK {
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                    it1.major == it2.major &&
-                    it1.minor == it2.minor
+                        it1.major == it2.major &&
+                        it1.minor == it2.minor
             },
         )
 
@@ -150,7 +150,7 @@ class LokateSDK {
         }
         beaconScanner.startScanning()
 
-        scanResultHandler(
+        processScanResults(
             beaconScannerFlow =
                 beaconScanner.scanResultFlow().transform { scan ->
                     val beacon =
@@ -173,8 +173,8 @@ class LokateSDK {
 
     private fun checkGone() {
         lokateScope.launch {
-            val checkInterval = GONE_CHECK_INTERVAL // Adjust based on your needs
-            while (isActive) { // Ensures coroutine stops when scope is cancelled
+            val checkInterval = GONE_CHECK_INTERVAL
+            while (isActive) {
                 delay(checkInterval)
                 try {
                     val currentTimeMillis = getTimeMillis()
@@ -220,7 +220,7 @@ class LokateSDK {
         }
     }
 
-    private fun scanResultHandler(beaconScannerFlow: Flow<BeaconScanResult>) {
+    private fun processScanResults(beaconScannerFlow: Flow<BeaconScanResult>) {
         lokateScope.launch {
             beaconScannerFlow.collect { scan ->
                 when (activeBeacons.contains(scan)) {
