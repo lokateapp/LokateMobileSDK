@@ -66,6 +66,7 @@ class LokateSDK {
             },
         )
 
+    // use unified instead of 3 different flows
     private val newComer = MutableSharedFlow<BeaconScanResult>()
     private val alreadyIn = MutableSharedFlow<BeaconScanResult>()
     private val gone = MutableSharedFlow<BeaconScanResult>()
@@ -87,7 +88,7 @@ class LokateSDK {
         }
     }
 
-    private fun fetchActiveBeacons(branchId: String) {
+    private fun fetchBranchBeacons(branchId: String) {
         if (isActive) {
             log.e { "Already scanning, stop scanning and get beacons again" }
             return
@@ -134,7 +135,7 @@ class LokateSDK {
 
     fun startScanning() {
         isActive = true
-        fetchActiveBeacons(EMPTY_STRING)
+        fetchBranchBeacons(EMPTY_STRING)
 
         if (branchBeacons.isEmpty()) {
             log.e { "No beacons to scan adding defaults" }
