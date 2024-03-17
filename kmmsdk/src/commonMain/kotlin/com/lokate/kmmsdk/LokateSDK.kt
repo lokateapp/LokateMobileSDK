@@ -145,7 +145,8 @@ class LokateSDK {
             log.d { "Beacons to scan: $branchBeacons" }
             beaconScanner.setRegions(
                 branchBeacons.map {
-                    it.toLokateBeacon().copy(major = null, minor = null) // to scan all beacons. we can change this
+                    it.toLokateBeacon()
+                        .copy(major = null, minor = null) // to scan all beacons. we can change this
                 },
             )
         }
@@ -153,18 +154,18 @@ class LokateSDK {
 
         processScanResults(
             beaconScannerFlow =
-                beaconScanner.scanResultFlow().transform { scan ->
-                    val beacon =
-                        branchBeacons.firstOrNull {
-                            it.id.lowercase() == scan.beaconUUID.lowercase() &&
+            beaconScanner.scanResultFlow().transform { scan ->
+                val beacon =
+                    branchBeacons.firstOrNull {
+                        it.id.lowercase() == scan.beaconUUID.lowercase() &&
                                 it.major == scan.major.toString() &&
                                 it.minor == scan.minor.toString()
-                        }
-                    val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
-                    if (scan.accuracy > -1.0 && comparison) {
-                        emit(scan)
                     }
-                },
+                val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
+                if (scan.accuracy > -1.0 && comparison) {
+                    emit(scan)
+                }
+            },
         )
         checkGone()
         sendEvents()
@@ -226,11 +227,9 @@ class LokateSDK {
             beaconScannerFlow.collect { scan ->
                 when (activeBeacons.contains(scan)) {
                     true -> alreadyIn.emit(scan)
-                    false -> {
-                        newComer.emit(scan)
-                        activeBeacons.add(scan)
-                    }
+                    false -> newComer.emit(scan)
                 }
+                activeBeacons.add(scan)
             }
         }
     }
