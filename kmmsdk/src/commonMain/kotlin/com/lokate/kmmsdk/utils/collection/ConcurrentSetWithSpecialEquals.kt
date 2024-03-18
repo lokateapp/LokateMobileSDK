@@ -14,14 +14,14 @@ class ConcurrentSetWithSpecialEquals<Key : Any>(
         }
     }
 
-    private fun addOrUpdate(key: Key): Boolean {
+    fun addOrUpdate(key: Key): Boolean {
         removeIf { equals(it, key) }
         return delegate.add(key)
     }
 
     override fun addAll(elements: Collection<Key>): Boolean {
         var result = true
-        elements.forEach { result = addOrUpdate(it) }
+        elements.forEach { result = add(it) }
         return result
     }
 
@@ -29,7 +29,10 @@ class ConcurrentSetWithSpecialEquals<Key : Any>(
         get() = delegate.size
 
     override fun add(element: Key): Boolean {
-        return addOrUpdate(element)
+        if (contains(element)) {
+            return false
+        }
+        return delegate.add(element)
     }
 
     override fun clear() {
