@@ -11,18 +11,18 @@ object Defaults {
     val DEFAULT_BEACONS =
         listOf(
             LokateBeacon(
-                // ?
+                // white
                 "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
                 24719,
-                65453,
+                28241,
                 "1",
                 BeaconProximity.Far.ordinal,
             ),
             LokateBeacon(
-                // ?
-                "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                24719,
-                28241,
+                // yellow
+                "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
+                1,
+                1,
                 "2",
                 BeaconProximity.Far.ordinal,
             ),
