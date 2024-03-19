@@ -1,6 +1,8 @@
 package com.lokate.kmmsdk
 
+import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
 import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
+import com.lokate.kmmsdk.Defaults.MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE
 import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
 import com.lokate.kmmsdk.data.datasource.local.factory.getDatabase
@@ -84,8 +86,8 @@ class LokateSDK {
             },
         )
 
-    private val beaconScanResultChannel = Channel<BeaconScanResult>(100)
-    private val eventChannel: Channel<EventRequest> = Channel(100)
+    private val beaconScanResultChannel = Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+    private val eventChannel: Channel<EventRequest> = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
     private var appTokenSet: Boolean = false
 
@@ -210,7 +212,8 @@ class LokateSDK {
                     scan.accuracy <= -1.0 -> log.d { "This shouldn't happen" }
                     beacon == null -> log.d { "Beacon not in branch: $scan, branch beacons: $branchBeacons" }
                     beacon.range < scan.proximity -> {
-                        log.d { "Beacon proximity is not in range: $scan. setted: ${beacon.range}, current: ${scan.proximity}" }
+                        log.d { "Beacon proximity is not in range: $scan." +
+                                " setted: ${beacon.range}, current: ${scan.proximity}" }
                     }
 
                     else -> {
@@ -253,7 +256,7 @@ class LokateSDK {
         for (event in eventPipeline) {
             log.d { "Send event (${event.status}): ${event.beaconUID}" }
             lokateScopeNetworkDB.launch {
-                withTimeoutOrNull(5000L) {
+                withTimeoutOrNull(EVENT_REQUEST_TIMEOUT) {
                     return@withTimeoutOrNull beaconRepository.sendBeaconEvent(event).also {
                         log.d { "event sent: (${event.status}): ${event.beaconUID}" }
                     }

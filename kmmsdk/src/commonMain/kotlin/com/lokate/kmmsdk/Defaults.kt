@@ -8,6 +8,8 @@ object Defaults {
     const val DEFAULT_TIMEOUT_BEFORE_GONE = 10000L
     const val GONE_CHECK_INTERVAL = 5000L
     const val BEACON_LAYOUT_IBEACON = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25,i:0-56"
+    const val MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE = 100
+    const val EVENT_REQUEST_TIMEOUT = 5000L
     val DEFAULT_BEACONS =
         listOf(
             LokateBeacon(
