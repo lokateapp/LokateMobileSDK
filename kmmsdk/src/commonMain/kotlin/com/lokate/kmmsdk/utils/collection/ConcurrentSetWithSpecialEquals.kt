@@ -41,8 +41,7 @@ class ConcurrentSetWithSpecialEquals<Key : Any>(
 
     override fun isEmpty(): Boolean = delegate.isEmpty()
 
-    override fun containsAll(elements: Collection<Key>): Boolean =
-        elements.all { contains(it) }
+    override fun containsAll(elements: Collection<Key>): Boolean = elements.all { contains(it) }
 
     override fun contains(element: Key): Boolean {
         return delegate.any { equals(it, element) }
@@ -50,11 +49,9 @@ class ConcurrentSetWithSpecialEquals<Key : Any>(
 
     override fun iterator(): MutableIterator<Key> = delegate.iterator()
 
-    override fun retainAll(elements: Collection<Key>): Boolean =
-        delegate.retainAll(elements.toSet())
+    override fun retainAll(elements: Collection<Key>): Boolean = delegate.retainAll(elements.toSet())
 
-    override fun removeAll(elements: Collection<Key>): Boolean =
-        delegate.removeAll(elements.toSet())
+    override fun removeAll(elements: Collection<Key>): Boolean = delegate.removeAll(elements.toSet())
 
     override fun remove(element: Key): Boolean = delegate.remove(element)
 }

@@ -64,10 +64,11 @@ class LokateSDK {
     private var customerId = "umut"
 
     fun setCustomerId(customerId: String) {
-        if (!isActive)
+        if (!isActive) {
             this.customerId = customerId
-        else
+        } else {
             log.e { "Cannot set customer ID while scanning" }
+        }
     }
 
     private val lokateJob = SupervisorJob()
@@ -78,8 +79,8 @@ class LokateSDK {
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                        it1.major == it2.major &&
-                        it1.minor == it2.minor
+                    it1.major == it2.major &&
+                    it1.minor == it2.minor
             },
         )
 
@@ -202,8 +203,8 @@ class LokateSDK {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.id.lowercase() == scan.beaconUUID.lowercase() &&
-                                it.major == scan.major.toString() &&
-                                it.minor == scan.minor.toString()
+                            it.major == scan.major.toString() &&
+                            it.minor == scan.minor.toString()
                     }
                 when {
                     scan.accuracy <= -1.0 -> log.d { "This shouldn't happen" }
@@ -221,7 +222,7 @@ class LokateSDK {
 
     private fun CoroutineScope.differentiateType(
         receiveChannel: ReceiveChannel<BeaconScanResult>,
-        outputChannel: Channel<EventRequest>
+        outputChannel: Channel<EventRequest>,
     ) {
         launch {
             for (scan in receiveChannel) {
@@ -260,7 +261,6 @@ class LokateSDK {
             }
         }
     }
-
 
     private fun checkGone() {
         lokateScopeComputation.launch {
