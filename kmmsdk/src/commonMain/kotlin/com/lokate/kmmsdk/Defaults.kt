@@ -16,7 +16,7 @@ object Defaults {
                 24719,
                 28241,
                 "1",
-                BeaconProximity.Far.ordinal,
+                BeaconProximity.Immediate,
             ),
             LokateBeacon(
                 // yellow
@@ -24,7 +24,7 @@ object Defaults {
                 1,
                 1,
                 "2",
-                BeaconProximity.Far.ordinal,
+                BeaconProximity.Far,
             ),
             LokateBeacon(
                 // pink
@@ -32,7 +32,7 @@ object Defaults {
                 1,
                 1,
                 "3",
-                BeaconProximity.Far.ordinal,
+                BeaconProximity.Far,
             ),
             LokateBeacon(
                 // red
@@ -40,7 +40,7 @@ object Defaults {
                 1,
                 2,
                 "4",
-                BeaconProximity.Far.ordinal,
+                BeaconProximity.Far,
             ),
         )
 }
