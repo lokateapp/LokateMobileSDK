@@ -12,10 +12,15 @@ import platform.Foundation.timeIntervalSince1970
 
 fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
     // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
+    if (this.minor == null || this.major == null)
+        return CLBeaconRegion(
+            uUID = NSUUID(this.uuid),
+            identifier = EMPTY_STRING,
+        )
     return CLBeaconRegion(
         uUID = NSUUID(this.uuid),
-        major = (this.major ?: 0).toUShort(),
-        minor = (this.minor ?: 0).toUShort(),
+        major = (this.major).toUShort(),
+        minor = (this.minor).toUShort(),
         identifier = EMPTY_STRING,
     )
 }
