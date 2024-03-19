@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -134,13 +133,16 @@ class LokateSDK {
     }
 
     fun startScanning() {
+        if (isActive) {
+            log.e { "Already scanning" }
+            return
+        }
         isActive = true
         fetchBranchBeacons(EMPTY_STRING)
 
         if (branchBeacons.isEmpty()) {
             log.e { "No beacons to scan adding defaults" }
             beaconScanner.setRegions(Defaults.DEFAULT_BEACONS)
-            return
         } else {
             log.d { "Beacons to scan: $branchBeacons" }
             beaconScanner.setRegions(
@@ -237,6 +239,6 @@ class LokateSDK {
     fun stopScanning() {
         isActive = false
         beaconScanner.stopScanning()
-        lokateScope.cancel()
+        lokateJob.cancel()
     }
 }
