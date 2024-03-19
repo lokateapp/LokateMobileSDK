@@ -12,8 +12,12 @@ import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
 import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
+import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
+import com.lokate.kmmsdk.domain.model.beacon.toActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.toEventRequest
+import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
+import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
 import com.lokate.kmmsdk.utils.collection.ConcurrentSetWithSpecialEquals
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
@@ -21,15 +25,19 @@ import com.russhwolf.settings.Settings
 import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LokateSDK {
     companion object {
         val log = logging("LokateSDK")
@@ -39,12 +47,12 @@ class LokateSDK {
 
     // move to DI
     private val beaconScanner = getBeaconScanner()
-    private val authenticationRepository =
+    private val authenticationRepository: AuthenticationRepository =
         AuthenticationRepositoryImpl(
             AuthenticationRemoteDS(AuthenticationAPI()),
             AuthenticationLocalDS(Settings()),
         )
-    private val beaconRepository =
+    private val beaconRepository: BeaconRepository =
         BeaconRepositoryImpl(
             authenticationRepository = authenticationRepository,
             remoteDS = BeaconRemoteDS(BeaconAPI()),
@@ -53,8 +61,18 @@ class LokateSDK {
 
     private val branchBeacons = mutableListOf<ActiveBeacon>()
 
+    private var customerId = "umut"
+
+    fun setCustomerId(customerId: String) {
+        if (!isActive)
+            this.customerId = customerId
+        else
+            log.e { "Cannot set customer ID while scanning" }
+    }
+
     private val lokateJob = SupervisorJob()
-    private val lokateScope = CoroutineScope(Dispatchers.IO + lokateJob)
+    private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
+    private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
 
     private val activeBeacons =
         ConcurrentSetWithSpecialEquals(
@@ -65,10 +83,9 @@ class LokateSDK {
             },
         )
 
-    // use unified instead of 3 different flows
-    private val newComer = MutableSharedFlow<BeaconScanResult>()
-    private val alreadyIn = MutableSharedFlow<BeaconScanResult>()
-    private val gone = MutableSharedFlow<BeaconScanResult>()
+    private val beaconScanResultChannel = Channel<BeaconScanResult>(100)
+    private val eventChannel: Channel<EventRequest> = Channel(100)
+
     private var appTokenSet: Boolean = false
 
     /*
@@ -79,7 +96,7 @@ class LokateSDK {
     }
 
     fun setAppToken(appToken: String) {
-        lokateScope.launch {
+        lokateScopeNetworkDB.launch {
             authenticationRepository.setAppToken(appToken)
         }.invokeOnCompletion {
             log.d { "App token set" }
@@ -97,18 +114,39 @@ class LokateSDK {
                 log.e { "Branch ID is empty" }
                 "1b224840-de56-41a2-92e0-959193b0035e"
             }
-        lokateScope.launch {
+        if (branchBeacons.isEmpty()) {
+            log.e { "No beacons to scan" }
+            // debug purposes
+            addDefaultBeacons()
+        }
+        lokateScopeNetworkDB.launch {
+            log.d { "Fetching beacons for branch: $branch" }
             beaconRepository.fetchBeacons(branch).let {
-                if (it is RepositoryResult.Success) {
-                    branchBeacons.addAll(it.body)
-                    log.d { "Branch beacons: $branchBeacons" }
+                log.e { "Beacon fetch result arrived!, $it" }
+                when (it) {
+                    is RepositoryResult.Success -> {
+                        if (it.body.isNotEmpty() && it.body.any { it.id != EMPTY_STRING }) {
+                            branchBeacons.clear()
+                            branchBeacons.addAll(it.body)
+                        }
+                        log.d { "Branch beacons: $branchBeacons" }
+                    }
+
+                    is RepositoryResult.Error -> {
+                        log.e { "Error fetching beacons: ${it.message}" }
+                    }
                 }
             }
         }
     }
 
+    private fun addDefaultBeacons() {
+        log.e { "Adding default branch beacons" }
+        branchBeacons.addAll(Defaults.DEFAULT_BEACONS.map { it.toActiveBeacon() })
+    }
+
     private fun checkAppToken() {
-        lokateScope.launch {
+        lokateScopeNetworkDB.launch {
             authenticationRepository.getAppToken().let {
                 if (it is RepositoryResult.Success && it.body.isNotEmpty()) {
                     appTokenSet = true
@@ -137,12 +175,12 @@ class LokateSDK {
             log.e { "Already scanning" }
             return
         }
-        isActive = true
+
         fetchBranchBeacons(EMPTY_STRING)
 
         if (branchBeacons.isEmpty()) {
-            log.e { "No beacons to scan adding defaults" }
-            beaconScanner.setRegions(Defaults.DEFAULT_BEACONS)
+            log.e { "No beacons to scan" }
+            return
         } else {
             log.d { "Beacons to scan: $branchBeacons" }
             beaconScanner.setRegions(
@@ -153,33 +191,81 @@ class LokateSDK {
             )
         }
         beaconScanner.startScanning()
+        scanProcessPipeline(beaconScanner.scanResultFlow())
+        checkGone()
+        isActive = true
+    }
 
-        processScanResults(
-            beaconScannerFlow =
-            beaconScanner.scanResultFlow().transform { scan ->
+    private fun CoroutineScope.excludeMinimumProximityAndNonBranchBeacons(channel: ReceiveChannel<BeaconScanResult>) =
+        produce {
+            for (scan in channel) {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.id.lowercase() == scan.beaconUUID.lowercase() &&
                                 it.major == scan.major.toString() &&
                                 it.minor == scan.minor.toString()
                     }
-                val comparison = (beacon == null || beacon.range.ordinal >= scan.proximity.ordinal)
-                if (scan.accuracy > -1.0 && comparison) {
-                    emit(scan)
+                when {
+                    scan.accuracy <= -1.0 -> log.d { "This shouldn't happen" }
+                    beacon == null -> log.d { "Beacon not in branch: $scan, branch beacons: $branchBeacons" }
+                    beacon.range < scan.proximity -> {
+                        log.d { "Beacon proximity is not in range: $scan. setted: ${beacon.range}, current: ${scan.proximity}" }
+                    }
+
+                    else -> {
+                        send(scan)
+                    }
                 }
-            },
-        )
-        checkGone()
-        sendEvents()
-        // beaconScanner.start()
-        // results = beaconScanner.observeResults()
+            }
+        }
+
+    private fun CoroutineScope.differentiateType(
+        receiveChannel: ReceiveChannel<BeaconScanResult>,
+        outputChannel: Channel<EventRequest>
+    ) {
+        launch {
+            for (scan in receiveChannel) {
+                when (activeBeacons.contains(scan)) {
+                    true -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.STAY))
+                    false -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.ENTER))
+                }
+                activeBeacons.addOrUpdate(scan)
+            }
+        }
     }
 
+    private fun scanProcessPipeline(beaconScannerFlow: Flow<BeaconScanResult>) {
+        lokateScopeComputation.launch {
+            beaconScannerFlow.collect {
+                beaconScanResultChannel.send(it)
+            }
+        }
+        lokateScopeComputation.launch {
+            val excludeLowerProximityAndNonBranchBeacons =
+                excludeMinimumProximityAndNonBranchBeacons(beaconScanResultChannel)
+            differentiateType(excludeLowerProximityAndNonBranchBeacons, eventChannel)
+            sendEvent(eventChannel)
+        }
+    }
+
+    private suspend fun sendEvent(eventPipeline: ReceiveChannel<EventRequest>) {
+        for (event in eventPipeline) {
+            log.d { "Send event (${event.status}): ${event.beaconUID}" }
+            lokateScopeNetworkDB.launch {
+                withTimeoutOrNull(5000L) {
+                    return@withTimeoutOrNull beaconRepository.sendBeaconEvent(event).also {
+                        log.d { "event sent: (${event.status}): ${event.beaconUID}" }
+                    }
+                } ?: log.e { "Timeout while sending event" }
+            }
+        }
+    }
+
+
     private fun checkGone() {
-        lokateScope.launch {
-            val checkInterval = GONE_CHECK_INTERVAL
+        lokateScopeComputation.launch {
             while (isActive) {
-                delay(checkInterval)
+                delay(GONE_CHECK_INTERVAL)
                 try {
                     val currentTimeMillis = getTimeMillis()
                     val goneBeacons =
@@ -187,8 +273,8 @@ class LokateSDK {
                             it.seen < currentTimeMillis - Defaults.DEFAULT_TIMEOUT_BEFORE_GONE
                         }
                     goneBeacons.forEach { beacon ->
-                        gone.emit(beacon)
                         activeBeacons.remove(beacon)
+                        eventChannel.send(beacon.toEventRequest(customerId, EventStatus.EXIT))
                     }
                 } catch (e: Exception) {
                     log.e { "Error checking for gone beacons: ${e.message}" }
@@ -197,48 +283,15 @@ class LokateSDK {
         }
     }
 
-    private fun sendEvents() {
-        lokateScope.launch {
-            newComer.collect {
-                log.d { "Newcomer: $it" }
-                beaconRepository.sendBeaconEvent(
-                    it.toEventRequest("umut", EventStatus.ENTER),
-                ).also { log.d { "Send newcomer in: $it" } }
-            }
-        }
-        lokateScope.launch {
-            alreadyIn.collect {
-                log.d { "Already in: $it" }
-                beaconRepository.sendBeaconEvent(
-                    it.toEventRequest("umut", EventStatus.STAY),
-                ).also { log.d { "Send already in: $it" } }
-            }
-        }
-        lokateScope.launch {
-            gone.collect {
-                log.d { "Gone: $it" }
-                beaconRepository.sendBeaconEvent(
-                    it.toEventRequest("umut", EventStatus.EXIT),
-                ).also { log.d { "Send gone: $it" } }
-            }
-        }
-    }
-
-    private fun processScanResults(beaconScannerFlow: Flow<BeaconScanResult>) {
-        lokateScope.launch {
-            beaconScannerFlow.collect { scan ->
-                when (activeBeacons.contains(scan)) {
-                    true -> alreadyIn.emit(scan)
-                    false -> newComer.emit(scan)
-                }
-                activeBeacons.add(scan)
-            }
-        }
-    }
-
     fun stopScanning() {
         isActive = false
         beaconScanner.stopScanning()
         lokateJob.cancel()
+        closeChannels()
+    }
+
+    private fun closeChannels() {
+        beaconScanResultChannel.close()
+        eventChannel.close()
     }
 }

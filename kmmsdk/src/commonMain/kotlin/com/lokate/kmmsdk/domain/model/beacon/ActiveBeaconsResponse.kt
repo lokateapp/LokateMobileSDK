@@ -21,7 +21,7 @@ data class ActiveBeacon(
             major = this.major.toIntOrNull() ?: 0,
             minor = minor.toIntOrNull() ?: 0,
             campaign = this.campaign.name,
-            proximityType = this.range.ordinal,
+            minProximity = this.range,
         )
 }
 
@@ -68,4 +68,18 @@ enum class BeaconProximity {
                 else -> Unknown
             }
     }
+}
+
+fun LokateBeacon.toActiveBeacon(): ActiveBeacon {
+    return ActiveBeacon(
+        id = this.uuid,
+        userId = "1",
+        branchId = "1",
+        radius = 1,
+        name = "default",
+        major = this.major.toString(),
+        minor = this.minor.toString(),
+        campaign = Campaign("1", "default", "1", "active", "2021-08-01T00:00:00.000Z"),
+        range = this.minProximity,
+    )
 }
