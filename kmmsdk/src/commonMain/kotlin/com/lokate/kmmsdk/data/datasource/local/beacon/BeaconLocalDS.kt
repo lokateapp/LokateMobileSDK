@@ -3,7 +3,7 @@ package com.lokate.kmmsdk.data.datasource.local.beacon
 import com.lokate.kmmsdk.Database
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.beacon.BeaconDS
-import com.lokate.kmmsdk.domain.model.beacon.ActiveBeacon
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 
@@ -16,17 +16,17 @@ class BeaconLocalDS(
     override suspend fun fetchBeacons(
         latitude: Double,
         longitude: Double,
-    ): DSResult<List<ActiveBeacon>> {
+    ): DSResult<List<LokateBeacon>> {
         return try {
             queries.selectAllBeacons().executeAsList().let {
                 DSResult.Success(
                     it.map {
-                        ActiveBeacon(
+                        LokateBeacon(
                             proximityUUID = it.uuid,
                             major = it.major.toInt(),
                             minor = it.minor.toInt(),
                             radius = it.radius,
-                            campaignName = EMPTY_STRING,
+                            campaign = EMPTY_STRING,
                         )
                     },
                 )
@@ -41,14 +41,14 @@ class BeaconLocalDS(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    suspend fun updateOrInsertBeacon(beacons: List<ActiveBeacon>): DSResult<Boolean> {
+    suspend fun updateOrInsertBeacon(beacons: List<LokateBeacon>): DSResult<Boolean> {
         return try {
             queries.transaction {
                 beacons.forEach {
                     queries.insertBeacon(
                         uuid = it.proximityUUID,
-                        major = it.major.toLong(),
-                        minor = it.minor.toLong(),
+                        major = (it.major ?: 0).toLong(),
+                        minor = (it.minor ?: 0).toLong(),
                         radius = it.radius,
                     )
                 }

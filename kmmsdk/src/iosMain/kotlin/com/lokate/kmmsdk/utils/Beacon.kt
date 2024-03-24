@@ -14,12 +14,12 @@ fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
     // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
     if (this.minor == null || this.major == null) {
         return CLBeaconRegion(
-            uUID = NSUUID(this.uuid),
+            uUID = NSUUID(this.proximityUUID),
             identifier = EMPTY_STRING,
         )
     }
     return CLBeaconRegion(
-        uUID = NSUUID(this.uuid),
+        uUID = NSUUID(this.proximityUUID),
         major = (this.major).toUShort(),
         minor = (this.minor).toUShort(),
         identifier = EMPTY_STRING,

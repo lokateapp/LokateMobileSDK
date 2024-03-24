@@ -1,6 +1,7 @@
 package com.lokate.kmmsdk
 
 import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
+import com.lokate.kmmsdk.Defaults.DEFAULT_BEACONS
 import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
 import com.lokate.kmmsdk.Defaults.MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE
 import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
@@ -15,17 +16,13 @@ import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
-import com.lokate.kmmsdk.domain.model.beacon.toActiveBeacon
 import com.lokate.kmmsdk.domain.model.beacon.toEventRequest
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
-import com.lokate.kmmsdk.domain.model.beacon.toLokateBeacon
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
 import com.lokate.kmmsdk.utils.collection.ConcurrentSetWithSpecialEquals
-import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 import com.russhwolf.settings.Settings
-import io.ktor.util.collections.ConcurrentSet
 import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +92,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
     private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
 
-    private val activeBeacons =
+    private val LokateBeacons =
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
@@ -140,7 +137,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
             when (val result = beaconRepository.fetchBeacons(latitude, longitude)) {
                 is RepositoryResult.Success -> {
-                    branchBeacons.addAll(result.body.map { it.toLokateBeacon() })
+                    branchBeacons.addAll(result.body)
                     log.d { "Branch beacons: $branchBeacons" }
                 }
 
@@ -210,7 +207,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             for (scan in channel) {
                 val beacon =
                     branchBeacons.firstOrNull {
-                        it.uuid.lowercase() == scan.beaconUUID.lowercase() &&
+                        it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
                             it.major == scan.major &&
                             it.minor == scan.minor
                     }
@@ -235,11 +232,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     ) {
         launch {
             for (scan in receiveChannel) {
-                when (activeBeacons.contains(scan)) {
+                when (LokateBeacons.contains(scan)) {
                     true -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.STAY))
                     false -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.ENTER))
                 }
-                activeBeacons.addOrUpdate(scan)
+                LokateBeacons.addOrUpdate(scan)
             }
         }
     }
@@ -278,11 +275,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 try {
                     val currentTimeMillis = getTimeMillis()
                     val goneBeacons =
-                        activeBeacons.filter {
+                        LokateBeacons.filter {
                             it.seen < currentTimeMillis - Defaults.DEFAULT_TIMEOUT_BEFORE_GONE
                         }
                     goneBeacons.forEach { beacon ->
-                        activeBeacons.remove(beacon)
+                        LokateBeacons.remove(beacon)
                         eventChannel.send(beacon.toEventRequest(customerId, EventStatus.EXIT))
                     }
                 } catch (e: Exception) {

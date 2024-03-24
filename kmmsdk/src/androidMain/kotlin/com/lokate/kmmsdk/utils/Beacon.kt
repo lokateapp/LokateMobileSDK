@@ -12,6 +12,7 @@ fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
     return BeaconScanResult(
         beaconUUID = beaconUUID,
         rssi = rssi.toDouble(),
+        txPower = txPower,
         accuracy = accuracy,
         major = id2.toInt(),
         minor = id3.toInt(),
@@ -39,8 +40,8 @@ fun calculateAccuracy(
 
 fun LokateBeacon.toRegion() =
     Region(
-        this.uuid,
-        Identifier.parse(this.uuid),
+        this.proximityUUID,
+        Identifier.parse(this.proximityUUID),
         null,
         null,
         // Identifier.fromInt(this.major ?: 0),
