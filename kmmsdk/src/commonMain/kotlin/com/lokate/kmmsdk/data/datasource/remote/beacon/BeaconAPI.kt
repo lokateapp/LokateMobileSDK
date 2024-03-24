@@ -3,8 +3,8 @@ package com.lokate.kmmsdk.data.datasource.remote.beacon
 import com.lokate.kmmsdk.data.datasource.remote.ApiResponse
 import com.lokate.kmmsdk.data.datasource.remote.base.BaseAPI
 import com.lokate.kmmsdk.data.datasource.remote.base.lokateRequest
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
@@ -21,7 +21,7 @@ class BeaconAPI : BaseAPI {
                 method = HttpMethod.Get
                 host = baseUrl
                 port = defPort
-                path(getPath("LokateBeacons"))
+                path(getPath("activeBeacons"))
                 parameters.append("latitude", latitude.toString())
                 parameters.append("longitude", longitude.toString())
             }

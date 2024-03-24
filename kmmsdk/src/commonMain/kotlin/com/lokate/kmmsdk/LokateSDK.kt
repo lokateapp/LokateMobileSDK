@@ -1,7 +1,7 @@
 package com.lokate.kmmsdk
 
-import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
 import com.lokate.kmmsdk.Defaults.DEFAULT_BEACONS
+import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
 import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
 import com.lokate.kmmsdk.Defaults.MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE
 import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
@@ -16,10 +16,10 @@ import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.toEventRequest
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
 import com.lokate.kmmsdk.utils.collection.ConcurrentSetWithSpecialEquals
 import com.russhwolf.settings.Settings
@@ -184,21 +184,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         fetchBranchBeacons {
             beaconScanner.setRegions(branchBeacons)
             beaconScanner.startScanning()
+            scanProcessPipeline(beaconScanner.scanResultFlow())
+            checkGone()
+            isActive = true
         }
-
-        if (branchBeacons.isEmpty()) {
-            log.e { "No beacons to scan" }
-            return
-        } else {
-            log.d { "Beacons to scan: $branchBeacons" }
-            beaconScanner.setRegions(
-                branchBeacons
-            )
-        }
-        beaconScanner.startScanning()
-        scanProcessPipeline(beaconScanner.scanResultFlow())
-        checkGone()
-        isActive = true
     }
 
     private fun CoroutineScope.excludeMinimumProximityAndNonBranchBeacons(channel: ReceiveChannel<BeaconScanResult>) =
