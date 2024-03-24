@@ -1,4 +1,4 @@
-package csfair
+package com.lokate.demo.csfair
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable

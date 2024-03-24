@@ -1,3 +1,5 @@
+package com.lokate.demo
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.lokate.demo.market.MarketApp
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
@@ -21,7 +24,6 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import market.MarketApp
 
 internal val RequiredPermissions =
     arrayOf(
@@ -35,7 +37,7 @@ suspend fun checkPermissions(permissionsController: PermissionsController): Bool
 }
 
 // TODO: handle denied exceptions properly (redirect user to settings etc.)
-// should also check if bluetooth is open
+// should also check if bluetooth and internet are open
 suspend fun askPermission(
     permissionsController: PermissionsController,
     permission: Permission,

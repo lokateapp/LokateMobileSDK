@@ -1,6 +1,5 @@
 package com.lokate.demo
 
-import App
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.fragment.app.FragmentActivity

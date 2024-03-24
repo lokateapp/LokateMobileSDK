@@ -35,7 +35,7 @@ class AndroidBeaconScanner : BeaconScanner {
 
     override fun startScanning() {
         if (running) {
-            Log.e("BeaconScanner2", "Already scanning")
+            Log.e("AndroidBeaconScanner", "Already scanning")
             return
         }
 
@@ -43,14 +43,14 @@ class AndroidBeaconScanner : BeaconScanner {
             setRegions(listOf())
         }
 
-        Log.e("BeaconScanner2", "Starting scanning")
+        Log.d("AndroidBeaconScanner", "Starting scanning")
 
         with(manager) {
             running = true
             removeAllRangeNotifiers()
             removeAllMonitorNotifiers()
-            addRangeNotifier { beacons, _ ->
-                Log.e("BeaconScanner2", "Beacons found: $beacons")
+            addRangeNotifier { beacons, region ->
+                Log.i("AndroidBeaconScanner", "Beacons found: ${beacons.map { it.id3 }} in region $region")
                 beacons.forEach { beacon ->
                     coroutineScope.launch {
                         beaconFlow.emit(beacon.toBeaconScanResult())
@@ -70,11 +70,11 @@ class AndroidBeaconScanner : BeaconScanner {
 
     override fun setRegions(regions: List<LokateBeacon>) {
         if (running) {
-            Log.d("BeaconScanner2", "Already running!")
+            Log.d("AndroidBeaconScanner", "Already running!")
             return
         }
         if (regions.isEmpty()) {
-            Log.d("BeaconScanner2", "No regions to scan")
+            Log.d("AndroidBeaconScanner", "No regions to scan")
             return
         }
         this.regions.clear()
@@ -84,8 +84,4 @@ class AndroidBeaconScanner : BeaconScanner {
     override fun scanResultFlow(): Flow<BeaconScanResult> {
         return beaconFlow
     }
-}
-
-actual fun getBeaconScanner(): BeaconScanner {
-    return AndroidBeaconScanner()
 }

@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LokateBeacon(
-    val uuid: String,
+    val proximityUUID: String,
     val major: Int?,
     val minor: Int?,
-    val campaign: String?,
-    val minProximity: BeaconProximity,
+    val campaign: String,
+    val radius: Double,
 )

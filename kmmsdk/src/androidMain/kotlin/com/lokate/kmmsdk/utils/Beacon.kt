@@ -1,6 +1,5 @@
 package com.lokate.kmmsdk.utils
 
-import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import org.altbeacon.beacon.Identifier
@@ -10,27 +9,16 @@ import kotlin.math.pow
 fun org.altbeacon.beacon.Beacon.toBeaconScanResult(): BeaconScanResult {
     val beaconUUID = id1.toString()
     val accuracy = calculateAccuracy(txPower, rssi.toDouble())
-    val proximity = calculateProximity(accuracy)
     return BeaconScanResult(
         beaconUUID = beaconUUID,
         rssi = rssi.toDouble(),
+        txPower = txPower,
         accuracy = accuracy,
-        proximity = proximity,
         major = id2.toInt(),
         minor = id3.toInt(),
         seen = lastCycleDetectionTimestamp,
     )
 }
-
-// taken from kmmbeacons
-@Suppress("MagicNumber")
-fun calculateProximity(accuracy: Double): BeaconProximity =
-    when (accuracy) {
-        in 0.0..0.5 -> BeaconProximity.Immediate
-        in 0.5..3.0 -> BeaconProximity.Near
-        in 3.0..Double.MAX_VALUE -> BeaconProximity.Far
-        else -> BeaconProximity.Unknown
-    }
 
 @Suppress("MagicNumber")
 fun calculateAccuracy(
@@ -52,8 +40,8 @@ fun calculateAccuracy(
 
 fun LokateBeacon.toRegion() =
     Region(
-        this.uuid,
-        Identifier.parse(this.uuid),
+        this.proximityUUID,
+        Identifier.parse(this.proximityUUID),
         null,
         null,
         // Identifier.fromInt(this.major ?: 0),

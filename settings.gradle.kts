@@ -13,8 +13,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         google()
+        jcenter()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://estimote.jfrog.io/artifactory/android-proximity-sdk")
     }
 }
 

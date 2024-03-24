@@ -1,10 +1,11 @@
 package com.lokate.kmmsdk.data.datasource.remote.base
 
 import io.ktor.client.HttpClient
+import com.lokate.kmmsdk.BuildKonfig
 
 interface BaseAPI {
     companion object DEFAULTS {
-        const val SERVICE = "172.20.10.4"
+        val SERVICE = BuildKonfig.MOBILE_API_IP_ADDRESS
         const val MOBILE_PATH = "mobile"
     }
 

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EventRequest(
     val customerId: String,
-    val beaconUID: String,
+    val beaconUUID: String,
     val major: String,
     val minor: String,
     val status: EventStatus,

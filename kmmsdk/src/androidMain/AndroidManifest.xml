@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lokate.kmmsdk">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application>
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -13,6 +14,12 @@
                 android:name="com.lokate.kmmsdk.LokateSDKInitializer"
                 android:value="androidx.startup" />
         </provider>
+        <receiver android:name="com.estimote.proximity_sdk.api.TriggerBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.estimote.proximity_trigger" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

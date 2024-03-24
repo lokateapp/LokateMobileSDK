@@ -1,9 +1,9 @@
-package museum
+package com.lokate.demo.gym
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun MuseumApp() {
-    Text("Hello from MuseumApp")
+fun GymApp() {
+    Text("Hello from GymApp")
 }

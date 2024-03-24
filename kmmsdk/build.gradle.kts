@@ -1,8 +1,12 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
+    id("com.codingfeline.buildkonfig") version "0.15.1"
 }
 
 kotlin {
@@ -40,15 +44,19 @@ kotlin {
             implementation(libs.russhwolf.settings.no.arg)
             // lighthouse logging
             implementation(libs.lighthouse.log)
+            // geolocation
+            implementation(libs.play.services.location)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
         androidMain.dependencies {
+            implementation(libs.androidx.startup)
+            implementation(libs.androidx.core.ktx)
             implementation(libs.ktor.client.android)
             implementation(libs.sqldelight.driver.android)
             implementation(libs.altbeacon.android)
-            implementation(libs.androidx.startup)
+            implementation(libs.proximity.sdk)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.ios)
@@ -66,10 +74,6 @@ android {
     }
 }
 
-dependencies {
-    implementation(libs.androidx.core.ktx)
-}
-
 sqldelight {
     databases {
         create("Database") {
@@ -77,4 +81,21 @@ sqldelight {
         }
     }
     linkSqlite = true
+}
+
+buildkonfig {
+    packageName = "com.lokate.kmmsdk"
+
+    // default config is required
+    defaultConfigs {
+        val mobileApiIpAddress: String = gradleLocalProperties(rootDir).getProperty("MOBILE_API_IP_ADDRESS")
+        require(mobileApiIpAddress.isNotEmpty()) {
+            "Place your Mobile API IP address to local.properties as `MOBILE_API_IP_ADDRESS`"
+        }
+        buildConfigField(STRING, "MOBILE_API_IP_ADDRESS", mobileApiIpAddress)
+    }
+}
+
+task("testClasses").doLast {
+    println("This is a dummy testClasses task")
 }

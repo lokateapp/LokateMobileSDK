@@ -14,4 +14,4 @@ interface BeaconScanner {
     fun scanResultFlow(): Flow<BeaconScanResult>
 }
 
-expect fun getBeaconScanner(): BeaconScanner
+expect fun getBeaconScanner(scannerType: LokateSDK.BeaconScannerType): BeaconScanner
