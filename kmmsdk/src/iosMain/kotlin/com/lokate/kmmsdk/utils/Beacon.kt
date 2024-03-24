@@ -1,4 +1,4 @@
-package com.lokate.kmmsdk
+package com.lokate.kmmsdk.utils
 
 import com.lokate.kmmsdk.domain.model.beacon.BeaconProximity
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
@@ -8,13 +8,20 @@ import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLProximity
 import platform.Foundation.NSUUID
+import platform.Foundation.timeIntervalSince1970
 
 fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
     // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
+    if (this.minor == null || this.major == null) {
+        return CLBeaconRegion(
+            uUID = NSUUID(this.uuid),
+            identifier = EMPTY_STRING,
+        )
+    }
     return CLBeaconRegion(
         uUID = NSUUID(this.uuid),
-        major = (this.major ?: 0).toUShort(),
-        minor = (this.minor ?: 0).toUShort(),
+        major = (this.major).toUShort(),
+        minor = (this.minor).toUShort(),
         identifier = EMPTY_STRING,
     )
 }
@@ -33,22 +40,12 @@ fun CLProximity.toLokateProximity(): BeaconProximity {
 fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
     // NSLog("Converting CLBeacon to BeaconScanResult: UUID - ${this.proximityUUID.UUIDString}, RSSI - ${this.rssi}")
     return BeaconScanResult(
-        beaconUUID = this.proximityUUID.UUIDString,
-        rssi = this.rssi.toDouble(),
-        txPower = 0,
-        accuracy = this.accuracy,
-        proximity = this.proximity.toLokateProximity(),
-        major = this.major.intValue,
-        minor = this.minor.intValue,
-    )
-}
-
-fun Beacon.toCLBeaconRegion(): CLBeaconRegion {
-    // NSLog("Converting Beacon to CLBeaconRegion: UUID - ${this.uuid}, Major - ${this.major}, Minor - ${this.minor}")
-    return CLBeaconRegion(
-        uUID = NSUUID(this.uuid),
-        major = this.major.toUShort(),
-        minor = this.minor.toUShort(),
-        identifier = EMPTY_STRING,
+        beaconUUID = proximityUUID.UUIDString,
+        rssi = rssi.toDouble(),
+        accuracy = accuracy,
+        proximity = proximity.toLokateProximity(),
+        major = major.intValue,
+        minor = minor.intValue,
+        seen = (timestamp.timeIntervalSince1970 * 1000L).toLong(),
     )
 }

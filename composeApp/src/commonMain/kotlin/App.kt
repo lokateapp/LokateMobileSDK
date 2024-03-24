@@ -1,9 +1,13 @@
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +27,7 @@ internal val RequiredPermissions =
     arrayOf(
         Permission.LOCATION,
         Permission.COARSE_LOCATION,
-        Permission.BLUETOOTH_SCAN,
+        // Permission.BLUETOOTH_SCAN,
     )
 
 suspend fun checkPermissions(permissionsController: PermissionsController): Boolean {
@@ -53,9 +57,16 @@ fun App() {
     val hasPermissions = remember { mutableStateOf(false) }
 
     BindEffect(permissionsController)
-
+    val text = mutableStateOf("")
     coroutineScope.launch {
         hasPermissions.value = checkPermissions(permissionsController)
+    }
+    LaunchedEffect(hasPermissions) {
+        hasPermissions.value = checkPermissions(permissionsController)
+        text.value = ""
+        RequiredPermissions.forEach {
+            text.value += "${it.name}: ${permissionsController.isPermissionGranted(it)}\n"
+        }
     }
 
     MyApplicationTheme {
@@ -66,7 +77,12 @@ fun App() {
             if (hasPermissions.value) {
                 MarketApp()
             } else {
-                PermissionScreen(permissionsController, coroutineScope, hasPermissions)
+                Column(Modifier.fillMaxHeight()) {
+                    Box(Modifier.fillMaxHeight(0.3f)) {
+                        PermissionScreen(permissionsController, coroutineScope, hasPermissions)
+                    }
+                    Text(text.value)
+                }
             }
         }
     }

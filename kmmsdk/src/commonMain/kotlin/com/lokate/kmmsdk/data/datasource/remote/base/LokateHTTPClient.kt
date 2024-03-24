@@ -1,6 +1,5 @@
 package com.lokate.kmmsdk.data.datasource.remote.base
 
-import com.lokate.kmmsdk.data.datasource.remote.util.extension.HttpExceptions
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation

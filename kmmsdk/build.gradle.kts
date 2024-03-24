@@ -38,8 +38,8 @@ kotlin {
             // shared pref
             implementation(libs.russhwolf.settings)
             implementation(libs.russhwolf.settings.no.arg)
-            // napier
-            implementation(libs.napier)
+            // lighthouse logging
+            implementation(libs.lighthouse.log)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

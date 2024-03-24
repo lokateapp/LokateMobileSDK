@@ -5,9 +5,7 @@ data class BeaconScanResult(
     val major: Int,
     val minor: Int,
     val rssi: Double,
-    val txPower: Int,
-    val accuracy: Double?,
+    val accuracy: Double,
     val proximity: BeaconProximity,
-    val firstSeen: Long = 0,
-    val lastSeen: Long = 0,
+    val seen: Long,
 )
