@@ -46,7 +46,6 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
                 scanResults.forEach {
                     beaconFlow.emit(it)
                 }
-                scanResults.clear()
                 delay(Defaults.DEFAULT_SCAN_PERIOD)
             }
         }
