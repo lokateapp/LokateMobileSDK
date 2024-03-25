@@ -1,7 +1,6 @@
-- connect sdk with mobile be using the multiplatform repositories
 - implement geofencing
+- bugfix location fetching from CoreLocation on iOS
 - lokate requirements wizard
-- test ios on real phone (simulator has bluetooth scanning always denied)
 - remove ios permission handling logic from library (for now), which requires separating scanning logic from permission taking / remove authorization request
 - handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.) / demoApp - LokateSDK can check the authorization status.
 - have a more natural way of initializing the SDK in the example app, and also use an architectural pattern like MVVM
