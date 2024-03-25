@@ -3,8 +3,8 @@ package com.lokate.kmmsdk.data.datasource.local.beacon
 import com.lokate.kmmsdk.Database
 import com.lokate.kmmsdk.data.datasource.DSResult
 import com.lokate.kmmsdk.data.datasource.interfaces.beacon.BeaconDS
-import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
+import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.extension.EMPTY_STRING
 
 class BeaconLocalDS(

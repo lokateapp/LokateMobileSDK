@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
-    id("com.codingfeline.buildkonfig") version "0.15.1"
+    alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
@@ -15,6 +16,17 @@ kotlin {
             kotlinOptions {
                 jvmTarget = "1.8"
             }
+        }
+    }
+
+    cocoapods {
+        summary = "KMM SDK"
+        homepage = "lokate.tech"
+        version = "1.0.0"
+        pod("EstimoteProximitySDK") {
+            version = "1.8.0"
+            moduleName = "EstimoteProximitySDK"
+            extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }
 

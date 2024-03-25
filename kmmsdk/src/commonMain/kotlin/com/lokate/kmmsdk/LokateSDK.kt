@@ -42,6 +42,7 @@ import org.lighthousegames.logging.logging
 class LokateSDK private constructor(scannerType: BeaconScannerType) {
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
+
         data class EstimoteMonitoring(val appId: String, val appToken: String) : BeaconScannerType()
     }
 
@@ -128,12 +129,13 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             return
         }
         lokateScopeNetworkDB.launch {
-            val (latitude, longitude) = try {
-                getCurrentGeolocation()
-            } catch (e: Exception) {
-                log.e { "Failed to get current location: ${e.message}" }
-                Pair(0.0, 0.0)
-            }
+            val (latitude, longitude) =
+                try {
+                    getCurrentGeolocation()
+                } catch (e: Exception) {
+                    log.e { "Failed to get current location: ${e.message}" }
+                    Pair(0.0, 0.0)
+                }
             log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
             when (val result = beaconRepository.fetchBeacons(latitude, longitude)) {
                 is RepositoryResult.Success -> {
@@ -142,7 +144,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 }
                 is RepositoryResult.Error -> {
                     branchBeacons.addAll(DEFAULT_BEACONS)
-                    log.e {"Failed to fetch beacons: ${result.message}"}
+                    log.e { "Failed to fetch beacons: ${result.message}" }
                 }
             }
 
@@ -203,8 +205,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
                     beacon == null -> log.d { "Beacon not in branch: $scan, branch beacons: $branchBeacons" }
                     beacon.radius < scan.accuracy -> {
-                        log.d { "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.radius}, current: ${scan.accuracy}" }
+                        log.d {
+                            "Beacon proximity is not in range: $scan." +
+                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                        }
                     }
 
                     else -> {

@@ -23,6 +23,7 @@ fun LokateBeacon.toCLBeaconRegion(): CLBeaconRegion {
         identifier = EMPTY_STRING,
     )
 }
+
 fun CLBeacon.toBeaconScanResult(): BeaconScanResult {
     // NSLog("Converting CLBeacon to BeaconScanResult: UUID - ${this.proximityUUID.UUIDString}, RSSI - ${this.rssi}")
     return BeaconScanResult(
