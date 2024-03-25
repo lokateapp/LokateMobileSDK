@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.serialization)
     alias(libs.plugins.sqldelight)
-    id("com.codingfeline.buildkonfig") version "0.15.1"
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
