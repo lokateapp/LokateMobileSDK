@@ -22,11 +22,11 @@ import platform.Foundation.NSLog
 
 @OptIn(ExperimentalForeignApi::class)
 class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner {
-
     private val cloudCredentials = EPXCloudCredentials(appId, appToken)
-    private val proximityObserver = EPXProximityObserver(cloudCredentials) { error ->
-        NSLog("Error: ${error}")
-    }
+    private val proximityObserver =
+        EPXProximityObserver(cloudCredentials) { error ->
+            NSLog("Error: $error")
+        }
 
     companion object {
         private val mainJob = SupervisorJob()
@@ -51,6 +51,7 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
             }
         }
     }
+
     override fun startScanning() {
         if (running) {
             NSLog("Already scanning")
@@ -92,27 +93,32 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
         NSLog("Setting regions")
         this.regions.clear()
         regions.forEach {
-            this.regions.add(it.toProximityZone().also {
-                it.onExit = {
-                    it?.tag?.let {
-                        val (uuid, major, minor) = it.split(':')
-                        scanResults.removeAll {
-                            it.beaconUUID == uuid && it.major == major.toInt() && it.minor == minor.toInt()
+            this.regions.add(
+                it.toProximityZone().also {
+                    it.onExit = {
+                        it?.tag?.let {
+                            val (uuid, major, minor) = it.split(':')
+                            scanResults.removeAll {
+                                it.beaconUUID == uuid && it.major == major.toInt() && it.minor == minor.toInt()
+                            }
                         }
                     }
-                }
-                it.onEnter = { zoneContext ->
-                   zoneContext?.tag?.let {
-                        scanResults.add(zoneContext.toBeaconScanResult())
-                   }
-                }
-            })
+                    it.onEnter = { zoneContext ->
+                        zoneContext?.tag?.let {
+                            scanResults.add(zoneContext.toBeaconScanResult())
+                        }
+                    }
+                },
+            )
         }
     }
 
     private fun LokateBeacon.toProximityZone() =
-        EPXProximityZone(proximityUUID.uppercase() + ':' + major + ':' + minor, EPXProximityRange.customRangeWithDesiredMeanTriggerDistance(this.radius)
-            ?: farRange)
+        EPXProximityZone(
+            proximityUUID.uppercase() + ':' + major + ':' + minor,
+            EPXProximityRange.customRangeWithDesiredMeanTriggerDistance(this.radius)
+                ?: farRange,
+        )
 
     private fun EPXProximityZoneContext.toBeaconScanResult(): BeaconScanResult {
         val (uuid, major, minor) = tag.split(':')
@@ -123,9 +129,10 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
             rssi = 0.0,
             txPower = 0,
             accuracy = 0.0,
-            seen = getTimeMillis()
-            )
+            seen = getTimeMillis(),
+        )
     }
+
     override fun scanResultFlow(): Flow<BeaconScanResult> {
         return beaconFlow
     }

@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.kotlinCocoapods) apply false
     alias(libs.plugins.gradleKtlint)
     alias(libs.plugins.detekt)
-
 }
 
 allprojects {

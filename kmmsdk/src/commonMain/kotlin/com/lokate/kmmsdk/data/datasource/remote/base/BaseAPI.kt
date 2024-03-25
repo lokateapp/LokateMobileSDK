@@ -1,7 +1,7 @@
 package com.lokate.kmmsdk.data.datasource.remote.base
 
-import io.ktor.client.HttpClient
 import com.lokate.kmmsdk.BuildKonfig
+import io.ktor.client.HttpClient
 
 interface BaseAPI {
     companion object DEFAULTS {

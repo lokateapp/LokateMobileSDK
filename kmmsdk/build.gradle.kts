@@ -19,11 +19,11 @@ kotlin {
         }
     }
 
-    cocoapods{
+    cocoapods {
         summary = "KMM SDK"
         homepage = "lokate.tech"
         version = "1.0.0"
-        pod("EstimoteProximitySDK"){
+        pod("EstimoteProximitySDK") {
             version = "1.8.0"
             moduleName = "EstimoteProximitySDK"
             extraOpts += listOf("-compiler-option", "-fmodules")
