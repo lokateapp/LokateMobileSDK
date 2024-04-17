@@ -35,6 +35,7 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
 
@@ -97,13 +98,15 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                    it1.major == it2.major &&
-                    it1.minor == it2.minor
+                        it1.major == it2.major &&
+                        it1.minor == it2.minor
             },
         )
 
-    private val beaconScanResultChannel = Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
-    private val eventChannel: Channel<EventRequest> = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+    private val beaconScanResultChannel =
+        Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+    private val eventChannel: Channel<EventRequest> =
+        Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
     private var appTokenSet: Boolean = false
 
@@ -129,24 +132,35 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             return
         }
         lokateScopeNetworkDB.launch {
-            val (latitude, longitude) =
+            val (latitude, longitude) = withTimeoutOrNull(10000) {
                 try {
                     getCurrentGeolocation()
                 } catch (e: Exception) {
                     log.e { "Failed to get current location: ${e.message}" }
                     Pair(0.0, 0.0)
                 }
+            } ?: Pair(0.0, 0.0)
+
             log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
-            when (val result = beaconRepository.fetchBeacons(latitude, longitude)) {
-                is RepositoryResult.Success -> {
-                    branchBeacons.addAll(result.body)
-                    log.d { "Branch beacons: $branchBeacons" }
+
+            val beacons = withTimeoutOrNull(5000) {
+                beaconRepository.fetchBeacons(latitude, longitude).let {
+                    when (it) {
+                        is RepositoryResult.Success -> {
+                            //branchBeacons.addAll(it.body)
+                            log.d { "Branch beacons: $branchBeacons" }
+                            it.body
+                        }
+
+                        is RepositoryResult.Error -> {
+                            //branchBeacons.addAll(DEFAULT_BEACONS)
+                            log.e { "Failed to fetch beacons: ${it.message}" }
+                            DEFAULT_BEACONS
+                        }
+                    }
                 }
-                is RepositoryResult.Error -> {
-                    branchBeacons.addAll(DEFAULT_BEACONS)
-                    log.e { "Failed to fetch beacons: ${result.message}" }
-                }
-            }
+            }?: DEFAULT_BEACONS
+            branchBeacons.addAll(beacons)
 
             afterFetch()
         }
@@ -198,8 +212,8 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major &&
-                            it.minor == scan.minor
+                                it.major == scan.major &&
+                                it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -207,7 +221,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                     beacon.radius < scan.accuracy -> {
                         log.d {
                             "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                                    " setted: ${beacon.radius}, current: ${scan.accuracy}"
                         }
                     }
 
