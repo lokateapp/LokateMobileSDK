@@ -11,7 +11,7 @@ import platform.darwin.NSObject
 object SharedCLLocationManager {
     val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         CLLocationManager().apply {
-            this.delegate = locationManagerDelegate
+            this.delegate = LocationManagerDelegate()
             // Beacon
             this.requestAlwaysAuthorization()
             this.allowsBackgroundLocationUpdates = true
@@ -19,13 +19,11 @@ object SharedCLLocationManager {
             this.desiredAccuracy = kCLLocationAccuracyBest
         }
     }
-    private val locationManagerDelegate: CLLocationManagerDelegateProtocol =
-        LocationManagerDelegate()
 
     // BeaconScanner
     // allow injecting a listener to be called when the location manager authorization status changes
     fun setAuthorizationStatusListener(listener: (Int) -> Unit) {
-        (locationManagerDelegate as LocationManagerDelegate).apply {
+        (manager.delegate as LocationManagerDelegate).apply {
             authorizationListener = if (authorizationListener == null) {
                 listener
             } else{
@@ -38,7 +36,7 @@ object SharedCLLocationManager {
 
     // allow injecting a listener to be called when the location manager authorization status changes
     fun setBeaconRangeListener(listener: (List<*>) -> Unit) {
-        (locationManagerDelegate as LocationManagerDelegate).apply {
+        (manager.delegate as LocationManagerDelegate).apply {
             beaconRangeListener = if (beaconRangeListener == null) {
                 listener
             } else{
@@ -51,13 +49,13 @@ object SharedCLLocationManager {
 
     // allow injecting a listener to be called when the location manager authorization status changes
     fun addErrorListener(listener: (NSError) -> Unit) {
-        (locationManagerDelegate as LocationManagerDelegate).errorListenerList += listener
+        (manager.delegate as LocationManagerDelegate).errorListenerList += listener
     }
 
     //Geolocation
     // allow injecting a listener to be called when location updates are received
     fun setLocationUpdateListener(listener: (List<*>) -> Unit) {
-        (locationManagerDelegate as LocationManagerDelegate).apply {
+        (manager.delegate as LocationManagerDelegate).apply {
             locationUpdateListener = if (locationUpdateListener == null) {
                 listener
             } else {
@@ -69,14 +67,14 @@ object SharedCLLocationManager {
     }
 
     fun removeLocationUpdateListener() {
-        (locationManagerDelegate as LocationManagerDelegate).apply {
+        (manager.delegate as LocationManagerDelegate).apply {
             locationUpdateListener = null
             manager.stopUpdatingLocation()
         }
     }
 
     fun removeErrorListener(listener: (NSError) -> Unit) {
-        (locationManagerDelegate as LocationManagerDelegate).errorListenerList -= listener
+        (manager.delegate as LocationManagerDelegate).errorListenerList -= listener
     }
 
     fun requestStartUpdatingLocation() {
