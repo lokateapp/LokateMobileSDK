@@ -52,9 +52,7 @@ class IOSBeaconScanner : BeaconScanner {
             SharedCLLocationManager.setBeaconRangeListener(::beaconRegionListener)
         }
 
-        private fun authorizationListener(
-            didChangeAuthorizationStatus: Int,
-        ) {
+        private fun authorizationListener(didChangeAuthorizationStatus: Int) {
             NSLog("locationManager didChangeAuthorizationStatus: Status - $didChangeAuthorizationStatus")
             when (didChangeAuthorizationStatus) {
                 NOT_DETERMINED -> {
@@ -78,9 +76,7 @@ class IOSBeaconScanner : BeaconScanner {
             }
         }
 
-        private fun beaconRegionListener(
-            didRangeBeacons: List<*>,
-        ) {
+        private fun beaconRegionListener(didRangeBeacons: List<*>) {
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
                     coroutineScope.launch {

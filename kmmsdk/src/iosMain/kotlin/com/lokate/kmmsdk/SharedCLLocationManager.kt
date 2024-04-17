@@ -24,26 +24,30 @@ object SharedCLLocationManager {
     // allow injecting a listener to be called when the location manager authorization status changes
     fun setAuthorizationStatusListener(listener: (Int) -> Unit) {
         (manager.delegate as LocationManagerDelegate).apply {
-            authorizationListener = if (authorizationListener == null) {
-                listener
-            } else{
-                NSLog("Authorization listener already set, will allow re-setting but possible memory leak")
-                listener
-                //throw IllegalStateException("Authorization listener already set")
-            }
+            authorizationListener =
+                if (authorizationListener == null) {
+                    listener
+                } else
+                    {
+                        NSLog("Authorization listener already set, will allow re-setting but possible memory leak")
+                        listener
+                        // throw IllegalStateException("Authorization listener already set")
+                    }
         }
     }
 
     // allow injecting a listener to be called when the location manager authorization status changes
     fun setBeaconRangeListener(listener: (List<*>) -> Unit) {
         (manager.delegate as LocationManagerDelegate).apply {
-            beaconRangeListener = if (beaconRangeListener == null) {
-                listener
-            } else{
-                NSLog("Beacon range listener already set, will allow re-setting but possible memory leak")
-                listener
-                //throw IllegalStateException("Beacon range listener already set")
-            }
+            beaconRangeListener =
+                if (beaconRangeListener == null) {
+                    listener
+                } else
+                    {
+                        NSLog("Beacon range listener already set, will allow re-setting but possible memory leak")
+                        listener
+                        // throw IllegalStateException("Beacon range listener already set")
+                    }
         }
     }
 
@@ -52,17 +56,18 @@ object SharedCLLocationManager {
         (manager.delegate as LocationManagerDelegate).errorListenerList += listener
     }
 
-    //Geolocation
+    // Geolocation
     // allow injecting a listener to be called when location updates are received
     fun setLocationUpdateListener(listener: (List<*>) -> Unit) {
         (manager.delegate as LocationManagerDelegate).apply {
-            locationUpdateListener = if (locationUpdateListener == null) {
-                listener
-            } else {
-                NSLog("Location update listener already set, will allow re-setting but possible memory leak")
-                listener
-                //throw IllegalStateException("Location update listener already set")
-            }
+            locationUpdateListener =
+                if (locationUpdateListener == null) {
+                    listener
+                } else {
+                    NSLog("Location update listener already set, will allow re-setting but possible memory leak")
+                    listener
+                    // throw IllegalStateException("Location update listener already set")
+                }
         }
     }
 
@@ -87,7 +92,6 @@ object SharedCLLocationManager {
 }
 
 class LocationManagerDelegate : NSObject(), CLLocationManagerDelegateProtocol {
-
     var errorListenerList: List<(NSError) -> Unit> = emptyList()
     var authorizationListener: ((Int) -> Unit)? = null
     var beaconRangeListener: ((List<*>) -> Unit)? = null

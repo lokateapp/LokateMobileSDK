@@ -5,13 +5,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreLocation.CLLocation
-import platform.CoreLocation.CLLocationManager
-import platform.CoreLocation.CLLocationManagerDelegateProtocol
-import platform.CoreLocation.kCLLocationAccuracyBest
 import platform.Foundation.NSError
 import platform.Foundation.NSLog
-import platform.Foundation.timeIntervalSinceNow
-import platform.darwin.NSObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -60,5 +55,4 @@ actual suspend fun getCurrentGeolocation(): Pair<Double, Double> =
         SharedCLLocationManager.requestStartUpdatingLocation()
         SharedCLLocationManager.addErrorListener(::errorListener)
         SharedCLLocationManager.setLocationUpdateListener(::locationUpdate)
-
     }
