@@ -1,5 +1,6 @@
 package com.lokate.kmmsdk
 
+import com.lokate.kmmsdk.SharedCLLocationManager.manager
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.AUTHORIZED_ALWAYS
@@ -18,28 +19,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
-import platform.CoreLocation.CLLocationManager
-import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.Foundation.NSLog
-import platform.darwin.NSObject
 
 class IOSBeaconScanner : BeaconScanner {
-    internal class IOSBeaconScannerHelper : NSObject(), CLLocationManagerDelegateProtocol {
-        private val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-            CLLocationManager()
-        }
+    internal class IOSBeaconScannerHelper {
         private val mainJob = SupervisorJob()
         private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
 
         private var regions: List<CLBeaconRegion> = listOf()
         private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
         private var running: Boolean = false
-
-        init {
-            manager.delegate = this
-            manager.requestAlwaysAuthorization()
-            manager.allowsBackgroundLocationUpdates = true
-        }
 
         fun startScanning() {
             if (running) {
@@ -58,16 +47,12 @@ class IOSBeaconScanner : BeaconScanner {
             running = true
         }
 
-        override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
-            NSLog("locationManagerDidChangeAuthorization called")
-            NSLog("locationManagerDidChangeAuthorization ${manager.authorizationStatus}")
-            startScanning()
+        init {
+            SharedCLLocationManager.setAuthorizationStatusListener(::authorizationListener)
+            SharedCLLocationManager.setBeaconRangeListener(::beaconRegionListener)
         }
 
-        override fun locationManager(
-            manager: CLLocationManager,
-            didChangeAuthorizationStatus: Int,
-        ) {
+        private fun authorizationListener(didChangeAuthorizationStatus: Int) {
             NSLog("locationManager didChangeAuthorizationStatus: Status - $didChangeAuthorizationStatus")
             when (didChangeAuthorizationStatus) {
                 NOT_DETERMINED -> {
@@ -91,11 +76,7 @@ class IOSBeaconScanner : BeaconScanner {
             }
         }
 
-        override fun locationManager(
-            manager: CLLocationManager,
-            didRangeBeacons: List<*>,
-            inRegion: CLBeaconRegion,
-        ) {
+        private fun beaconRegionListener(didRangeBeacons: List<*>) {
             didRangeBeacons.forEach {
                 with((it as CLBeacon).toBeaconScanResult()) {
                     coroutineScope.launch {

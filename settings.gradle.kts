@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-include(":kmmsdk")
+include(":lokateSDK")
 include(":composeApp")

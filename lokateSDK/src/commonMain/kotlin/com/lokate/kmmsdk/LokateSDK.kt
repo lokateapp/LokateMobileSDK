@@ -93,7 +93,7 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
     private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
 
-    private val LokateBeacons =
+    private val lokateBeacons =
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
@@ -102,8 +102,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
             },
         )
 
-    private val beaconScanResultChannel = Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
-    private val eventChannel: Channel<EventRequest> = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+    private val beaconScanResultChannel =
+        Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+    private val eventChannel: Channel<EventRequest> =
+        Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
     private var appTokenSet: Boolean = false
 
@@ -130,23 +132,36 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         }
         lokateScopeNetworkDB.launch {
             val (latitude, longitude) =
-                try {
-                    getCurrentGeolocation()
-                } catch (e: Exception) {
-                    log.e { "Failed to get current location: ${e.message}" }
-                    Pair(0.0, 0.0)
-                }
+                withTimeoutOrNull(10000) {
+                    try {
+                        getCurrentGeolocation()
+                    } catch (e: Exception) {
+                        log.e { "Failed to get current location: ${e.message}" }
+                        Pair(0.0, 0.0)
+                    }
+                } ?: Pair(0.0, 0.0)
+
             log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
-            when (val result = beaconRepository.fetchBeacons(latitude, longitude)) {
-                is RepositoryResult.Success -> {
-                    branchBeacons.addAll(result.body)
-                    log.d { "Branch beacons: $branchBeacons" }
-                }
-                is RepositoryResult.Error -> {
-                    branchBeacons.addAll(DEFAULT_BEACONS)
-                    log.e { "Failed to fetch beacons: ${result.message}" }
-                }
-            }
+
+            val beacons =
+                withTimeoutOrNull(5000) {
+                    beaconRepository.fetchBeacons(latitude, longitude).let {
+                        when (it) {
+                            is RepositoryResult.Success -> {
+                                // branchBeacons.addAll(it.body)
+                                log.d { "Branch beacons: $branchBeacons" }
+                                it.body
+                            }
+
+                            is RepositoryResult.Error -> {
+                                // branchBeacons.addAll(DEFAULT_BEACONS)
+                                log.e { "Failed to fetch beacons: ${it.message}" }
+                                DEFAULT_BEACONS
+                            }
+                        }
+                    }
+                } ?: DEFAULT_BEACONS
+            branchBeacons.addAll(beacons)
 
             afterFetch()
         }
@@ -224,11 +239,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     ) {
         launch {
             for (scan in receiveChannel) {
-                when (LokateBeacons.contains(scan)) {
+                when (lokateBeacons.contains(scan)) {
                     true -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.STAY))
                     false -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.ENTER))
                 }
-                LokateBeacons.addOrUpdate(scan)
+                lokateBeacons.addOrUpdate(scan)
             }
         }
     }
@@ -267,11 +282,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                 try {
                     val currentTimeMillis = getTimeMillis()
                     val goneBeacons =
-                        LokateBeacons.filter {
+                        lokateBeacons.filter {
                             it.seen < currentTimeMillis - Defaults.DEFAULT_TIMEOUT_BEFORE_GONE
                         }
                     goneBeacons.forEach { beacon ->
-                        LokateBeacons.remove(beacon)
+                        lokateBeacons.remove(beacon)
                         eventChannel.send(beacon.toEventRequest(customerId, EventStatus.EXIT))
                     }
                 } catch (e: Exception) {

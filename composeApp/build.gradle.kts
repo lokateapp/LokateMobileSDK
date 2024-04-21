@@ -37,7 +37,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.permissions.compose)
-            implementation(project(mapOf("path" to ":kmmsdk")))
+            implementation(projects.lokateSDK)
         }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)

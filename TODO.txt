@@ -1,9 +1,7 @@
-- bugfix location fetching from CoreLocation on iOS
 - lokate requirements wizard
 - remove ios permission handling logic from library (for now), which requires separating scanning logic from permission taking / remove authorization request
 - handle permission denied cases accordingly (redirect user to settings page, change ui to inform user about which permission needed to be granted, etc.) / demoApp - LokateSDK can check the authorization status.
 - have a more natural way of initializing the SDK in the example app, and also use an architectural pattern like MVVM
 - seperate demo applications (composeApp) and library (kmmsdk) into separate repos
-- rename kmmsdk -> lokatesdk
 - publish kmmsdk onto remote maven repository
 - implement deterministic test suite for kmmsdk
