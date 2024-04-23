@@ -30,7 +30,7 @@ fun MarketApp() {
 
 @Composable
 fun GreetingView(lokateSDK: LokateSDK) {
-    val scanResultState by lokateSDK.getScanResultFlow().collectAsState(initial = "No scan result")
+    val scanResultState by lokateSDK.getClosestBeaconFlow().collectAsState(initial = "No scan result")
 
     Column(
         modifier =

@@ -34,6 +34,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
@@ -107,13 +108,12 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     private val eventChannel: Channel<EventRequest> =
         Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
+    private val closestBeaconFlow: MutableSharedFlow<LokateBeacon?> = MutableSharedFlow()
+
     private var appTokenSet: Boolean = false
 
-    /*
-     * it is being used but I believe we should not expose as it comes from the scanner
-     */
-    fun getScanResultFlow(): Flow<BeaconScanResult> {
-        return beaconScanner.scanResultFlow()
+    fun getClosestBeaconFlow(): Flow<LokateBeacon?> {
+        return closestBeaconFlow
     }
 
     fun setAppToken(appToken: String) {
@@ -244,12 +244,25 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         outputChannel: Channel<EventRequest>,
     ) {
         launch {
+            var closestBeacon: LokateBeacon? = null
+
             for (scan in receiveChannel) {
                 when (lokateBeacons.contains(scan)) {
                     true -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.STAY))
                     false -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.ENTER))
                 }
                 lokateBeacons.addOrUpdate(scan)
+
+                // emit closest beacon only if there is a change in the closest beacon (prevent unnecessary emits)
+                val closestScan = lokateBeacons.minBy { it.accuracy }
+                if (closestBeacon == null || closestBeacon.proximityUUID.lowercase() != closestScan.beaconUUID.lowercase() || closestBeacon.major != closestScan.major || closestBeacon.minor != closestScan.minor) {
+                    closestBeacon =
+                        branchBeacons.firstOrNull {
+                            closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() && closestScan.major == it.major && closestScan.minor == it.minor
+                        }
+                    closestBeaconFlow.emit(closestBeacon)
+                    log.d { "closest beacon changed: $closestBeacon" }
+                }
             }
         }
     }
