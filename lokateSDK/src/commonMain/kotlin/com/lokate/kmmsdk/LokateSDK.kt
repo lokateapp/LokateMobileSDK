@@ -141,27 +141,33 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                     }
                 } ?: Pair(0.0, 0.0)
 
-            log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
+            log.d { "latitude: $latitude, longitude: $longitude" }
 
             val beacons =
                 withTimeoutOrNull(5000) {
                     beaconRepository.fetchBeacons(latitude, longitude).let {
                         when (it) {
                             is RepositoryResult.Success -> {
-                                // branchBeacons.addAll(it.body)
-                                log.d { "Branch beacons: $branchBeacons" }
+                                log.d { "Successfully fetched beacons" }
                                 it.body
                             }
 
                             is RepositoryResult.Error -> {
-                                // branchBeacons.addAll(DEFAULT_BEACONS)
-                                log.e { "Failed to fetch beacons: ${it.message}" }
+                                log.e { "Failed to fetch beacons: ${it.message}, ${it.errorType}" }
+                                log.d { "Default beacons will be scanned" }
                                 DEFAULT_BEACONS
                             }
                         }
                     }
                 } ?: DEFAULT_BEACONS
+
             branchBeacons.addAll(beacons)
+
+            log.d { "Branch beacons:" }.also {
+                for (beacon in branchBeacons) {
+                    log.d { "$beacon" }
+                }
+            }
 
             afterFetch()
         }
@@ -264,11 +270,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
 
     private suspend fun sendEvent(eventPipeline: ReceiveChannel<EventRequest>) {
         for (event in eventPipeline) {
-            log.d { "Send event (${event.status}): ${event.beaconUUID}" }
+            log.d { "Sending event (${event.status}): ${event.beaconUUID}, ${event.major}, ${event.minor}" }
             lokateScopeNetworkDB.launch {
                 withTimeoutOrNull(EVENT_REQUEST_TIMEOUT) {
                     return@withTimeoutOrNull beaconRepository.sendBeaconEvent(event).also {
-                        log.d { "event sent: (${event.status}): ${event.beaconUUID}" }
+                        log.d { "event sent: (${event.status}): ${event.beaconUUID}, ${event.major}, ${event.minor}" }
                     }
                 } ?: log.e { "Timeout while sending event" }
             }

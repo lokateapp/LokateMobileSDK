@@ -24,18 +24,26 @@ class BeaconRepositoryImpl(
             return RepositoryResult.Error("Couldn't fetch!", "No auth token!")
         }
 
+        if (latitude == 0.0 && longitude == 0.0) {
+            return RepositoryResult.Error("Couldn't fetch!", "Current geolocation is unknown!")
+        }
+
+        logging("LokateSDK").d { "Fetching beacons for branch close to $latitude, $longitude" }
+
         val remoteBeacons = remoteDS.fetchBeacons(latitude, longitude).toRepositoryResult()
         if (remoteBeacons is RepositoryResult.Success) {
             localDS.updateOrInsertBeacon(remoteBeacons.body)
             return remoteBeacons.also {
-                logging("BeaconRepository").e { "Fetched from remote" }
+                logging("LokateSDK").d { "Fetched from remote" }
             }
+        } else {
+            logging("LokateSDK").e { "Fetching from remote failed: $remoteBeacons" }
         }
 
         val localBeacons = localDS.fetchBeacons(latitude, longitude).toRepositoryResult()
         return if (localBeacons is RepositoryResult.Success && localBeacons.body.isNotEmpty()) {
             localBeacons.also {
-                logging("BeaconRepository").e { "Fetched from DB" }
+                logging("LokateSDK").d { "Fetched from DB" }
             }
         } else {
             RepositoryResult.Error("Couldn't fetch!", "No beacons!")

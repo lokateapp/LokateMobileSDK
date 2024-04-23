@@ -26,7 +26,7 @@ class BeaconLocalDS(
                             major = it.major.toInt(),
                             minor = it.minor.toInt(),
                             radius = it.radius,
-                            campaign = EMPTY_STRING,
+                            campaignName = EMPTY_STRING,
                         )
                     },
                 )
