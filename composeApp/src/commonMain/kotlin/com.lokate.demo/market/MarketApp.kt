@@ -18,6 +18,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,13 +94,20 @@ fun GreetingView(lokateSDK: LokateSDK) {
                 textAlign = TextAlign.Center,
             )
         } else { // There is a nearby campaign
-            CampaignExperience(campaignState)
+            CampaignExperience(campaignState, lokateSDK.getCustomerId())
         }
     }
 }
 
 @Composable
-fun CampaignExperience(campaignName: String) {
+fun CampaignExperience(campaignName: String, customerId: String) {
+    var affinedCampaigns by remember { mutableStateOf(emptyList<String>()) }
+
+    LaunchedEffect(campaignName) {
+        val campaigns = getAffinedCampaigns(customerId)
+        affinedCampaigns = campaigns
+    }
+
     val notification = notificationPool[campaignName]?.random() ?: "No notification available"
 
     Column(
@@ -119,7 +127,11 @@ fun CampaignExperience(campaignName: String) {
                         .padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Notification(notification)
+                if (campaignName in affinedCampaigns) {
+                    Notification(notification)
+                } else {
+                    Notification("No relevant campaign in the current location")
+                }
             }
         }
 

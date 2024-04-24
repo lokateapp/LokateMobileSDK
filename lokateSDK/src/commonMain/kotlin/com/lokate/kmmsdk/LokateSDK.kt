@@ -90,6 +90,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         }
     }
 
+    fun getCustomerId(): String {
+        return customerId
+    }
+
     private val lokateJob = SupervisorJob()
     private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
     private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
