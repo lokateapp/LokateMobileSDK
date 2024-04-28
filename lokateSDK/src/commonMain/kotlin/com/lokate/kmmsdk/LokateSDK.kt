@@ -34,6 +34,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
@@ -89,6 +90,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         }
     }
 
+    fun getCustomerId(): String {
+        return customerId
+    }
+
     private val lokateJob = SupervisorJob()
     private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
     private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
@@ -107,13 +112,12 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     private val eventChannel: Channel<EventRequest> =
         Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
+    private val closestBeaconFlow: MutableSharedFlow<LokateBeacon?> = MutableSharedFlow()
+
     private var appTokenSet: Boolean = false
 
-    /*
-     * it is being used but I believe we should not expose as it comes from the scanner
-     */
-    fun getScanResultFlow(): Flow<BeaconScanResult> {
-        return beaconScanner.scanResultFlow()
+    fun getClosestBeaconFlow(): Flow<LokateBeacon?> {
+        return closestBeaconFlow
     }
 
     fun setAppToken(appToken: String) {
@@ -141,27 +145,33 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
                     }
                 } ?: Pair(0.0, 0.0)
 
-            log.d { "Fetching beacons for branch close to: $latitude, $longitude" }
+            log.d { "latitude: $latitude, longitude: $longitude" }
 
             val beacons =
                 withTimeoutOrNull(5000) {
                     beaconRepository.fetchBeacons(latitude, longitude).let {
                         when (it) {
                             is RepositoryResult.Success -> {
-                                // branchBeacons.addAll(it.body)
-                                log.d { "Branch beacons: $branchBeacons" }
+                                log.d { "Successfully fetched beacons" }
                                 it.body
                             }
 
                             is RepositoryResult.Error -> {
-                                // branchBeacons.addAll(DEFAULT_BEACONS)
-                                log.e { "Failed to fetch beacons: ${it.message}" }
+                                log.e { "Failed to fetch beacons: ${it.message}, ${it.errorType}" }
+                                log.d { "Default beacons will be scanned" }
                                 DEFAULT_BEACONS
                             }
                         }
                     }
                 } ?: DEFAULT_BEACONS
+
             branchBeacons.addAll(beacons)
+
+            log.d { "Branch beacons:" }.also {
+                for (beacon in branchBeacons) {
+                    log.d { "$beacon" }
+                }
+            }
 
             afterFetch()
         }
@@ -238,12 +248,25 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
         outputChannel: Channel<EventRequest>,
     ) {
         launch {
+            var closestBeacon: LokateBeacon? = null
+
             for (scan in receiveChannel) {
                 when (lokateBeacons.contains(scan)) {
                     true -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.STAY))
                     false -> outputChannel.send(scan.toEventRequest(customerId, EventStatus.ENTER))
                 }
                 lokateBeacons.addOrUpdate(scan)
+
+                // emit closest beacon only if there is a change in the closest beacon (prevent unnecessary emits)
+                val closestScan = lokateBeacons.minBy { it.accuracy }
+                if (closestBeacon == null || closestBeacon.proximityUUID.lowercase() != closestScan.beaconUUID.lowercase() || closestBeacon.major != closestScan.major || closestBeacon.minor != closestScan.minor) {
+                    closestBeacon =
+                        branchBeacons.firstOrNull {
+                            closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() && closestScan.major == it.major && closestScan.minor == it.minor
+                        }
+                    closestBeaconFlow.emit(closestBeacon)
+                    log.d { "closest beacon changed: $closestBeacon" }
+                }
             }
         }
     }
@@ -264,11 +287,11 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
 
     private suspend fun sendEvent(eventPipeline: ReceiveChannel<EventRequest>) {
         for (event in eventPipeline) {
-            log.d { "Send event (${event.status}): ${event.beaconUUID}" }
+            log.d { "Sending event (${event.status}): ${event.beaconUUID}, ${event.major}, ${event.minor}" }
             lokateScopeNetworkDB.launch {
                 withTimeoutOrNull(EVENT_REQUEST_TIMEOUT) {
                     return@withTimeoutOrNull beaconRepository.sendBeaconEvent(event).also {
-                        log.d { "event sent: (${event.status}): ${event.beaconUUID}" }
+                        log.d { "event sent: (${event.status}): ${event.beaconUUID}, ${event.major}, ${event.minor}" }
                     }
                 } ?: log.e { "Timeout while sending event" }
             }

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.serialization)
     id("com.codingfeline.buildkonfig") version "0.15.1"
 }
 
@@ -30,6 +31,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.serialization)
+            implementation(libs.lighthouse.log)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -40,9 +45,13 @@ kotlin {
             implementation(projects.lokateSDK)
         }
         androidMain.dependencies {
+            implementation(libs.ktor.client.android)
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.ios)
         }
     }
 }
@@ -101,5 +110,11 @@ buildkonfig {
             "Place your Estimote app token to local.properties as `ESTIMOTE_CLOUD_APP_TOKEN`"
         }
         buildConfigField(STRING, "ESTIMOTE_CLOUD_APP_TOKEN", appToken)
+
+        val mobileApiIpAddress: String = gradleLocalProperties(rootDir).getProperty("MOBILE_API_IP_ADDRESS")
+        require(mobileApiIpAddress.isNotEmpty()) {
+            "Place your Mobile API IP address to local.properties as `MOBILE_API_IP_ADDRESS`"
+        }
+        buildConfigField(STRING, "MOBILE_API_IP_ADDRESS", mobileApiIpAddress)
     }
 }

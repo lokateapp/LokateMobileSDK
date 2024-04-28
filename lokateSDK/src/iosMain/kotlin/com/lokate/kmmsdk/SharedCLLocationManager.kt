@@ -27,12 +27,11 @@ object SharedCLLocationManager {
             authorizationListener =
                 if (authorizationListener == null) {
                     listener
-                } else
-                    {
-                        NSLog("Authorization listener already set, will allow re-setting but possible memory leak")
-                        listener
-                        // throw IllegalStateException("Authorization listener already set")
-                    }
+                } else {
+                    NSLog("Authorization listener already set, will allow re-setting but possible memory leak")
+                    listener
+                    // throw IllegalStateException("Authorization listener already set")
+                }
         }
     }
 
@@ -42,12 +41,11 @@ object SharedCLLocationManager {
             beaconRangeListener =
                 if (beaconRangeListener == null) {
                     listener
-                } else
-                    {
-                        NSLog("Beacon range listener already set, will allow re-setting but possible memory leak")
-                        listener
-                        // throw IllegalStateException("Beacon range listener already set")
-                    }
+                } else {
+                    NSLog("Beacon range listener already set, will allow re-setting but possible memory leak")
+                    listener
+                    // throw IllegalStateException("Beacon range listener already set")
+                }
         }
     }
 
