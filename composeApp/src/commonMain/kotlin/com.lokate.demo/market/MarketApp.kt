@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun MarketApp() {
     // val lokateSDK = LokateSDK.createForEstimoteMonitoring(BuildKonfig.ESTIMOTE_CLOUD_APP_ID, BuildKonfig.ESTIMOTE_CLOUD_APP_TOKEN)
-    val lokateSDK = LokateSDK.createForIBeacon()
+    val lokateSDK = LokateSDK.getInstance(LokateSDK.BeaconScannerType.IBeacon)
 
     GreetingView(
         lokateSDK,

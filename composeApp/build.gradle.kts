@@ -42,6 +42,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.permissions.compose)
+            implementation(libs.koin.core)
             implementation(projects.lokateSDK)
         }
         androidMain.dependencies {

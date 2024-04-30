@@ -13,6 +13,7 @@ import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconAPI
 import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
 import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
 import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
+import com.lokate.kmmsdk.di.initKoin
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
@@ -37,10 +38,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.component.KoinComponent
 import org.lighthousegames.logging.logging
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LokateSDK private constructor(scannerType: BeaconScannerType) {
+class LokateSDK private constructor(scannerType: BeaconScannerType): KoinComponent {
+
+    private val authenticationRepository: AuthenticationRepository by inject()
+    private val beaconRepository: BeaconRepository by inject()
+    private val beaconScanner = getBeaconScanner(scannerType)
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
 
@@ -49,6 +57,13 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
 
     companion object {
         val log = logging("LokateSDK")
+        private var _instance: LokateSDK? = null
+        fun getInstance(scannerType: BeaconScannerType): LokateSDK {
+            return _instance ?: initKoin().let {
+                _instance = LokateSDK(scannerType)
+                _instance!!
+            }
+        }
 
         fun createForIBeacon(): LokateSDK {
             return LokateSDK(BeaconScannerType.IBeacon)
@@ -63,20 +78,6 @@ class LokateSDK private constructor(scannerType: BeaconScannerType) {
     }
 
     private var isActive = false
-
-    // move to DI
-    private val beaconScanner = getBeaconScanner(scannerType)
-    private val authenticationRepository: AuthenticationRepository =
-        AuthenticationRepositoryImpl(
-            AuthenticationRemoteDS(AuthenticationAPI()),
-            AuthenticationLocalDS(Settings()),
-        )
-    private val beaconRepository: BeaconRepository =
-        BeaconRepositoryImpl(
-            authenticationRepository = authenticationRepository,
-            remoteDS = BeaconRemoteDS(BeaconAPI()),
-            localDS = BeaconLocalDS(getDatabase()),
-        )
 
     private val branchBeacons = mutableListOf<LokateBeacon>()
 
