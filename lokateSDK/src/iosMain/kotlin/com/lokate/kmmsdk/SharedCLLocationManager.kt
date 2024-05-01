@@ -1,17 +1,10 @@
 package com.lokate.kmmsdk
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.internal.SynchronizedObject
-import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
-import platform.CoreLocation.kCLLocationAccuracyBest
 import platform.Foundation.NSError
 import platform.Foundation.NSLog
-import platform.Foundation.addObserver
 import platform.darwin.NSObject
 
 class SharedCLLocationManager(val manager: CLLocationManager) {
@@ -81,7 +74,9 @@ class SharedCLLocationManager(val manager: CLLocationManager) {
     fun requestStopUpdatingLocation() {
         manager.stopUpdatingLocation()
     }
+
     var delegate: LocationManagerDelegate? = null
+
     fun storeDelegate(delegate: LocationManagerDelegate) {
         this.delegate = delegate
     }

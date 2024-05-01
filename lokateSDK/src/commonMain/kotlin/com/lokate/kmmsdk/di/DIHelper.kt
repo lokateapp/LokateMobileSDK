@@ -16,43 +16,46 @@ import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import org.koin.dsl.module
 
-val dbModule = module {
-    single<Database>{
-        getDatabase()
+val dbModule =
+    module {
+        single<Database> {
+            getDatabase()
+        }
     }
-}
 
-val dataSourceModule = module {
-    single<AuthenticationLocalDS> {
-        AuthenticationLocalDS(authenticationSettings = Settings.authenticationSettings)
+val dataSourceModule =
+    module {
+        single<AuthenticationLocalDS> {
+            AuthenticationLocalDS(authenticationSettings = Settings.authenticationSettings)
+        }
+        single<BeaconLocalDS> {
+            BeaconLocalDS(get())
+        }
+        single<AuthenticationLocalDS> {
+            AuthenticationLocalDS(authenticationSettings = Settings.authenticationSettings)
+        }
+        single<AuthenticationAPI> {
+            AuthenticationAPI()
+        }
+        single<AuthenticationRemoteDS> {
+            AuthenticationRemoteDS(get())
+        }
+        single<BeaconAPI> {
+            BeaconAPI()
+        }
+        single<BeaconRemoteDS> {
+            BeaconRemoteDS(get())
+        }
     }
-    single <BeaconLocalDS> {
-        BeaconLocalDS(get())
-    }
-    single <AuthenticationLocalDS> {
-        AuthenticationLocalDS(authenticationSettings = Settings.authenticationSettings)
-    }
-    single <AuthenticationAPI>{
-        AuthenticationAPI()
-    }
-    single<AuthenticationRemoteDS> {
-        AuthenticationRemoteDS(get())
-    }
-    single<BeaconAPI> {
-        BeaconAPI()
-    }
-    single<BeaconRemoteDS> {
-        BeaconRemoteDS(get())
-    }
-}
 
-val repositoryModule = module {
-    single <AuthenticationRepository>{
-        AuthenticationRepositoryImpl(get(), get())
+val repositoryModule =
+    module {
+        single<AuthenticationRepository> {
+            AuthenticationRepositoryImpl(get(), get())
+        }
+        single<BeaconRepository> {
+            BeaconRepositoryImpl(get(), get(), get())
+        }
     }
-    single<BeaconRepository> {
-        BeaconRepositoryImpl(get(), get(), get())
-    }
-}
 
 expect fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType)

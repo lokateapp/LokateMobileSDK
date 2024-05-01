@@ -21,7 +21,6 @@ import org.koin.core.component.get
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.Foundation.NSLog
-import org.koin.core.component.inject
 
 class IOSBeaconScanner : BeaconScanner, KoinComponent {
     private val sharedCLLocationManager: SharedCLLocationManager = get()

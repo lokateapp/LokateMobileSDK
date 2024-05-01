@@ -34,10 +34,10 @@ import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LokateSDK : KoinComponent {
-
     private val authenticationRepository: AuthenticationRepository = get()
     private val beaconRepository: BeaconRepository = get()
     private val beaconScanner: BeaconScanner = get()
+
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
 
@@ -47,6 +47,7 @@ class LokateSDK : KoinComponent {
     companion object {
         val log = logging("LokateSDK")
         private var _instance: LokateSDK? = null
+
         fun getInstance(scannerType: BeaconScannerType): LokateSDK {
             return _instance ?: initKoin(scannerType).let {
                 _instance = LokateSDK()
@@ -238,10 +239,16 @@ class LokateSDK : KoinComponent {
 
                 // emit closest beacon only if there is a change in the closest beacon (prevent unnecessary emits)
                 val closestScan = lokateBeacons.minBy { it.accuracy }
-                if (closestBeacon == null || closestBeacon.proximityUUID.lowercase() != closestScan.beaconUUID.lowercase() || closestBeacon.major != closestScan.major || closestBeacon.minor != closestScan.minor) {
+                if (closestBeacon == null ||
+                    closestBeacon.proximityUUID.lowercase() != closestScan.beaconUUID.lowercase() ||
+                    closestBeacon.major != closestScan.major ||
+                    closestBeacon.minor != closestScan.minor
+                ) {
                     closestBeacon =
                         branchBeacons.firstOrNull {
-                            closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() && closestScan.major == it.major && closestScan.minor == it.minor
+                            closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() &&
+                                closestScan.major == it.major &&
+                                closestScan.minor == it.minor
                         }
                     closestBeaconFlow.emit(closestBeacon)
                     log.d { "closest beacon changed: $closestBeacon" }

@@ -100,7 +100,10 @@ fun GreetingView(lokateSDK: LokateSDK) {
 }
 
 @Composable
-fun CampaignExperience(campaignName: String, customerId: String) {
+fun CampaignExperience(
+    campaignName: String,
+    customerId: String,
+) {
     var affinedCampaigns by remember { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(campaignName) {

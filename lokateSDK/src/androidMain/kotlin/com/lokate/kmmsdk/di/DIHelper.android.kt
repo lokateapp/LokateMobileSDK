@@ -13,10 +13,11 @@ actual fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType) {
             single<BeaconScanner> {
                 when (beaconScannerType) {
                     is LokateSDK.BeaconScannerType.IBeacon -> AndroidBeaconScanner()
-                    is LokateSDK.BeaconScannerType.EstimoteMonitoring -> AndroidEstimoteBeaconScanner(
-                        beaconScannerType.appId,
-                        beaconScannerType.appToken
-                    )
+                    is LokateSDK.BeaconScannerType.EstimoteMonitoring ->
+                        AndroidEstimoteBeaconScanner(
+                            beaconScannerType.appId,
+                            beaconScannerType.appToken,
+                        )
                 }
             }
         }
