@@ -1,6 +1,7 @@
 package com.lokate.kmmsdk.di
 
 import com.lokate.kmmsdk.Database
+import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.data.datasource.local.Settings
 import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
 import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
@@ -13,7 +14,6 @@ import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
 import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
-import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 val dbModule = module {
@@ -55,8 +55,4 @@ val repositoryModule = module {
     }
 }
 
-fun initKoin() {
-    startKoin {
-        modules(dbModule, dataSourceModule, repositoryModule)
-    }
-}
+expect fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType)

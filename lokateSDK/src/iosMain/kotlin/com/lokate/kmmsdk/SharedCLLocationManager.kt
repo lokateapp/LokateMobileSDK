@@ -1,27 +1,21 @@
 package com.lokate.kmmsdk
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.internal.SynchronizedObject
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import platform.CoreLocation.CLBeaconRegion
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
 import platform.CoreLocation.kCLLocationAccuracyBest
 import platform.Foundation.NSError
 import platform.Foundation.NSLog
+import platform.Foundation.addObserver
 import platform.darwin.NSObject
 
-object SharedCLLocationManager {
-    val manager: CLLocationManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        CLLocationManager().apply {
-            this.delegate = LocationManagerDelegate()
-            // Beacon
-            this.requestAlwaysAuthorization()
-            this.allowsBackgroundLocationUpdates = true
-            // Geolocation
-            this.desiredAccuracy = kCLLocationAccuracyBest
-        }
-    }
-
+class SharedCLLocationManager(val manager: CLLocationManager) {
     // BeaconScanner
-    // allow injecting a listener to be called when the location manager authorization status changes
     fun setAuthorizationStatusListener(listener: (Int) -> Unit) {
         (manager.delegate as LocationManagerDelegate).apply {
             authorizationListener =
@@ -86,6 +80,10 @@ object SharedCLLocationManager {
 
     fun requestStopUpdatingLocation() {
         manager.stopUpdatingLocation()
+    }
+    var delegate: LocationManagerDelegate? = null
+    fun storeDelegate(delegate: LocationManagerDelegate) {
+        this.delegate = delegate
     }
 }
 

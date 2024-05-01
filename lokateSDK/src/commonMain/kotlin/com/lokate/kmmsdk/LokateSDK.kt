@@ -4,15 +4,6 @@ import com.lokate.kmmsdk.Defaults.DEFAULT_BEACONS
 import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
 import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
 import com.lokate.kmmsdk.Defaults.MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE
-import com.lokate.kmmsdk.data.datasource.local.authentication.AuthenticationLocalDS
-import com.lokate.kmmsdk.data.datasource.local.beacon.BeaconLocalDS
-import com.lokate.kmmsdk.data.datasource.local.factory.getDatabase
-import com.lokate.kmmsdk.data.datasource.remote.authentication.AuthenticationAPI
-import com.lokate.kmmsdk.data.datasource.remote.authentication.AuthenticationRemoteDS
-import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconAPI
-import com.lokate.kmmsdk.data.datasource.remote.beacon.BeaconRemoteDS
-import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
-import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.di.initKoin
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
@@ -23,7 +14,6 @@ import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
 import com.lokate.kmmsdk.domain.repository.RepositoryResult
 import com.lokate.kmmsdk.utils.collection.ConcurrentSetWithSpecialEquals
-import com.russhwolf.settings.Settings
 import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,16 +29,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.lighthousegames.logging.logging
-import org.koin.core.component.inject
-import org.koin.core.context.startKoin
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LokateSDK private constructor(scannerType: BeaconScannerType): KoinComponent {
+class LokateSDK : KoinComponent {
 
-    private val authenticationRepository: AuthenticationRepository by inject()
-    private val beaconRepository: BeaconRepository by inject()
-    private val beaconScanner = getBeaconScanner(scannerType)
+    private val authenticationRepository: AuthenticationRepository = get()
+    private val beaconRepository: BeaconRepository = get()
+    private val beaconScanner: BeaconScanner = get()
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
 
@@ -59,21 +48,10 @@ class LokateSDK private constructor(scannerType: BeaconScannerType): KoinCompone
         val log = logging("LokateSDK")
         private var _instance: LokateSDK? = null
         fun getInstance(scannerType: BeaconScannerType): LokateSDK {
-            return _instance ?: initKoin().let {
-                _instance = LokateSDK(scannerType)
+            return _instance ?: initKoin(scannerType).let {
+                _instance = LokateSDK()
                 _instance!!
             }
-        }
-
-        fun createForIBeacon(): LokateSDK {
-            return LokateSDK(BeaconScannerType.IBeacon)
-        }
-
-        fun createForEstimoteMonitoring(
-            appId: String,
-            appToken: String,
-        ): LokateSDK {
-            return LokateSDK(BeaconScannerType.EstimoteMonitoring(appId, appToken))
         }
     }
 
