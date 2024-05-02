@@ -57,7 +57,9 @@ kotlin {
             // lighthouse logging
             implementation(libs.lighthouse.log)
             // geolocation
-            implementation(libs.play.services.location)
+            implementation(libs.play.services.location) // are we sure that it should be in the common?
+            // koin
+            implementation(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
-	<key>NSLocationUsageDescription</key>
-	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -24,9 +20,22 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSLocationUsageDescription</key>
+	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -36,6 +45,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
+		<string>fetch</string>
 		<string>location</string>
 		<string>processing</string>
 	</array>
@@ -51,10 +61,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
