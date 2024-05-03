@@ -3,7 +3,6 @@ package com.lokate.demo.di
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.di.SDKSettings
-import moe.tlaster.precompose.koin.koinViewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 

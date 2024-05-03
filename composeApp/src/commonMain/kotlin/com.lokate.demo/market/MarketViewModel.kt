@@ -27,10 +27,10 @@ class MarketViewModel : ViewModel(), KoinComponent {
     init {
         listenClosestBeacon()
     }
-    fun listenClosestBeacon() {
+    private fun listenClosestBeacon() {
         viewModelScope.launch {
             closestBeaconFlow.collect {
-                logger.e{"Closest beacon changed: $it" }
+                logger.i{"Closest beacon changed: $it" }
                 if (it != null) {
                     updateCampaign(it.campaignName)
                 }
@@ -54,7 +54,7 @@ class MarketViewModel : ViewModel(), KoinComponent {
     private fun updateCampaign(newCampaignName: String?) {
         if (newCampaignName != null) {
             viewModelScope.launch {
-                _affinedCampaigns.value = getAffinedCampaigns(lokateSDK.getCustomerId())
+                _affinedCampaigns.value = getAffinedCampaigns(customerId)
                 _campaignName.value = newCampaignName
                 _notification.value = notificationPool[newCampaignName]?.random() ?: "No notification available"
             }
@@ -65,7 +65,6 @@ class MarketViewModel : ViewModel(), KoinComponent {
         if (!isLokateRunning) {
             lokateSDK.startScanning()
             _buttonClicked.value = true
-            updateCampaign(null)
         }
     }
 }
