@@ -14,7 +14,6 @@ import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
 class MarketViewModel : ViewModel(), KoinComponent {
-
     private val logger = logging("MarketViewModel")
 
     private val lokateSDK: LokateSDK = get()
@@ -24,13 +23,15 @@ class MarketViewModel : ViewModel(), KoinComponent {
 
     private val _buttonClicked = MutableStateFlow(false)
     val buttonClicked: StateFlow<Boolean> = _buttonClicked.asStateFlow()
+
     init {
         listenClosestBeacon()
     }
+
     private fun listenClosestBeacon() {
         viewModelScope.launch {
             closestBeaconFlow.collect {
-                logger.i{"Closest beacon changed: $it" }
+                logger.i { "Closest beacon changed: $it" }
                 if (it != null) {
                     updateCampaign(it.campaignName)
                 }

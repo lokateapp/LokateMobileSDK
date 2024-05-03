@@ -18,17 +18,19 @@ import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.dsl.module
 
-object SDKSettings{
+object SDKSettings {
     var beaconScannerType: LokateSDK.BeaconScannerType = LokateSDK.BeaconScannerType.IBeacon
 }
-object SDKKoinContext{
+
+object SDKKoinContext {
     var beaconScannerType = SDKSettings.beaconScannerType
     private val koinApp
         get() = getKoinApp(beaconScannerType)
 
     val koin = koinApp.koin
 }
-abstract class SDKKoinComponent: KoinComponent {
+
+abstract class SDKKoinComponent : KoinComponent {
     override fun getKoin() = SDKKoinContext.koin
 }
 

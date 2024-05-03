@@ -40,27 +40,29 @@ fun GreetingView(
     onButtonClick: () -> Unit,
     campaignName: String?,
     affinedCampaigns: List<String>,
-    notification: String
-){
+    notification: String,
+)  {
     if (!buttonClicked) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = "Lokate Demo",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp),
                 style = MaterialTheme.typography.h1.copy(color = MaterialTheme.colors.primary),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onButtonClick
+                onClick = onButtonClick,
             ) {
                 Text(text = "Start Scanning")
             }
@@ -74,7 +76,7 @@ fun GreetingView(
 fun CampaignExperience(
     campaignName: String?,
     affinedCampaigns: List<String>,
-    notification: String
+    notification: String,
 ) {
     if (campaignName != null) {
         Column(
@@ -118,8 +120,7 @@ fun CampaignExperience(
                 }
             }
         }
-    }
-    else {
+    } else {
         Notification("No campaign available")
     }
 }

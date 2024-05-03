@@ -58,7 +58,7 @@ internal val RequiredPermissions =
 suspend fun checkPermissions(permissionsController: PermissionsController): Boolean {
     return RequiredPermissions.all { permission ->
         permissionsController.isPermissionGranted(
-            permission
+            permission,
         )
     }
 }
@@ -113,31 +113,30 @@ fun App() {
                                     NavigationItem("Market") {
                                         navigator.navigate(
                                             "/market",
-                                            options = NavOptions(launchSingleTop = true)
+                                            options = NavOptions(launchSingleTop = true),
                                         )
                                     },
                                     NavigationItem("CSFair") {
                                         navigator.navigate(
                                             "/csfair",
-                                            options = NavOptions(launchSingleTop = true)
+                                            options = NavOptions(launchSingleTop = true),
                                         )
-
                                     },
                                     NavigationItem("Gym") {
                                         navigator.navigate(
                                             "/gym",
-                                            options = NavOptions(launchSingleTop = true)
+                                            options = NavOptions(launchSingleTop = true),
                                         )
                                     },
                                     NavigationItem("Museum") {
                                         navigator.navigate(
                                             "/museum",
-                                            options = NavOptions(launchSingleTop = true)
+                                            options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                )
+                                ),
                             )
-                        }
+                        },
                     ) {
                         Nav(navigator = navigator, it)
                     }
@@ -155,19 +154,21 @@ fun App() {
 }
 
 @Composable
-fun Nav(navigator: Navigator = rememberNavigator(), paddingValues: PaddingValues) {
-
+fun Nav(
+    navigator: Navigator = rememberNavigator(),
+    paddingValues: PaddingValues,
+) {
     NavHost(
         modifier = Modifier.padding(paddingValues),
         navigator = navigator,
         // Navigation transition for the scenes in this NavHost, this is optional
         navTransition = NavTransition(),
         // The start destination
-        initialRoute = "/market"
-    )
-    {
+        initialRoute = "/market",
+    ) {
         scene(
-            "/market", navTransition = NavTransition()
+            "/market",
+            navTransition = NavTransition(),
         ) {
             val vm = koinViewModel(MarketViewModel::class)
             MarketApp(vm)
@@ -194,17 +195,18 @@ fun NavigationBar(items: List<NavigationItem>) {
         isVisible = false
     }
     Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f)
-            .clickable(enabled = !isVisible) {
-                isVisible = true
-            }
-            .background(Color.Transparent),
-        contentAlignment = androidx.compose.ui.Alignment.CenterStart
+        modifier =
+            Modifier.fillMaxWidth().fillMaxHeight(0.1f)
+                .clickable(enabled = !isVisible) {
+                    isVisible = true
+                }
+                .background(Color.Transparent),
+        contentAlignment = androidx.compose.ui.Alignment.CenterStart,
     ) {
-        if (isVisible)
+        if (isVisible) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 items.forEach {
                     Button(onClick = it.onClick) {
@@ -212,6 +214,7 @@ fun NavigationBar(items: List<NavigationItem>) {
                     }
                 }
             }
+        }
     }
 }
 
@@ -226,7 +229,7 @@ fun PermissionScreen(
             RequiredPermissions.forEach { permission ->
                 askPermission(
                     permissionsController,
-                    permission
+                    permission,
                 )
             }
             hasPermissions.value = checkPermissions(permissionsController)

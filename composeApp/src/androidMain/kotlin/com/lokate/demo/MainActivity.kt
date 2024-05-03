@@ -9,7 +9,7 @@ import com.lokate.kmmsdk.LokateSDK
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initKoin(LokateSDK.BeaconScannerType.IBeacon) //beacon scanner type
+        initKoin(LokateSDK.BeaconScannerType.IBeacon) // beacon scanner type
         setContent {
             App()
         }
