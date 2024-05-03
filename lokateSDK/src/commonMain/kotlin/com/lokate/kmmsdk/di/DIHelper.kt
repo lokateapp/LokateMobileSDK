@@ -14,7 +14,23 @@ import com.lokate.kmmsdk.data.repository.AuthenticationRepositoryImpl
 import com.lokate.kmmsdk.data.repository.BeaconRepositoryImpl
 import com.lokate.kmmsdk.domain.repository.AuthenticationRepository
 import com.lokate.kmmsdk.domain.repository.BeaconRepository
+import org.koin.core.KoinApplication
+import org.koin.core.component.KoinComponent
 import org.koin.dsl.module
+
+object SDKSettings{
+    var beaconScannerType: LokateSDK.BeaconScannerType = LokateSDK.BeaconScannerType.IBeacon
+}
+object SDKKoinContext{
+    var beaconScannerType = SDKSettings.beaconScannerType
+    private val koinApp
+        get() = getKoinApp(beaconScannerType)
+
+    val koin = koinApp.koin
+}
+abstract class SDKKoinComponent: KoinComponent {
+    override fun getKoin() = SDKKoinContext.koin
+}
 
 val dbModule =
     module {
@@ -58,4 +74,4 @@ val repositoryModule =
         }
     }
 
-expect fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType)
+expect fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinApplication

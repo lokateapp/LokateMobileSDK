@@ -4,7 +4,8 @@ import com.lokate.kmmsdk.Defaults.DEFAULT_BEACONS
 import com.lokate.kmmsdk.Defaults.EVENT_REQUEST_TIMEOUT
 import com.lokate.kmmsdk.Defaults.GONE_CHECK_INTERVAL
 import com.lokate.kmmsdk.Defaults.MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE
-import com.lokate.kmmsdk.di.initKoin
+import com.lokate.kmmsdk.di.SDKKoinComponent
+import com.lokate.kmmsdk.di.SDKKoinContext
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.EventRequest
 import com.lokate.kmmsdk.domain.model.beacon.EventStatus
@@ -26,14 +27,14 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LokateSDK : KoinComponent {
+class LokateSDK : SDKKoinComponent() {
     private val authenticationRepository: AuthenticationRepository = get()
     private val beaconRepository: BeaconRepository = get()
     private val beaconScanner: BeaconScanner = get()
@@ -49,11 +50,16 @@ class LokateSDK : KoinComponent {
         private var _instance: LokateSDK? = null
 
         fun getInstance(scannerType: BeaconScannerType): LokateSDK {
-            return _instance ?: initKoin(scannerType).let {
+            return _instance ?: let {
+                SDKKoinContext.beaconScannerType = scannerType
                 _instance = LokateSDK()
                 _instance!!
             }
         }
+    }
+
+    fun isRunning(): Boolean {
+        return isActive
     }
 
     private var isActive = false
@@ -82,8 +88,8 @@ class LokateSDK : KoinComponent {
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                    it1.major == it2.major &&
-                    it1.minor == it2.minor
+                        it1.major == it2.major &&
+                        it1.minor == it2.minor
             },
         )
 
@@ -96,7 +102,7 @@ class LokateSDK : KoinComponent {
 
     private var appTokenSet: Boolean = false
 
-    fun getClosestBeaconFlow(): Flow<LokateBeacon?> {
+    fun getClosestBeaconFlow(): SharedFlow<LokateBeacon?> {
         return closestBeaconFlow
     }
 
@@ -143,7 +149,7 @@ class LokateSDK : KoinComponent {
                             }
                         }
                     }
-                } ?: DEFAULT_BEACONS
+                }?.plus(DEFAULT_BEACONS) ?: DEFAULT_BEACONS
 
             branchBeacons.addAll(beacons)
 
@@ -203,8 +209,8 @@ class LokateSDK : KoinComponent {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major &&
-                            it.minor == scan.minor
+                                it.major == scan.major &&
+                                it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -212,7 +218,7 @@ class LokateSDK : KoinComponent {
                     beacon.radius < scan.accuracy -> {
                         log.d {
                             "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                                    " setted: ${beacon.radius}, current: ${scan.accuracy}"
                         }
                     }
 
@@ -247,8 +253,8 @@ class LokateSDK : KoinComponent {
                     closestBeacon =
                         branchBeacons.firstOrNull {
                             closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() &&
-                                closestScan.major == it.major &&
-                                closestScan.minor == it.minor
+                                    closestScan.major == it.major &&
+                                    closestScan.minor == it.minor
                         }
                     closestBeaconFlow.emit(closestBeacon)
                     log.d { "closest beacon changed: $closestBeacon" }
