@@ -16,7 +16,7 @@ object Defaults {
                 // white
                 proximityUUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
                 major = 24719,
-                minor = 65453,
+                minor = 28241,
                 campaignName = "white",
                 radius = 100.0,
             ),
