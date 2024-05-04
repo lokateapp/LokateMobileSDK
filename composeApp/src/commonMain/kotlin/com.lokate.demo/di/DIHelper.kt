@@ -37,12 +37,12 @@ fun initKoin(scannerType: LokateSDK.BeaconScannerType) {
         modules(audioPlayerModule(), viewModelModule(), lokateModule(scannerType))
     }
 }
+
 fun startKoinIBeacon() {
     initKoin(LokateSDK.BeaconScannerType.IBeacon)
 }
 
-fun startKoinEstimote(
-) {
+fun startKoinEstimote() {
     val appId = BuildKonfig.ESTIMOTE_CLOUD_APP_ID
     val appToken = BuildKonfig.ESTIMOTE_CLOUD_APP_TOKEN
     initKoin(LokateSDK.BeaconScannerType.EstimoteMonitoring(appId, appToken))

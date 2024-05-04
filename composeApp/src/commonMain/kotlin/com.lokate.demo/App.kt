@@ -22,11 +22,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Museum
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SportsGymnastics
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -211,7 +208,7 @@ data class NavigationItem(val title: String, val icon: ImageVector, val onClick:
 fun NavigationBar(
     items: List<NavigationItem>,
     isVisible: Boolean,
-    isVisibleChanged: (Boolean) -> Unit = {}
+    isVisibleChanged: (Boolean) -> Unit = {},
 ) {
     LaunchedEffect(isVisible) {
         delay(5000)
@@ -219,12 +216,12 @@ fun NavigationBar(
     }
     Box(
         modifier =
-        Modifier.fillMaxWidth(if (isVisible) 1f else 0.1f)
-            .fillMaxHeight(0.1f)
-            .clickable(enabled = !isVisible) {
-                isVisibleChanged(!isVisible)
-            }
-            .background(Color.Transparent),
+            Modifier.fillMaxWidth(if (isVisible) 1f else 0.1f)
+                .fillMaxHeight(0.1f)
+                .clickable(enabled = !isVisible) {
+                    isVisibleChanged(!isVisible)
+                }
+                .background(Color.Transparent),
         contentAlignment = Alignment.CenterStart,
     ) {
         if (isVisible) {
@@ -235,12 +232,12 @@ fun NavigationBar(
                 items.forEach {
                     Column(
                         verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Button(
                             modifier = Modifier.aspectRatio(1f),
                             onClick = it.onClick,
-                            shape = RoundedCornerShape(0.dp)
+                            shape = RoundedCornerShape(0.dp),
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(it.icon, null)

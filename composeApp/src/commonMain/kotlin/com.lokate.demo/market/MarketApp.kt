@@ -41,7 +41,7 @@ fun GreetingView(
     campaignName: String?,
     affinedCampaigns: List<String>,
     notification: String,
-)  {
+) {
     if (!buttonClicked) {
         Column(
             modifier =

@@ -1,21 +1,15 @@
 package com.lokate.demo.utils
 
-import android.content.res.AssetManager
 import android.media.MediaPlayer
-import android.net.Uri
-import androidx.core.net.toFile
 import com.lokate.kmmsdk.applicationContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.Resource
-import org.jetbrains.compose.resources.ResourceItem
 import org.lighthousegames.logging.Log
-import java.io.File
-import java.io.FileDescriptor
 
 private object AndroidResourceReader
 
 class AndroidAudioPlayer : AudioPlayer {
     private var mediaPlayer: MediaPlayer? = null
+
     override fun play() {
         if (mediaPlayer == null) {
             Log.e("AudioPlayer", "mediaPlayer is null")
@@ -53,10 +47,11 @@ class AndroidAudioPlayer : AudioPlayer {
     override fun setDataSource(source: String) {
         val assetManager = applicationContext.assets
         val afd = assetManager.openFd(source)
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            prepare()
-        }
+        mediaPlayer =
+            MediaPlayer().apply {
+                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                prepare()
+            }
     }
 
     override fun getDuration(): Int {
@@ -76,7 +71,7 @@ class AndroidAudioPlayer : AudioPlayer {
     }
 
     override val isRunning: Boolean
-          get() = mediaPlayer?.isPlaying == true
+        get() = mediaPlayer?.isPlaying == true
 }
 
 actual fun getAudioPlayer(): AudioPlayer {

@@ -27,13 +27,14 @@ class MuseumViewModel : ViewModel(), KoinComponent {
 
     val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying
+
     init {
         logger.d { "MuseumViewModel init" }
         collectClosestBeacon()
     }
 
     fun play() {
-        if(player.isRunning) {
+        if (player.isRunning) {
             player.pause()
             _isPlaying.value = false
             return

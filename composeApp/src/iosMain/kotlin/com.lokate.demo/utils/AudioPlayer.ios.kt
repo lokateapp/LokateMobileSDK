@@ -6,9 +6,10 @@ import platform.Foundation.NSBundle
 import platform.Foundation.NSLog
 import platform.Foundation.NSURL
 
-class IOSAudioPlayer : AudioPlayer{
+class IOSAudioPlayer : AudioPlayer {
 
     private var avPlayer: AVAudioPlayer? = null
+
     override fun play() {
         if (avPlayer == null) {
             NSLog("AudioPlayer", "mediaPlayer is null")
@@ -44,10 +45,11 @@ class IOSAudioPlayer : AudioPlayer{
     @OptIn(ExperimentalForeignApi::class)
     override fun setDataSource(source: String) {
         NSLog("AudioPlayer source: $source")
-        val url = NSBundle.mainBundle.resourcePath()?.let {
-            NSURL.fileURLWithPath("$it/compose-resources/$source")
-        }
-        NSLog("AudioPlayer url: $url", )
+        val url =
+            NSBundle.mainBundle.resourcePath()?.let {
+                NSURL.fileURLWithPath("$it/compose-resources/$source")
+            }
+        NSLog("AudioPlayer url: $url")
         if (url == null) {
             NSLog("AudioPlayer", "url is null")
             return
@@ -73,7 +75,6 @@ class IOSAudioPlayer : AudioPlayer{
 
     override val isRunning: Boolean
         get() = avPlayer?.isPlaying() == true
-
 }
 
 actual fun getAudioPlayer(): AudioPlayer {

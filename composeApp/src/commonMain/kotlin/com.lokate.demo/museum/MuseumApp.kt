@@ -1,7 +1,6 @@
 package com.lokate.demo.museum
 
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,19 +16,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.unit.dp
 import com.lokate.demo.utils.TextFlow
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.imageResource
-
 
 @Composable
 fun MuseumApp(vm: MuseumViewModel) {
@@ -43,7 +42,7 @@ fun MuseumApp(vm: MuseumViewModel) {
 fun MuseumScreen(
     closestExhibitionUIState: ExhibitionUIState?,
     play: () -> Unit,
-    isPlaying: Boolean
+    isPlaying: Boolean,
 ) {
     val scrollState = rememberScrollState()
     val fabVisibility = remember { mutableStateOf(true) }
@@ -61,26 +60,26 @@ fun MuseumScreen(
                     FloatingActionButton(onClick = play) {
                         Icon(
                             if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = "Information"
+                            contentDescription = "Information",
                         )
                     }
                 }
-            }
+            },
         ) {
             Card(
                 modifier = Modifier.padding(4.dp).verticalScroll(scrollState),
                 elevation = 4.dp,
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(4.dp),
             ) {
                 TextFlow(
                     text = closestExhibitionUIState.description,
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                 ) {
                     closestExhibitionUIState.imagePath?.let {
                         Image(
                             painter = BitmapPainter(imageResource(DrawableResource(it))),
                             contentDescription = null,
-                            modifier = Modifier.size(192.dp)
+                            modifier = Modifier.size(192.dp),
                         )
                     }
                 }
