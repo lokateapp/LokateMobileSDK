@@ -1,6 +1,9 @@
 package com.lokate.demo.di
 
+import com.lokate.demo.BuildKonfig
 import com.lokate.demo.market.MarketViewModel
+import com.lokate.demo.museum.MuseumViewModel
+import com.lokate.demo.utils.getAudioPlayer
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.di.SDKSettings
 import org.koin.core.context.startKoin
@@ -11,27 +14,36 @@ fun lokateModule(scannerType: LokateSDK.BeaconScannerType) =
         single { LokateSDK.getInstance(scannerType) }
     }
 
+fun audioPlayerModule() =
+    module {
+        single {
+            getAudioPlayer()
+        }
+    }
+
 fun viewModelModule() =
     module {
         single {
             MarketViewModel()
+        }
+        single {
+            MuseumViewModel()
         }
     }
 
 fun initKoin(scannerType: LokateSDK.BeaconScannerType) {
     SDKSettings.beaconScannerType = scannerType
     startKoin {
-        modules(viewModelModule(), lokateModule(scannerType))
+        modules(audioPlayerModule(), viewModelModule(), lokateModule(scannerType))
     }
 }
-
 fun startKoinIBeacon() {
     initKoin(LokateSDK.BeaconScannerType.IBeacon)
 }
 
 fun startKoinEstimote(
-    appId: String,
-    appToken: String,
 ) {
+    val appId = BuildKonfig.ESTIMOTE_CLOUD_APP_ID
+    val appToken = BuildKonfig.ESTIMOTE_CLOUD_APP_TOKEN
     initKoin(LokateSDK.BeaconScannerType.EstimoteMonitoring(appId, appToken))
 }
