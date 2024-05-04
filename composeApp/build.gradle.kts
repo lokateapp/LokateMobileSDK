@@ -41,6 +41,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.permissions.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
@@ -68,6 +69,7 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+    sourceSets["main"].assets.srcDirs("src/commonMain/composeResources")
 
     defaultConfig {
         applicationId = "com.lokate.demo"
