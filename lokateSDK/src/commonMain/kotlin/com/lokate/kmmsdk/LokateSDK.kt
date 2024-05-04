@@ -34,10 +34,12 @@ import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LokateSDK : SDKKoinComponent() {
-    private val authenticationRepository: AuthenticationRepository = get()
-    private val beaconRepository: BeaconRepository = get()
-    private val beaconScanner: BeaconScanner = get()
+class LokateSDK(
+    private val authenticationRepository: AuthenticationRepository,
+    private val beaconRepository: BeaconRepository,
+    private val beaconScanner: BeaconScanner
+) : SDKKoinComponent() {
+
 
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
@@ -50,11 +52,19 @@ class LokateSDK : SDKKoinComponent() {
         private var _instance: LokateSDK? = null
 
         fun getInstance(scannerType: BeaconScannerType): LokateSDK {
-            return _instance ?: let {
-                SDKKoinContext.beaconScannerType = scannerType
-                _instance = LokateSDK()
-                _instance!!
+            if(_instance == null) {
+                configure(scannerType)
             }
+            return _instance!!
+        }
+
+        private fun configure(scannerType: BeaconScannerType) {
+            SDKKoinContext.beaconScannerType = scannerType
+            initSDK()
+        }
+
+        private fun initSDK() {
+            _instance = SDKKoinContext.koin.get()
         }
     }
 
@@ -88,8 +98,8 @@ class LokateSDK : SDKKoinComponent() {
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                    it1.major == it2.major &&
-                    it1.minor == it2.minor
+                        it1.major == it2.major &&
+                        it1.minor == it2.minor
             },
         )
 
@@ -209,8 +219,8 @@ class LokateSDK : SDKKoinComponent() {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major &&
-                            it.minor == scan.minor
+                                it.major == scan.major &&
+                                it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -218,7 +228,7 @@ class LokateSDK : SDKKoinComponent() {
                     beacon.radius < scan.accuracy -> {
                         log.d {
                             "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                                    " setted: ${beacon.radius}, current: ${scan.accuracy}"
                         }
                     }
 
@@ -253,8 +263,8 @@ class LokateSDK : SDKKoinComponent() {
                     closestBeacon =
                         branchBeacons.firstOrNull {
                             closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() &&
-                                closestScan.major == it.major &&
-                                closestScan.minor == it.minor
+                                    closestScan.major == it.major &&
+                                    closestScan.minor == it.minor
                         }
                     closestBeaconFlow.emit(closestBeacon)
                     log.d { "closest beacon changed: $closestBeacon" }

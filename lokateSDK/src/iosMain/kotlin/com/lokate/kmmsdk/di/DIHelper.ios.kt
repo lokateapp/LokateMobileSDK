@@ -46,5 +46,12 @@ actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinAppli
             }
         }
 
-    return koinApp.modules(sharedCLLocationManagerModule, scannerModule, dbModule, dataSourceModule, repositoryModule)
+    return koinApp.modules(
+        lokateModule,
+        sharedCLLocationManagerModule,
+        scannerModule,
+        dbModule,
+        dataSourceModule,
+        repositoryModule
+    )
 }

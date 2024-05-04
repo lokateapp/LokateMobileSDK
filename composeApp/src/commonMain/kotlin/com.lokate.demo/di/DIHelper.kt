@@ -11,7 +11,9 @@ import org.koin.dsl.module
 
 fun lokateModule(scannerType: LokateSDK.BeaconScannerType) =
     module {
-        single { LokateSDK.getInstance(scannerType) }
+        single {
+            LokateSDK.getInstance(scannerType)
+        }
     }
 
 fun audioPlayerModule() =

@@ -34,6 +34,13 @@ abstract class SDKKoinComponent : KoinComponent {
     override fun getKoin() = SDKKoinContext.koin
 }
 
+val lokateModule =
+    module {
+        single {
+            LokateSDK(get(), get(), get())
+        }
+    }
+
 val dbModule =
     module {
         single<Database> {

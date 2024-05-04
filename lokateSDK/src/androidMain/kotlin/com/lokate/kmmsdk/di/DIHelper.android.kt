@@ -23,5 +23,5 @@ actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinAppli
             }
         }
 
-    return koinApp.modules(scannerModule, dbModule, dataSourceModule, repositoryModule)
+    return koinApp.modules(scannerModule, lokateModule, dbModule, dataSourceModule, repositoryModule)
 }
