@@ -7,15 +7,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.Museum
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -24,13 +35,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lokate.demo.csfair.CSFairApp
 import com.lokate.demo.gym.GymApp
 import com.lokate.demo.market.MarketApp
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumApp
+import com.lokate.demo.museum.MuseumViewModel
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
@@ -100,6 +116,7 @@ fun App() {
     }
     PreComposeApp {
         val navigator = rememberNavigator()
+        var isVisible by remember { mutableStateOf(false) }
         MyApplicationTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -110,35 +127,37 @@ fun App() {
                         bottomBar = {
                             NavigationBar(
                                 listOf(
-                                    NavigationItem("Market") {
+                                    NavigationItem("Market", Icons.Default.ShoppingCart) {
                                         navigator.navigate(
                                             "/market",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("CSFair") {
+                                    NavigationItem("CSFair", Icons.Default.Celebration) {
                                         navigator.navigate(
                                             "/csfair",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("Gym") {
+                                    NavigationItem("Gym", Icons.Default.SportsGymnastics) {
                                         navigator.navigate(
                                             "/gym",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("Museum") {
+                                    NavigationItem("Museum", Icons.Default.Museum) {
                                         navigator.navigate(
-                                            "/museum",
+                                            "/files/museum",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
                                 ),
+                                isVisible = isVisible,
+                                isVisibleChanged = { isVisible = it },
                             )
                         },
                     ) {
-                        Nav(navigator = navigator, it)
+                        Nav(navigator = navigator, if (isVisible) it else PaddingValues(0.dp))
                     }
                 } else {
                     Column(Modifier.fillMaxHeight()) {
@@ -179,29 +198,34 @@ fun Nav(
         scene("/gym", navTransition = NavTransition()) {
             GymApp()
         }
-        scene("/museum", navTransition = NavTransition()) {
-            MuseumApp()
+        scene("/files/museum", navTransition = NavTransition()) {
+            val vm = koinViewModel(MuseumViewModel::class)
+            MuseumApp(vm)
         }
     }
 }
 
-data class NavigationItem(val title: String, val onClick: () -> Unit)
+data class NavigationItem(val title: String, val icon: ImageVector, val onClick: () -> Unit)
 
 @Composable
-fun NavigationBar(items: List<NavigationItem>) {
-    var isVisible by remember { mutableStateOf(false) }
+fun NavigationBar(
+    items: List<NavigationItem>,
+    isVisible: Boolean,
+    isVisibleChanged: (Boolean) -> Unit = {}
+) {
     LaunchedEffect(isVisible) {
         delay(5000)
-        isVisible = false
+        isVisibleChanged(false)
     }
     Box(
         modifier =
-            Modifier.fillMaxWidth().fillMaxHeight(0.1f)
-                .clickable(enabled = !isVisible) {
-                    isVisible = true
-                }
-                .background(Color.Transparent),
-        contentAlignment = androidx.compose.ui.Alignment.CenterStart,
+        Modifier.fillMaxWidth(if (isVisible) 1f else 0.1f)
+            .fillMaxHeight(0.1f)
+            .clickable(enabled = !isVisible) {
+                isVisibleChanged(!isVisible)
+            }
+            .background(Color.Transparent),
+        contentAlignment = Alignment.CenterStart,
     ) {
         if (isVisible) {
             Row(
@@ -209,8 +233,20 @@ fun NavigationBar(items: List<NavigationItem>) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 items.forEach {
-                    Button(onClick = it.onClick) {
-                        Text(it.title)
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            modifier = Modifier.aspectRatio(1f),
+                            onClick = it.onClick,
+                            shape = RoundedCornerShape(0.dp)
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(it.icon, null)
+                                Text(it.title, fontSize = 8.sp)
+                            }
+                        }
                     }
                 }
             }
