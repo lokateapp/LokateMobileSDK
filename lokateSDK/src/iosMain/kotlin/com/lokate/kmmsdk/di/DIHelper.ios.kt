@@ -52,6 +52,6 @@ actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinAppli
         scannerModule,
         dbModule,
         dataSourceModule,
-        repositoryModule
+        repositoryModule,
     )
 }

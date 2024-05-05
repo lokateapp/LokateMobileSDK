@@ -7,7 +7,6 @@ import platform.Foundation.NSLog
 import platform.Foundation.NSURL
 
 class IOSAudioPlayer : AudioPlayer {
-
     private var avPlayer: AVAudioPlayer? = null
 
     override fun play() {

@@ -37,10 +37,8 @@ import org.lighthousegames.logging.logging
 class LokateSDK(
     private val authenticationRepository: AuthenticationRepository,
     private val beaconRepository: BeaconRepository,
-    private val beaconScanner: BeaconScanner
+    private val beaconScanner: BeaconScanner,
 ) : SDKKoinComponent() {
-
-
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
 
@@ -52,7 +50,7 @@ class LokateSDK(
         private var _instance: LokateSDK? = null
 
         fun getInstance(scannerType: BeaconScannerType): LokateSDK {
-            if(_instance == null) {
+            if (_instance == null) {
                 configure(scannerType)
             }
             return _instance!!
@@ -98,8 +96,8 @@ class LokateSDK(
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                        it1.major == it2.major &&
-                        it1.minor == it2.minor
+                    it1.major == it2.major &&
+                    it1.minor == it2.minor
             },
         )
 
@@ -219,8 +217,8 @@ class LokateSDK(
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
-                                it.major == scan.major &&
-                                it.minor == scan.minor
+                            it.major == scan.major &&
+                            it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -228,7 +226,7 @@ class LokateSDK(
                     beacon.radius < scan.accuracy -> {
                         log.d {
                             "Beacon proximity is not in range: $scan." +
-                                    " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
                         }
                     }
 
@@ -263,8 +261,8 @@ class LokateSDK(
                     closestBeacon =
                         branchBeacons.firstOrNull {
                             closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() &&
-                                    closestScan.major == it.major &&
-                                    closestScan.minor == it.minor
+                                closestScan.major == it.major &&
+                                closestScan.minor == it.minor
                         }
                     closestBeaconFlow.emit(closestBeacon)
                     log.d { "closest beacon changed: $closestBeacon" }

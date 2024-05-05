@@ -77,13 +77,14 @@ fun MuseumScreen(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Card(
-                    modifier = Modifier.padding(4.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(.75f)
-                        .verticalScroll(scrollState),
+                    modifier =
+                        Modifier.padding(4.dp)
+                            .fillMaxWidth()
+                            .fillMaxHeight(.75f)
+                            .verticalScroll(scrollState),
                     elevation = 4.dp,
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, Color.Black)
+                    border = BorderStroke(2.dp, Color.Black),
                 ) {
                     TextFlow(
                         text = closestExhibitionUIState.description,
@@ -105,7 +106,7 @@ fun MuseumScreen(
                 ) { // use the whole remaining size
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text("Next one is: ${nextExhibition?.description ?: "No next exhibition found"}")
                     }
