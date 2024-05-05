@@ -1,6 +1,11 @@
 package com.lokate.demo.museum
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.unit.dp
 import com.lokate.demo.utils.TextFlow
@@ -34,13 +41,15 @@ import org.jetbrains.compose.resources.imageResource
 fun MuseumApp(vm: MuseumViewModel) {
     val closestExhibitionUIState by vm.closestExhibition.collectAsState(null)
     val isPlaying by vm.isPlaying.collectAsState(false)
-    MuseumScreen(closestExhibitionUIState, vm::play, isPlaying)
+    val nextExhibitionUIState by vm.nextExhibition.collectAsState(null)
+    MuseumScreen(closestExhibitionUIState, nextExhibitionUIState, vm::play, isPlaying)
 }
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MuseumScreen(
     closestExhibitionUIState: ExhibitionUIState?,
+    nextExhibition: ExhibitionUIState?,
     play: () -> Unit,
     isPlaying: Boolean,
 ) {
@@ -66,21 +75,39 @@ fun MuseumScreen(
                 }
             },
         ) {
-            Card(
-                modifier = Modifier.padding(4.dp).verticalScroll(scrollState),
-                elevation = 4.dp,
-                shape = RoundedCornerShape(4.dp),
-            ) {
-                TextFlow(
-                    text = closestExhibitionUIState.description,
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            Column(modifier = Modifier.fillMaxSize()) {
+                Card(
+                    modifier = Modifier.padding(4.dp)
+                        .fillMaxWidth()
+                        .fillMaxHeight(.75f)
+                        .verticalScroll(scrollState),
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(2.dp, Color.Black)
                 ) {
-                    closestExhibitionUIState.imagePath?.let {
-                        Image(
-                            painter = BitmapPainter(imageResource(DrawableResource(it))),
-                            contentDescription = null,
-                            modifier = Modifier.size(192.dp),
-                        )
+                    TextFlow(
+                        text = closestExhibitionUIState.description,
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(4.dp),
+                    ) {
+                        closestExhibitionUIState.imagePath?.let {
+                            Image(
+                                painter = BitmapPainter(imageResource(DrawableResource(it))),
+                                contentDescription = null,
+                                modifier = Modifier.size(192.dp),
+                            )
+                        }
+                    }
+                }
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(2.dp, Color.Black),
+                ) { // use the whole remaining size
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Next one is: ${nextExhibition?.description ?: "No next exhibition found"}")
                     }
                 }
             }

@@ -25,6 +25,9 @@ class MuseumViewModel : ViewModel(), KoinComponent {
     private val _closestExhibition: MutableStateFlow<ExhibitionUIState?> = MutableStateFlow(null)
     val closestExhibition: StateFlow<ExhibitionUIState?> = _closestExhibition
 
+    private val _nextExhibition: MutableStateFlow<ExhibitionUIState?> = MutableStateFlow(null)
+    val nextExhibition: StateFlow<ExhibitionUIState?> = _nextExhibition
+
     val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying
 
