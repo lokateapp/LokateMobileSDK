@@ -14,7 +14,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,13 +22,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun MarketApp(vm: MarketViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsState()
-    val campaignName by vm.campaignName.collectAsState()
-    val affinedCampaigns by vm.affinedCampaigns.collectAsState()
-    val notification by vm.notification.collectAsState()
+    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
+    val campaignName by vm.campaignName.collectAsStateWithLifecycle()
+    val affinedCampaigns by vm.affinedCampaigns.collectAsStateWithLifecycle()
+    val notification by vm.notification.collectAsStateWithLifecycle()
 
     GreetingView(buttonClicked, vm::toggleLokate, campaignName, affinedCampaigns, notification)
 }

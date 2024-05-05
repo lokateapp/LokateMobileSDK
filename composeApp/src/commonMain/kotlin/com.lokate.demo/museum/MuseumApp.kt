@@ -33,15 +33,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.unit.dp
 import com.lokate.demo.utils.TextFlow
+import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.imageResource
 
 @Composable
 fun MuseumApp(vm: MuseumViewModel) {
-    val closestExhibitionUIState by vm.closestExhibition.collectAsState(null)
-    val isPlaying by vm.isPlaying.collectAsState(false)
-    val nextExhibitionUIState by vm.nextExhibition.collectAsState(null)
+    val closestExhibitionUIState by vm.closestExhibition.collectAsStateWithLifecycle(null)
+    val isPlaying by vm.isPlaying.collectAsStateWithLifecycle(false)
+    val nextExhibitionUIState by vm.nextExhibition.collectAsStateWithLifecycle(null)
     MuseumScreen(closestExhibitionUIState, nextExhibitionUIState, vm::play, isPlaying)
 }
 
