@@ -35,10 +35,7 @@ gradleKtlint = "12.1.0"
 detekt = "1.23.5"
 buildkonfig = "0.15.1"
 detekt-rules = "0.0.26"
-koin = "3.5.6" #do not update other versions causing crashes on iOS side.
-koin-compose = "1.1.5"
-precompose = "1.6.0"
-statelyConcurrency = "2.0.6"
+koin = "3.4.3" #do not update other versions causing crashes on iOS side.
 
 [libraries]
 buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
@@ -60,12 +57,6 @@ compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 koin-core = {module = "io.insert-koin:koin-core", version.ref = "koin"}
-koin-compose = {module = "io.insert-koin:koin-compose", version.ref = "koin-compose"}
-#precompose
-precompose-core = {module = "moe.tlaster:precompose", version.ref = "precompose"}
-precompose-vm = {module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose"}
-precompose-koin = {module = "moe.tlaster:precompose-koin", version.ref = "precompose"}
-
 #ktor common
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVersion" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorVersion" }
@@ -104,8 +95,6 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 ktlint-rules-twitter = { module = "com.twitter.compose.rules:ktlint", version.ref = "ktlint-rules" }
 
 detekt-rules-twitter = { module = "com.twitter.compose.rules:detekt", version.ref = "detekt-rules" }
-stately-common = { module = "co.touchlab:stately-common", version.ref = "statelyConcurrency" }
-stately-concurrency = { module = "co.touchlab:stately-concurrency", version.ref = "statelyConcurrency" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

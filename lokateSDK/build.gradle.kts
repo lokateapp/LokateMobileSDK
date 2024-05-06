@@ -60,8 +60,6 @@ kotlin {
             implementation(libs.play.services.location) // are we sure that it should be in the common?
             // koin
             implementation(libs.koin.core)
-            implementation(libs.stately.common)
-            implementation(libs.stately.concurrency)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

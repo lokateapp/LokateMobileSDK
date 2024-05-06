@@ -6,14 +6,13 @@ import com.lokate.kmmsdk.IOSEstimoteBeaconScanner
 import com.lokate.kmmsdk.LocationManagerDelegate
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.SharedCLLocationManager
-import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLLocationAccuracyBest
 import platform.Foundation.NSLog
 
-actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinApplication {
-    val koinApp = KoinApplication.init()
+actual fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType) {
     val sharedCLLocationManagerModule =
         module {
             single<SharedCLLocationManager> {
@@ -45,6 +44,13 @@ actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinAppli
                 }
             }
         }
-
-    return koinApp.modules(sharedCLLocationManagerModule, scannerModule, dbModule, dataSourceModule, repositoryModule)
+    startKoin {
+        modules(
+            dbModule,
+            dataSourceModule,
+            repositoryModule,
+            scannerModule,
+            sharedCLLocationManagerModule,
+        )
+    }
 }

@@ -1,10 +1,10 @@
 package com.lokate.kmmsdk
 
-import com.lokate.kmmsdk.di.SDKKoinComponent
 import com.lokate.kmmsdk.utils.DENIED
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import platform.CoreLocation.CLLocation
 import platform.Foundation.NSError
@@ -12,7 +12,7 @@ import platform.Foundation.NSLog
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-object GeolocationHelper : SDKKoinComponent() {
+object GeolocationHelper : KoinComponent {
     val sharedCLLocationManager: SharedCLLocationManager = get()
 }
 
