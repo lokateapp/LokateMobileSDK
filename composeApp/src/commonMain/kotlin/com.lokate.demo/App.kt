@@ -144,7 +144,7 @@ fun App() {
                                     },
                                     NavigationItem("Museum", Icons.Default.Museum) {
                                         navigator.navigate(
-                                            "/files/museum",
+                                            "/museum",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
@@ -195,7 +195,7 @@ fun Nav(
         scene("/gym", navTransition = NavTransition()) {
             GymApp()
         }
-        scene("/files/museum", navTransition = NavTransition()) {
+        scene("/museum", navTransition = NavTransition()) {
             val vm = koinViewModel(MuseumViewModel::class)
             MuseumApp(vm)
         }

@@ -13,22 +13,6 @@ object Defaults {
     val DEFAULT_BEACONS =
         listOf(
             LokateBeacon(
-                // white
-                proximityUUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D",
-                major = 24719,
-                minor = 28241,
-                campaignName = "white",
-                radius = 100.0,
-            ),
-            LokateBeacon(
-                // yellow
-                proximityUUID = "D5D885F1-D7DA-4F5A-AD51-487281B7F8B3",
-                major = 1,
-                minor = 1,
-                campaignName = "yellow",
-                radius = 100.0,
-            ),
-            LokateBeacon(
                 // pink
                 proximityUUID = "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
                 major = 1,
@@ -42,6 +26,22 @@ object Defaults {
                 major = 1,
                 minor = 2,
                 campaignName = "red",
+                radius = 100.0,
+            ),
+            LokateBeacon(
+                // white
+                proximityUUID = "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                major = 1,
+                minor = 3,
+                campaignName = "white",
+                radius = 100.0,
+            ),
+            LokateBeacon(
+                // yellow
+                proximityUUID = "5D72CC30-5C61-4C09-889F-9AE750FA84EC",
+                major = 1,
+                minor = 4,
+                campaignName = "yellow",
                 radius = 100.0,
             ),
         )
