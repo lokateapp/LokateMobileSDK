@@ -3,7 +3,7 @@ package com.lokate.kmmsdk
 import android.content.Context
 import androidx.startup.Initializer
 
-internal lateinit var applicationContext: Context
+lateinit var applicationContext: Context
     private set
 
 object LokateSDKContext
