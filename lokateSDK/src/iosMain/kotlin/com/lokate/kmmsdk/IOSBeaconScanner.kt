@@ -1,6 +1,5 @@
 package com.lokate.kmmsdk
 
-import com.lokate.kmmsdk.di.SDKKoinComponent
 import com.lokate.kmmsdk.domain.model.beacon.BeaconScanResult
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.AUTHORIZED_ALWAYS
@@ -17,12 +16,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import platform.CoreLocation.CLBeacon
 import platform.CoreLocation.CLBeaconRegion
 import platform.Foundation.NSLog
 
-class IOSBeaconScanner : BeaconScanner, SDKKoinComponent() {
+class IOSBeaconScanner : BeaconScanner, KoinComponent {
     private val sharedCLLocationManager: SharedCLLocationManager = get()
     private val manager = sharedCLLocationManager.manager
     private val mainJob = SupervisorJob()

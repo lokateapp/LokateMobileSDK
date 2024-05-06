@@ -43,10 +43,6 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.permissions.compose)
             implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.precompose.core)
-            implementation(libs.precompose.vm)
-            implementation(libs.precompose.koin)
             implementation(projects.lokateSDK)
         }
         androidMain.dependencies {
