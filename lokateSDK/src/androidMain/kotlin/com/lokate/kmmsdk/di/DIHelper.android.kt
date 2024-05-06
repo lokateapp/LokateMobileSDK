@@ -4,10 +4,11 @@ import com.lokate.kmmsdk.AndroidBeaconScanner
 import com.lokate.kmmsdk.AndroidEstimoteBeaconScanner
 import com.lokate.kmmsdk.BeaconScanner
 import com.lokate.kmmsdk.LokateSDK
-import org.koin.core.context.startKoin
+import org.koin.core.KoinApplication
 import org.koin.dsl.module
 
-actual fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType) {
+actual fun getKoinApp(beaconScannerType: LokateSDK.BeaconScannerType): KoinApplication {
+    val koinApp = KoinApplication.init()
     val scannerModule =
         module {
             single<BeaconScanner> {
@@ -21,7 +22,6 @@ actual fun initKoin(beaconScannerType: LokateSDK.BeaconScannerType) {
                 }
             }
         }
-    startKoin {
-        modules(dbModule, dataSourceModule, repositoryModule, scannerModule)
-    }
+
+    return koinApp.modules(scannerModule, dbModule, dataSourceModule, repositoryModule)
 }
