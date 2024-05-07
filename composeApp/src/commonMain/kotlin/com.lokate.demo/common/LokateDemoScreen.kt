@@ -22,6 +22,7 @@ enum class DemoType {
     MARKET,
     MUSEUM,
     GYM,
+    CSFAIR,
 }
 
 @OptIn(ExperimentalResourceApi::class)
@@ -35,6 +36,7 @@ fun LokateDemoStartScreen(
             DemoType.MARKET -> painterResource(DrawableResource("files/market/background.jpg"))
             DemoType.MUSEUM -> painterResource(DrawableResource("files/museum/background.jpg"))
             DemoType.GYM -> painterResource(DrawableResource("files/gym/background.jpg"))
+            DemoType.CSFAIR -> painterResource(DrawableResource("files/csfair/background.jpg"))
         }
 
     Box(

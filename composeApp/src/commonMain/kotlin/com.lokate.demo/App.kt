@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lokate.demo.csfair.CSFairApp
+import com.lokate.demo.csfair.CSFairViewModel
 import com.lokate.demo.gym.GymApp
 import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketApp
@@ -131,9 +132,9 @@ fun App() {
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("CSFair", Icons.Default.Celebration) {
+                                    NavigationItem("Museum", Icons.Default.Museum) {
                                         navigator.navigate(
-                                            "/csfair",
+                                            "/museum",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
@@ -143,9 +144,9 @@ fun App() {
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("Museum", Icons.Default.Museum) {
+                                    NavigationItem("CSFair", Icons.Default.Celebration) {
                                         navigator.navigate(
-                                            "/museum",
+                                            "/csfair",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
@@ -181,7 +182,7 @@ fun Nav(
         // Navigation transition for the scenes in this NavHost, this is optional
         navTransition = NavTransition(),
         // The start destination
-        initialRoute = "/gym",
+        initialRoute = "/market",
     ) {
         scene(
             "/market",
@@ -190,16 +191,17 @@ fun Nav(
             val vm = koinViewModel(MarketViewModel::class)
             MarketApp(vm)
         }
-        scene("/csfair", navTransition = NavTransition()) {
-            CSFairApp()
+        scene("/museum", navTransition = NavTransition()) {
+            val vm = koinViewModel(MuseumViewModel::class)
+            MuseumApp(vm)
         }
         scene("/gym", navTransition = NavTransition()) {
             val vm = koinViewModel(GymViewModel::class)
             GymApp(vm)
         }
-        scene("/museum", navTransition = NavTransition()) {
-            val vm = koinViewModel(MuseumViewModel::class)
-            MuseumApp(vm)
+        scene("/csfair", navTransition = NavTransition()) {
+            val vm = koinViewModel(CSFairViewModel::class)
+            CSFairApp(vm)
         }
     }
 }
