@@ -21,42 +21,46 @@ import androidx.compose.ui.unit.sp
 import com.lokate.demo.common.CampaignExperience
 import com.lokate.demo.common.DemoType
 import com.lokate.demo.common.LokateDemoStartScreen
+import com.lokate.demo.common.NextCampaignUIState
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun MarketApp(vm: MarketViewModel) {
     val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
-    val currentCampaignName by vm.currentCampaignName.collectAsStateWithLifecycle()
-    val nextCampaignName by vm.nextCampaignName.collectAsStateWithLifecycle()
+    val closestDiscountUIState by vm.closestDiscountUIState.collectAsStateWithLifecycle()
+    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle()
     val affinedCampaigns by vm.affinedCampaigns.collectAsStateWithLifecycle()
 
-    MarketScreen(buttonClicked, vm::toggleLokate, currentCampaignName, nextCampaignName, affinedCampaigns)
+    MarketScreen(buttonClicked, vm::toggleLokate, closestDiscountUIState, nextCampaignUIState, affinedCampaigns)
 }
 
 @Composable
 fun MarketScreen(
     buttonClicked: Boolean,
     onButtonClick: () -> Unit,
-    currentCampaignName: String?,
-    nextCampaignName: String?,
+    closestDiscountUIState: DiscountUIState?,
+    nextCampaignUIState: NextCampaignUIState?,
     affinedCampaigns: List<String>,
 ) {
     if (!buttonClicked) {
         LokateDemoStartScreen(DemoType.MARKET, onButtonClick)
     } else {
-        CampaignExperience(nextCampaignName) {
-            if (currentCampaignName in affinedCampaigns) {
-                val notification = notificationPool[currentCampaignName]?.random() ?: "No notification available for the current campaign"
-                Notification(notification)
+        CampaignExperience(nextCampaignUIState) {
+            if (closestDiscountUIState != null) {
+                if (closestDiscountUIState.category in affinedCampaigns) {
+                    Discount(closestDiscountUIState.pool.random())
+                } else {
+                    Discount("No relevant discounts nearby")
+                }
             } else {
-                Notification("No relevant campaign in the current location")
+                Discount("No nearby campaigns")
             }
         }
     }
 }
 
 @Composable
-fun Notification(message: String) {
+fun Discount(message: String) {
     Surface(
         modifier = Modifier.padding(8.dp),
         shape = RoundedCornerShape(8.dp),

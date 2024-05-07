@@ -1,11 +1,10 @@
 package com.lokate.demo.market
 
+import com.lokate.demo.common.NextCampaignUIState
 import com.lokate.demo.common.getNextCampaign
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
@@ -19,11 +18,16 @@ class MarketViewModel : ViewModel(), KoinComponent {
 
     private val lokateSDK: LokateSDK = get()
 
-    private val _closestBeaconFlow = lokateSDK.getClosestBeaconFlow()
-    private val closestBeaconFlow: SharedFlow<LokateBeacon?> = _closestBeaconFlow
+    private val closestBeaconFlow = lokateSDK.getClosestBeaconFlow()
 
     private val _buttonClicked = MutableStateFlow(false)
-    val buttonClicked: StateFlow<Boolean> = _buttonClicked.asStateFlow()
+    val buttonClicked = _buttonClicked.asStateFlow()
+
+    private val _closestDiscountUIState = MutableStateFlow<DiscountUIState?>(null)
+    val closestDiscountUIState = _closestDiscountUIState.asStateFlow()
+
+    private val _affinedCampaigns = MutableStateFlow<List<String>>(emptyList())
+    val affinedCampaigns = _affinedCampaigns.asStateFlow()
 
     init {
         collectClosestBeacon()
@@ -32,34 +36,53 @@ class MarketViewModel : ViewModel(), KoinComponent {
     private fun collectClosestBeacon() {
         viewModelScope.launch {
             closestBeaconFlow.collect {
-                logger.i { "Closest beacon changed: $it" }
+                logger.d { "Closest beacon changed: $it" }
                 if (it != null) {
-                    updateCampaign(it.campaignName)
+                    val mapped = it.toDiscountUIState()
+                    if (mapped != null) {
+                        getAffinedCampaigns()
+                        updateNextCampaign()
+                    }
+                    _closestDiscountUIState.emit(mapped)
                 }
             }
         }
     }
 
-    val customerId: String
+    private val customerId: String
         get() = lokateSDK.getCustomerId()
 
-    val isLokateRunning: Boolean = lokateSDK.isRunning()
+    private val isLokateRunning: Boolean = lokateSDK.isRunning()
 
-    private val _currentCampaignName = MutableStateFlow<String?>(null)
-    private val _nextCampaignName = MutableStateFlow<String?>(null)
-    private val _affinedCampaigns = MutableStateFlow<List<String>>(emptyList())
+    private val _nextCampaignUIState = MutableStateFlow<NextCampaignUIState?>(null)
+    val nextCampaignUIState = _nextCampaignUIState.asStateFlow()
 
-    val currentCampaignName: StateFlow<String?> = _currentCampaignName.asStateFlow()
-    val nextCampaignName: StateFlow<String?> = _nextCampaignName.asStateFlow()
-    val affinedCampaigns: StateFlow<List<String>> = _affinedCampaigns.asStateFlow()
+    private fun getAffinedCampaigns() {
+        viewModelScope.launch {
+            _affinedCampaigns.value = getAffinedCampaigns(customerId)
+        }
+    }
 
-    private fun updateCampaign(newCampaignName: String?) {
-        if (newCampaignName != null) {
-            viewModelScope.launch {
-                _currentCampaignName.value = newCampaignName
-                _nextCampaignName.value = getNextCampaign(customerId)
-                _affinedCampaigns.value = getAffinedCampaigns(customerId)
-            }
+    private fun updateNextCampaign() {
+        viewModelScope.launch {
+            _nextCampaignUIState.value = getNextCampaign(customerId).toNextCampaignUIState()
+        }
+    }
+
+    private fun LokateBeacon.toDiscountUIState(): DiscountUIState? {
+        return when (this.campaignName) {
+            "pink" -> selfCare
+            "red" -> electronics
+            "white" -> cloth
+            "yellow" -> homeAppliances
+            else -> null
+        }
+    }
+
+    private fun String?.toNextCampaignUIState(): NextCampaignUIState? {
+        return when (this) {
+            "Bira" -> bira
+            else -> null
         }
     }
 

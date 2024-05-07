@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CampaignExperience(
-    nextCampaignName: String?,
+    nextCampaignUIState: NextCampaignUIState?,
     currentCampaignExperience: @Composable () -> Unit,
 ) {
     Column(
