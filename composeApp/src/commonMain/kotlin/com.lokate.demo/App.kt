@@ -213,7 +213,7 @@ fun NavigationBar(
     isVisibleChanged: (Boolean) -> Unit = {},
 ) {
     LaunchedEffect(isVisible) {
-        delay(5000)
+        delay(3000)
         isVisibleChanged(false)
     }
     Box(
