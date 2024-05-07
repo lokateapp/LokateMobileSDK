@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lokate.demo.csfair.CSFairApp
 import com.lokate.demo.gym.GymApp
+import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketApp
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumApp
@@ -193,7 +194,8 @@ fun Nav(
             CSFairApp()
         }
         scene("/gym", navTransition = NavTransition()) {
-            GymApp()
+            val vm = koinViewModel(GymViewModel::class)
+            GymApp(vm)
         }
         scene("/museum", navTransition = NavTransition()) {
             val vm = koinViewModel(MuseumViewModel::class)

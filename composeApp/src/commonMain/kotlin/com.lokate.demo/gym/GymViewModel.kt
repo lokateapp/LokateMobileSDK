@@ -1,4 +1,4 @@
-package com.lokate.demo.market
+package com.lokate.demo.gym
 
 import com.lokate.demo.common.getNextCampaign
 import com.lokate.kmmsdk.LokateSDK
@@ -14,8 +14,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
-class MarketViewModel : ViewModel(), KoinComponent {
-    private val logger = logging("MarketViewModel")
+class GymViewModel : ViewModel(), KoinComponent {
+    private val logger = logging("GymViewModel")
 
     private val lokateSDK: LokateSDK = get()
 
@@ -47,18 +47,15 @@ class MarketViewModel : ViewModel(), KoinComponent {
 
     private val _currentCampaignName = MutableStateFlow<String?>(null)
     private val _nextCampaignName = MutableStateFlow<String?>(null)
-    private val _affinedCampaigns = MutableStateFlow<List<String>>(emptyList())
 
     val currentCampaignName: StateFlow<String?> = _currentCampaignName.asStateFlow()
     val nextCampaignName: StateFlow<String?> = _nextCampaignName.asStateFlow()
-    val affinedCampaigns: StateFlow<List<String>> = _affinedCampaigns.asStateFlow()
 
     private fun updateCampaign(newCampaignName: String?) {
         if (newCampaignName != null) {
             viewModelScope.launch {
                 _currentCampaignName.value = newCampaignName
                 _nextCampaignName.value = getNextCampaign(customerId)
-                _affinedCampaigns.value = getAffinedCampaigns(customerId)
             }
         }
     }
