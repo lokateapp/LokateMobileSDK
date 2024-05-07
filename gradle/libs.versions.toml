@@ -14,6 +14,7 @@ buildkonfigGradlePlugin = "0.15.1"
 compose = "1.6.4"
 compose-plugin = "1.6.1"
 compose-compiler = "1.5.10"
+composeMultiplatformMediaPlayer = "1.0.0"
 junit = "4.13.2"
 kotlin = "1.9.23" # 1.9.22 has a bug with cocoapods https://youtrack.jetbrains.com/issue/KT-65542
 androidx-startup = "1.1.1"
@@ -42,6 +43,7 @@ statelyConcurrency = "2.0.6"
 
 [libraries]
 buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
+compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "composeMultiplatformMediaPlayer" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

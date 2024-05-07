@@ -62,8 +62,8 @@ class GymViewModel : ViewModel(), KoinComponent {
     private fun LokateBeacon.toEquipmentUIState(): EquipmentUIState? {
         return when (this.campaignName) {
             "pink" -> benchPress
-            "red" -> deadlift
-            "white" -> pullUp
+            "red" -> cableRow
+            "white" -> latPulldown
             "yellow" -> squat
             else -> null
         }
