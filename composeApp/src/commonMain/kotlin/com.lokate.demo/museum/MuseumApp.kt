@@ -40,7 +40,6 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun MuseumApp(vm: MuseumViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     val closestExhibitionUIState by vm.closestExhibitionUIState.collectAsStateWithLifecycle(null)
     val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
     val isPlaying by vm.isPlaying.collectAsStateWithLifecycle(false)

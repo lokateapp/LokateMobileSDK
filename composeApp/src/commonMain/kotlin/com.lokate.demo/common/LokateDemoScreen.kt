@@ -19,13 +19,6 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
-enum class DemoType {
-    MARKET,
-    MUSEUM,
-    GYM,
-    CSFAIR,
-}
-
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LokateDemoStartScreen(

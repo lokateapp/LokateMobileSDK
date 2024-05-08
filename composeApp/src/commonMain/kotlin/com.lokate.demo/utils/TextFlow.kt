@@ -71,7 +71,7 @@ import kotlin.math.max
  * @param obstacleContent The slot for an "obstacle".
  */
 @Composable
-public fun TextFlow(
+fun TextFlow(
     text: String,
     modifier: Modifier = Modifier,
     obstacleAlignment: TextFlowObstacleAlignment = TextFlowObstacleAlignment.TopStart,
@@ -146,7 +146,7 @@ public fun TextFlow(
  * @param obstacleContent The slot for an "obstacle".
  */
 @Composable
-public fun TextFlow(
+fun TextFlow(
     text: AnnotatedString,
     modifier: Modifier = Modifier,
     obstacleAlignment: TextFlowObstacleAlignment = TextFlowObstacleAlignment.TopStart,
@@ -227,7 +227,7 @@ public fun TextFlow(
 /**
  * The allowed alignment for an "obstacle" inside the [TextFlow] composable.
  */
-public enum class TextFlowObstacleAlignment {
+enum class TextFlowObstacleAlignment {
     /**
      * Obstacle is aligned in the top start corner.
      */
@@ -271,7 +271,6 @@ internal fun TextFlowCanvas(
         }
 
     // Basically copy-pasta from Text composable
-    @Suppress("DEPRECATION")
     val mergedStyle =
         style.merge(
             textAlign?.let {
