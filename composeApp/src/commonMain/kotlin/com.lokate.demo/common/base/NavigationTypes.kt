@@ -65,8 +65,7 @@ fun RouteBuilder.toScene(screen: Screen) =
     scene(
         screen.route,
         navTransition = NavTransition(),
-    ) { bse ->
-        val vm = screen.getVM()
+    ) {
         BaseScreen(screen)
     }
 
