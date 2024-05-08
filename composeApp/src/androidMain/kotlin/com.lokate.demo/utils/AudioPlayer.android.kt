@@ -2,10 +2,7 @@ package com.lokate.demo.utils
 
 import android.media.MediaPlayer
 import com.lokate.kmmsdk.applicationContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.lighthousegames.logging.Log
-
-private object AndroidResourceReader
 
 class AndroidAudioPlayer : AudioPlayer {
     private var mediaPlayer: MediaPlayer? = null

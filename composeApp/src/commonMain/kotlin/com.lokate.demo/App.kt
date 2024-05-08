@@ -168,12 +168,12 @@ fun NavigationBar(
     }
     Box(
         modifier =
-        Modifier.fillMaxWidth(if (isVisible) 1f else 0.1f)
-            .fillMaxHeight(0.1f)
-            .clickable(enabled = !isVisible) {
-                isVisibleChanged(!isVisible)
-            }
-            .background(Color.Transparent),
+            Modifier.fillMaxWidth(if (isVisible) 1f else 0.1f)
+                .fillMaxHeight(0.1f)
+                .clickable(enabled = !isVisible) {
+                    isVisibleChanged(!isVisible)
+                }
+                .background(Color.Transparent),
         contentAlignment = Alignment.CenterStart,
     ) {
         if (isVisible) {

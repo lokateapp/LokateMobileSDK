@@ -76,15 +76,15 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
     if (closestEquipmentUIState != null) {
         Card(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    rotationY = rotation
-                    cameraDistance = 8 * density
-                }
-                .clickable {
-                    rotated.value = !rotated.value
-                },
+                Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        rotationY = rotation
+                        cameraDistance = 8 * density
+                    }
+                    .clickable {
+                        rotated.value = !rotated.value
+                    },
             shape = RoundedCornerShape(14.dp),
         ) {
             if (!rotated.value) {
@@ -100,10 +100,10 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
 
                     Column(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter)
-                            .padding(16.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter)
+                                .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
@@ -115,15 +115,15 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
             } else {
                 VideoPlayerView(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .graphicsLayer {
-                            alpha = animateBack
-                            rotationY = rotation
-                        }
-                        .clickable {
-                            rotated.value = !rotated.value
-                        },
+                        Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                alpha = animateBack
+                                rotationY = rotation
+                            }
+                            .clickable {
+                                rotated.value = !rotated.value
+                            },
                     showSeekBar = true,
                     url = closestEquipmentUIState.videoPath,
                 )

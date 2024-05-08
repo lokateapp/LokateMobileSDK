@@ -31,7 +31,7 @@ fun MarketApp(vm: MarketViewModel) {
     MarketScreen(
         closestDiscountUIState,
         nextCampaignUIState,
-        affinedCampaigns
+        affinedCampaigns,
     )
 }
 
@@ -64,9 +64,9 @@ fun Discount(message: String) {
     ) {
         Box(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -74,8 +74,8 @@ fun Discount(message: String) {
                 modifier = Modifier.wrapContentSize(),
                 textAlign = TextAlign.Center,
                 style =
-                MaterialTheme.typography.subtitle1
-                    .copy(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black),
+                    MaterialTheme.typography.subtitle1
+                        .copy(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black),
             )
         }
     }

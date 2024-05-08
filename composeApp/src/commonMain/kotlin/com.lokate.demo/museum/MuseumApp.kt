@@ -49,7 +49,7 @@ fun MuseumApp(vm: MuseumViewModel) {
         closestExhibitionUIState,
         nextCampaignUIState,
         vm::play,
-        isPlaying
+        isPlaying,
     )
 }
 
@@ -104,15 +104,15 @@ fun Exhibition(
     } else {
         Card(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    rotationY = rotation
-                    cameraDistance = 8 * density
-                }
-                .clickable {
-                    rotated.value = !rotated.value
-                },
+                Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        rotationY = rotation
+                        cameraDistance = 8 * density
+                    }
+                    .clickable {
+                        rotated.value = !rotated.value
+                    },
             shape = RoundedCornerShape(14.dp),
         ) {
             if (!rotated.value) {
@@ -138,12 +138,12 @@ fun Exhibition(
                 ) {
                     Card(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(scrollState).graphicsLayer {
-                                alpha = animateBack
-                                rotationY = rotation
-                            },
+                            Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(scrollState).graphicsLayer {
+                                    alpha = animateBack
+                                    rotationY = rotation
+                                },
                         elevation = 4.dp,
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(2.dp, Color.Black),

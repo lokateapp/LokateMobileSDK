@@ -35,7 +35,7 @@ fun LokateDemoStartScreen(
     val backgroundPainter: Painter =
         when (demoType) {
             Screen.MarketScreen -> painterResource(DrawableResource("files/market/background.jpg"))
-            Screen.MuseumScreen-> painterResource(DrawableResource("files/museum/background.jpg"))
+            Screen.MuseumScreen -> painterResource(DrawableResource("files/museum/background.jpg"))
             Screen.GymScreen -> painterResource(DrawableResource("files/gym/background.jpg"))
             Screen.CSFairScreen -> painterResource(DrawableResource("files/csfair/background.jpg"))
         }

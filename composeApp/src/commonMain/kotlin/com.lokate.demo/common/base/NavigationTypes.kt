@@ -35,42 +35,48 @@ sealed class Screen(val title: String, val route: String, val navIcon: ImageVect
         Screen(title = "CSFair", route = "/csfair", navIcon = Icons.Default.Celebration)
 }
 
-val ScreenList = listOf(
-    Screen.MarketScreen,
-    Screen.MuseumScreen,
-    Screen.GymScreen,
-    Screen.CSFairScreen
-)
+val ScreenList =
+    listOf(
+        Screen.MarketScreen,
+        Screen.MuseumScreen,
+        Screen.GymScreen,
+        Screen.CSFairScreen,
+    )
 
 @Composable
-fun Screen.getVM() = when (this) {
-    Screen.MarketScreen -> koinViewModel<MarketViewModel>(MarketViewModel::class)
-    Screen.MuseumScreen -> koinViewModel<MuseumViewModel>(MuseumViewModel::class)
-    Screen.GymScreen -> koinViewModel<GymViewModel>(GymViewModel::class)
-    Screen.CSFairScreen -> koinViewModel<CSFairViewModel>(CSFairViewModel::class)
-}
+fun Screen.getVM() =
+    when (this) {
+        Screen.MarketScreen -> koinViewModel<MarketViewModel>(MarketViewModel::class)
+        Screen.MuseumScreen -> koinViewModel<MuseumViewModel>(MuseumViewModel::class)
+        Screen.GymScreen -> koinViewModel<GymViewModel>(GymViewModel::class)
+        Screen.CSFairScreen -> koinViewModel<CSFairViewModel>(CSFairViewModel::class)
+    }
 
 @Composable
-fun Screen.getScreen() = when (this) {
-    Screen.MarketScreen -> MarketApp(this.getVM() as MarketViewModel)
-    Screen.MuseumScreen -> MuseumApp(this.getVM() as MuseumViewModel)
-    Screen.GymScreen -> GymApp(this.getVM() as GymViewModel)
-    Screen.CSFairScreen -> CSFairApp(this.getVM() as CSFairViewModel)
-}
-
-fun RouteBuilder.toScene(screen: Screen) = scene(
-    screen.route, navTransition = NavTransition()
-) {
-    val vm = screen.getVM()
-    BaseScreen(vm, screen) {
-        screen.getScreen()
+fun Screen.getScreen() =
+    when (this) {
+        Screen.MarketScreen -> MarketApp(this.getVM() as MarketViewModel)
+        Screen.MuseumScreen -> MuseumApp(this.getVM() as MuseumViewModel)
+        Screen.GymScreen -> GymApp(this.getVM() as GymViewModel)
+        Screen.CSFairScreen -> CSFairApp(this.getVM() as CSFairViewModel)
     }
-}
 
-fun Screen.getNavigationItem(navigator: Navigator) = NavigationItem(
-    title = title,
-    icon = navIcon,
-    onClick = {
-        navigator.navigate(route)
+fun RouteBuilder.toScene(screen: Screen) =
+    scene(
+        screen.route,
+        navTransition = NavTransition(),
+    ) {
+        val vm = screen.getVM()
+        BaseScreen(vm, screen) {
+            screen.getScreen()
+        }
     }
-)
+
+fun Screen.getNavigationItem(navigator: Navigator) =
+    NavigationItem(
+        title = title,
+        icon = navIcon,
+        onClick = {
+            navigator.navigate(route)
+        },
+    )

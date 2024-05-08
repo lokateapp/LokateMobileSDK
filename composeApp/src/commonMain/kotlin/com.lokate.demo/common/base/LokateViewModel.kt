@@ -9,7 +9,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
-open class LokateViewModel: ViewModel(), KoinComponent {
+open class LokateViewModel : ViewModel(), KoinComponent {
     protected val logger = logging(this::class.simpleName)
 
     private val lokateSDK: LokateSDK = get()
@@ -21,6 +21,7 @@ open class LokateViewModel: ViewModel(), KoinComponent {
     private val isLokateRunning: Boolean = lokateSDK.isRunning()
     private val _buttonClicked = MutableStateFlow(isLokateRunning)
     val buttonClicked: StateFlow<Boolean> = _buttonClicked.asStateFlow()
+
     fun toggleLokate() {
         if (!isLokateRunning) {
             lokateSDK.startScanning()

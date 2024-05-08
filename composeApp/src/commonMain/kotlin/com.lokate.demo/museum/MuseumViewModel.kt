@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.koin.core.component.get
 
-class MuseumViewModel : LokateViewModel(){
+class MuseumViewModel : LokateViewModel() {
     private val player: AudioPlayer = get()
 
     private val _closestExhibitionUIState = MutableStateFlow<ExhibitionUIState?>(null)
