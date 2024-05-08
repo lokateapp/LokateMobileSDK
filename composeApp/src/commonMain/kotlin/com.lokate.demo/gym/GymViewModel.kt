@@ -28,6 +28,7 @@ class GymViewModel : LokateViewModel() {
             }
         }
     }
+
     private fun LokateBeacon.toEquipmentUIState(): EquipmentUIState? {
         return when (this.campaignName) {
             "pink" -> benchPress

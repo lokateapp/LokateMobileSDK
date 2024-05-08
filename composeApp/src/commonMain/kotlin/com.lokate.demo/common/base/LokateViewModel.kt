@@ -33,7 +33,9 @@ open class LokateViewModel : ViewModel(), KoinComponent {
     }
 
     private fun onScreenChange() {
-        logger.e { "onScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLED" }
+        logger.e {
+            "onScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLED"
+        }
         if (isLokateRunning) {
             lokateSDK.stopScanning()
             _buttonClicked.value = false

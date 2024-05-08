@@ -14,9 +14,7 @@ fun CSFairApp(vm: CSFairViewModel) {
 }
 
 @Composable
-fun CSFairScreen(
-    closestStandUIState: StandUIState?,
-) {
+fun CSFairScreen(closestStandUIState: StandUIState?) {
     CommonSurface {
         Stand(closestStandUIState)
     }

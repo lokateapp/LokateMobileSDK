@@ -42,12 +42,14 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
 
     private val scanResults = mutableSetOf<BeaconScanResult>()
 
-    private fun initJobs(){
-        if(!mainJob.isActive){
-            mainJob = SupervisorJob()
-            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
-        }
+    private fun initJobs()  {
+        if (!mainJob.isActive)
+            {
+                mainJob = SupervisorJob()
+                coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+            }
     }
+
     override fun startScanning() {
         if (running) {
             Log.e("AndroidEstimoteBeaconScanner", "Already scanning")
@@ -113,7 +115,7 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
                 delay(Defaults.DEFAULT_SCAN_PERIOD)
                 Log.i(
                     "AndroidEstimoteBeaconScanner",
-                    "Beacons found: ${scanResults.map { it.minor }}"
+                    "Beacons found: ${scanResults.map { it.minor }}",
                 )
                 scanResults.forEach {
                     beaconFlow.emit(it.copy(seen = System.currentTimeMillis()))

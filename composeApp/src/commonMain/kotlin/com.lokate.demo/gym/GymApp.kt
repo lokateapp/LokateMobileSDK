@@ -38,9 +38,7 @@ fun GymApp(vm: GymViewModel) {
 }
 
 @Composable
-fun GymScreen(
-    closestEquipmentUIState: EquipmentUIState?,
-) {
+fun GymScreen(closestEquipmentUIState: EquipmentUIState?) {
     CommonSurface {
         Equipment(closestEquipmentUIState)
     }

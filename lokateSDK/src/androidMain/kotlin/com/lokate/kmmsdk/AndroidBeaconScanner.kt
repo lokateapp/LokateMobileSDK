@@ -60,7 +60,7 @@ class AndroidBeaconScanner : BeaconScanner {
             addRangeNotifier { beacons, region ->
                 Log.i(
                     "AndroidBeaconScanner",
-                    "Beacons found: ${beacons.map { it.id3 }} in region $region"
+                    "Beacons found: ${beacons.map { it.id3 }} in region $region",
                 )
                 beacons.forEach { beacon ->
                     coroutineScope.launch {

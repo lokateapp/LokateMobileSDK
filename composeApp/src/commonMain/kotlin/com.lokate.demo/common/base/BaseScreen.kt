@@ -7,9 +7,7 @@ import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import moe.tlaster.precompose.koin.koinViewModel
 
 @Composable
-fun BaseScreen(
-    type: Screen
-) {
+fun BaseScreen(type: Screen) {
     val vm = koinViewModel(type.getVM())
     val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     if (!buttonClicked) {
