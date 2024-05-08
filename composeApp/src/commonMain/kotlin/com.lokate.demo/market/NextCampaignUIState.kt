@@ -1,4 +1,4 @@
-package com.lokate.demo.common
+package com.lokate.demo.market
 
 data class NextCampaignUIState(
     val iconPath: String,

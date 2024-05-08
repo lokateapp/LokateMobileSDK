@@ -36,7 +36,7 @@ import org.lighthousegames.logging.logging
 class LokateSDK(
     private val authenticationRepository: AuthenticationRepository,
     private val beaconRepository: BeaconRepository,
-    private val beaconScanner: BeaconScanner,
+    private var beaconScanner: BeaconScanner,
 ) : SDKKoinComponent() {
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
@@ -83,26 +83,34 @@ class LokateSDK(
         }
     }
 
+    fun setBeaconScanner(beaconScanner: BeaconScanner) {
+        if (!isActive) {
+            this.beaconScanner = beaconScanner
+        } else {
+            log.e { "Cannot set beacon scanner while scanning" }
+        }
+    }
+
     fun getCustomerId(): String {
         return customerId
     }
 
-    private val lokateJob = SupervisorJob()
-    private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
-    private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
+    private var lokateJob = SupervisorJob()
+    private var lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
+    private var lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
 
     private val lokateBeacons =
         ConcurrentSetWithSpecialEquals(
             equals = { it1: BeaconScanResult, it2 ->
                 it1.beaconUUID.lowercase() == it2.beaconUUID.lowercase() &&
-                    it1.major == it2.major &&
-                    it1.minor == it2.minor
+                        it1.major == it2.major &&
+                        it1.minor == it2.minor
             },
         )
 
-    private val beaconScanResultChannel =
+    private var beaconScanResultChannel =
         Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
-    private val eventChannel: Channel<EventRequest> =
+    private var eventChannel: Channel<EventRequest> =
         Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
     private val closestBeaconFlow: MutableSharedFlow<LokateBeacon?> = MutableSharedFlow()
@@ -200,7 +208,7 @@ class LokateSDK(
             log.e { "Already scanning" }
             return
         }
-
+        initJobsPipeline()
         fetchBranchBeacons {
             beaconScanner.setRegions(branchBeacons)
             beaconScanner.startScanning()
@@ -210,14 +218,38 @@ class LokateSDK(
         }
     }
 
+    /**
+     *     fun stopScanning() {
+     *         isActive = false
+     *         beaconScanner.stopScanning()
+     *         lokateJob.cancel()
+     *         closeChannels()
+     *     }
+     *
+     *     private fun closeChannels() {
+     *         beaconScanResultChannel.close()
+     *         eventChannel.close()
+     *     }
+     */
+    private fun initJobsPipeline() {
+        if (!lokateJob.isActive) {
+            lokateJob = SupervisorJob()
+            lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
+            lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
+
+            beaconScanResultChannel = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+            eventChannel = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+        }
+    }
+
     private fun CoroutineScope.excludeMinimumProximityAndNonBranchBeacons(channel: ReceiveChannel<BeaconScanResult>) =
         produce {
             for (scan in channel) {
                 val beacon =
                     branchBeacons.firstOrNull {
                         it.proximityUUID.lowercase() == scan.beaconUUID.lowercase() &&
-                            it.major == scan.major &&
-                            it.minor == scan.minor
+                                it.major == scan.major &&
+                                it.minor == scan.minor
                     }
                 when {
                     scan.accuracy < 0 -> log.d { "This shouldn't happen" }
@@ -225,7 +257,7 @@ class LokateSDK(
                     beacon.radius < scan.accuracy -> {
                         log.d {
                             "Beacon proximity is not in range: $scan." +
-                                " setted: ${beacon.radius}, current: ${scan.accuracy}"
+                                    " setted: ${beacon.radius}, current: ${scan.accuracy}"
                         }
                     }
 
@@ -260,8 +292,8 @@ class LokateSDK(
                     closestBeacon =
                         branchBeacons.firstOrNull {
                             closestScan.beaconUUID.lowercase() == it.proximityUUID.lowercase() &&
-                                closestScan.major == it.major &&
-                                closestScan.minor == it.minor
+                                    closestScan.major == it.major &&
+                                    closestScan.minor == it.minor
                         }
                     closestBeaconFlow.emit(closestBeacon)
                     log.d { "closest beacon changed: $closestBeacon" }
@@ -319,6 +351,7 @@ class LokateSDK(
     }
 
     fun stopScanning() {
+        log.e { "stopScanning CALLED"}
         isActive = false
         beaconScanner.stopScanning()
         lokateJob.cancel()

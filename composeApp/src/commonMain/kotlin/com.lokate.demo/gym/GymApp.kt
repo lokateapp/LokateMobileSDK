@@ -24,8 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import chaintech.videoplayer.ui.VideoPlayerView
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.common.CommonSurface
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -34,17 +33,15 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun GymApp(vm: GymViewModel) {
     val closestEquipmentUIState by vm.closestEquipmentUIState.collectAsStateWithLifecycle(null)
-    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
 
-    GymScreen(closestEquipmentUIState, nextCampaignUIState)
+    GymScreen(closestEquipmentUIState)
 }
 
 @Composable
 fun GymScreen(
     closestEquipmentUIState: EquipmentUIState?,
-    nextCampaignUIState: NextCampaignUIState?,
 ) {
-    CampaignExperience(nextCampaignUIState) {
+    CommonSurface {
         Equipment(closestEquipmentUIState)
     }
 }

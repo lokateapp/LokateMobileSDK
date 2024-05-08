@@ -1,4 +1,4 @@
-package com.lokate.demo.common
+package com.lokate.demo.market
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -40,23 +40,24 @@ fun CampaignExperience(
                 currentCampaignExperience()
             }
         }
-
         // Bottom part, next campaign experience (1/4 of the screen)
-        Surface(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(2.dp, Color.Black),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                contentAlignment = Alignment.Center,
+        if (nextCampaignUIState != null) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(2.dp, Color.Black),
             ) {
-                Text(
-                    text = "Next campaign: to be implemented",
-                    modifier = Modifier.wrapContentSize(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.body1,
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Next campaign: to be implemented",
+                        modifier = Modifier.wrapContentSize(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body1,
+                    )
+                }
             }
         }
     }

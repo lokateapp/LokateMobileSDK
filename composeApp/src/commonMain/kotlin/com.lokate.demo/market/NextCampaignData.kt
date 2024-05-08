@@ -1,7 +1,5 @@
 package com.lokate.demo.market
 
-import com.lokate.demo.common.NextCampaignUIState
-
 val bira =
     NextCampaignUIState(
         iconPath = "files/market/next/",

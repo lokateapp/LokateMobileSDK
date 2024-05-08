@@ -18,11 +18,30 @@ open class LokateViewModel : ViewModel(), KoinComponent {
     protected val customerId: String
         get() = lokateSDK.getCustomerId()
 
-    private val isLokateRunning: Boolean = lokateSDK.isRunning()
-    private val _buttonClicked = MutableStateFlow(isLokateRunning)
+    private val isLokateRunning: Boolean
+        get() = lokateSDK.isRunning()
+    private val _buttonClicked = MutableStateFlow(false)
     val buttonClicked: StateFlow<Boolean> = _buttonClicked.asStateFlow()
 
+    init {
+        lokateSDK.stopScanning()
+    }
+
+    override fun onCleared() {
+        onScreenChange()
+        super.onCleared()
+    }
+
+    private fun onScreenChange() {
+        logger.e { "onScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLEDonScreenChange CALLED" }
+        if (isLokateRunning) {
+            lokateSDK.stopScanning()
+            _buttonClicked.value = false
+        }
+    }
+
     fun toggleLokate() {
+        logger.e { "TOGGLE LOKATE $isLokateRunning" }
         if (!isLokateRunning) {
             lokateSDK.startScanning()
             _buttonClicked.value = true

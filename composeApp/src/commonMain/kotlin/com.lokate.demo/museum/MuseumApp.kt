@@ -30,8 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.common.CommonSurface
 import com.lokate.demo.utils.TextFlow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
@@ -41,12 +40,10 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun MuseumApp(vm: MuseumViewModel) {
     val closestExhibitionUIState by vm.closestExhibitionUIState.collectAsStateWithLifecycle(null)
-    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
     val isPlaying by vm.isPlaying.collectAsStateWithLifecycle(false)
 
     MuseumScreen(
         closestExhibitionUIState,
-        nextCampaignUIState,
         vm::play,
         isPlaying,
     )
@@ -55,11 +52,10 @@ fun MuseumApp(vm: MuseumViewModel) {
 @Composable
 fun MuseumScreen(
     closestExhibitionUIState: ExhibitionUIState?,
-    nextCampaignUIState: NextCampaignUIState?,
     play: () -> Unit,
     isPlaying: Boolean,
 ) {
-    CampaignExperience(nextCampaignUIState) {
+    CommonSurface {
         Exhibition(closestExhibitionUIState, play, isPlaying)
     }
 }
@@ -119,7 +115,7 @@ fun Exhibition(
                     painter = painterResource(DrawableResource(closestExhibitionUIState.imagePath)),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize().graphicsLayer { alpha = animateFront },
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = ContentScale.Fit,
                 )
             } else {
                 Scaffold(

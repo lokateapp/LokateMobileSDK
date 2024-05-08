@@ -1,8 +1,6 @@
 package com.lokate.demo.museum
 
-import com.lokate.demo.common.NextCampaignUIState
 import com.lokate.demo.common.base.LokateViewModel
-import com.lokate.demo.common.getNextCampaign
 import com.lokate.demo.utils.AudioPlayer
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,20 +41,10 @@ class MuseumViewModel : LokateViewModel() {
                     val mapped = it.toExhibitionUIState()
                     if (mapped != null) {
                         setPlayer(mapped)
-                        updateNextCampaign()
+                        _closestExhibitionUIState.emit(mapped)
                     }
-                    _closestExhibitionUIState.emit(mapped)
                 }
             }
-        }
-    }
-
-    private val _nextCampaignUIState = MutableStateFlow<NextCampaignUIState?>(null)
-    val nextCampaignUIState = _nextCampaignUIState.asStateFlow()
-
-    private fun updateNextCampaign() {
-        viewModelScope.launch {
-            _nextCampaignUIState.value = getNextCampaign(customerId).toNextCampaignUIState()
         }
     }
 
@@ -72,13 +60,6 @@ class MuseumViewModel : LokateViewModel() {
             "red" -> schoolOfAthens
             "white" -> venusDeMilo
             "yellow" -> monaLisa
-            else -> null
-        }
-    }
-
-    private fun String?.toNextCampaignUIState(): NextCampaignUIState? {
-        return when (this) {
-            "Pieta" -> pietaNext
             else -> null
         }
     }

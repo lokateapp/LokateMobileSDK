@@ -1,4 +1,4 @@
-package com.lokate.demo.common
+package com.lokate.demo.market
 
 import com.lokate.demo.BuildKonfig
 import com.lokate.kmmsdk.LokateSDK.Companion.log
@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class ApiResult(val nextCampaignName: String)
+internal data class NextCampaignApiResult(val nextCampaignName: String)
 
 // TODO: extract HTTP client to a separate object and do not create it on each function call
 suspend fun getNextCampaign(customerId: String): String? {
@@ -59,7 +59,7 @@ suspend fun getNextCampaign(customerId: String): String? {
 
     return try {
         val response: HttpResponse = client.get(url.buildString())
-        val nextCampaignName = response.body<ApiResult>().nextCampaignName
+        val nextCampaignName = response.body<NextCampaignApiResult>().nextCampaignName
         log.d { "Next campaign based on the order of visits: $nextCampaignName" }
         nextCampaignName
     } catch (e: Exception) {

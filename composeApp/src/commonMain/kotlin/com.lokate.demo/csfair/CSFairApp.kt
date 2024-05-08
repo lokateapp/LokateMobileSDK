@@ -3,24 +3,21 @@ package com.lokate.demo.csfair
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.common.CommonSurface
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun CSFairApp(vm: CSFairViewModel) {
     val closestStandUIState by vm.closestStandUIState.collectAsStateWithLifecycle(null)
-    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
 
-    CSFairScreen(closestStandUIState, nextCampaignUIState)
+    CSFairScreen(closestStandUIState)
 }
 
 @Composable
 fun CSFairScreen(
     closestStandUIState: StandUIState?,
-    nextCampaignUIState: NextCampaignUIState?,
 ) {
-    CampaignExperience(nextCampaignUIState) {
+    CommonSurface {
         Stand(closestStandUIState)
     }
 }

@@ -25,8 +25,9 @@ import platform.Foundation.NSLog
 class IOSBeaconScanner : BeaconScanner, SDKKoinComponent() {
     private val sharedCLLocationManager: SharedCLLocationManager = get()
     private val manager = sharedCLLocationManager.manager
-    private val mainJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+
+    private var mainJob = SupervisorJob()
+    private var coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
 
     private var regions: List<CLBeaconRegion> = listOf()
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
@@ -41,12 +42,19 @@ class IOSBeaconScanner : BeaconScanner, SDKKoinComponent() {
             NSLog("No regions to scan1")
             return
         }
-
+        initJobs()
         regions.forEach {
             NSLog("Starting ranging for region: $it")
             manager.startRangingBeaconsInRegion(it)
         }
         running = true
+    }
+
+    private fun initJobs() {
+        if (!mainJob.isActive) {
+            mainJob = SupervisorJob()
+            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+        }
     }
 
     init {
@@ -98,6 +106,8 @@ class IOSBeaconScanner : BeaconScanner, SDKKoinComponent() {
             manager.stopRangingBeaconsInRegion(it)
         }
         running = false
+
+        mainJob.cancel()
     }
 
     override fun setRegions(regions: List<LokateBeacon>) {

@@ -1,8 +1,6 @@
 package com.lokate.demo.market
 
-import com.lokate.demo.common.NextCampaignUIState
 import com.lokate.demo.common.base.LokateViewModel
-import com.lokate.demo.common.getNextCampaign
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

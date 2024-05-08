@@ -16,10 +16,11 @@ import com.lokate.demo.market.MarketApp
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumApp
 import com.lokate.demo.museum.MuseumViewModel
-import moe.tlaster.precompose.koin.koinViewModel
+import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import moe.tlaster.precompose.viewmodel.ViewModel
 
 sealed class Screen(val title: String, val route: String, val navIcon: ImageVector) {
     data object MarketScreen :
@@ -43,33 +44,30 @@ val ScreenList =
         Screen.CSFairScreen,
     )
 
-@Composable
 fun Screen.getVM() =
     when (this) {
-        Screen.MarketScreen -> koinViewModel<MarketViewModel>(MarketViewModel::class)
-        Screen.MuseumScreen -> koinViewModel<MuseumViewModel>(MuseumViewModel::class)
-        Screen.GymScreen -> koinViewModel<GymViewModel>(GymViewModel::class)
-        Screen.CSFairScreen -> koinViewModel<CSFairViewModel>(CSFairViewModel::class)
+        Screen.MarketScreen -> MarketViewModel::class
+        Screen.MuseumScreen -> MuseumViewModel::class
+        Screen.GymScreen -> GymViewModel::class
+        Screen.CSFairScreen -> CSFairViewModel::class
     }
 
 @Composable
-fun Screen.getScreen() =
+fun Screen.getScreen(vm: ViewModel) =
     when (this) {
-        Screen.MarketScreen -> MarketApp(this.getVM() as MarketViewModel)
-        Screen.MuseumScreen -> MuseumApp(this.getVM() as MuseumViewModel)
-        Screen.GymScreen -> GymApp(this.getVM() as GymViewModel)
-        Screen.CSFairScreen -> CSFairApp(this.getVM() as CSFairViewModel)
+        Screen.MarketScreen -> MarketApp(vm as MarketViewModel)
+        Screen.MuseumScreen -> MuseumApp(vm as MuseumViewModel)
+        Screen.GymScreen -> GymApp(vm as GymViewModel)
+        Screen.CSFairScreen -> CSFairApp(vm as CSFairViewModel)
     }
 
 fun RouteBuilder.toScene(screen: Screen) =
     scene(
         screen.route,
         navTransition = NavTransition(),
-    ) {
+    ) { bse ->
         val vm = screen.getVM()
-        BaseScreen(vm, screen) {
-            screen.getScreen()
-        }
+        BaseScreen(screen)
     }
 
 fun Screen.getNavigationItem(navigator: Navigator) =
@@ -77,6 +75,6 @@ fun Screen.getNavigationItem(navigator: Navigator) =
         title = title,
         icon = navIcon,
         onClick = {
-            navigator.navigate(route)
+            navigator.navigate(route, options = NavOptions(launchSingleTop = true))
         },
     )

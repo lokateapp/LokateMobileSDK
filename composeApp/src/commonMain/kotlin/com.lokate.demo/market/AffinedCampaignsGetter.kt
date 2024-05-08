@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class ApiResult(val affinedCampaigns: List<String>)
+data class AffinedCampaignsApiResult(val affinedCampaigns: List<String>)
 
 // TODO: extract HTTP client to a separate object and do not create it on each function call
 suspend fun getAffinedCampaigns(customerId: String): List<String> {
@@ -59,7 +59,7 @@ suspend fun getAffinedCampaigns(customerId: String): List<String> {
 
     return try {
         val response: HttpResponse = client.get(url.buildString())
-        val affinedCampaigns = response.body<ApiResult>().affinedCampaigns
+        val affinedCampaigns = response.body<AffinedCampaignsApiResult>().affinedCampaigns
         log.d { "Successfully retrieved affined campaigns: $affinedCampaigns" }
         affinedCampaigns
     } catch (e: Exception) {

@@ -24,21 +24,29 @@ class AndroidBeaconScanner : BeaconScanner {
                 isRegionStatePersistenceEnabled = false
             }
         }
-        private val mainJob = SupervisorJob()
-        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
     }
+
+    private var mainJob = SupervisorJob()
+    private var coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
 
     private var running: Boolean = false
 
     private val regions = mutableListOf<Region>()
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
 
+    private fun initJobs() {
+        if (!mainJob.isActive) {
+            mainJob = SupervisorJob()
+            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+        }
+    }
+
     override fun startScanning() {
         if (running) {
             Log.e("AndroidBeaconScanner", "Already scanning")
             return
         }
-
+        initJobs()
         if (regions.isEmpty()) {
             setRegions(listOf())
         }
@@ -50,7 +58,10 @@ class AndroidBeaconScanner : BeaconScanner {
             removeAllRangeNotifiers()
             removeAllMonitorNotifiers()
             addRangeNotifier { beacons, region ->
-                Log.i("AndroidBeaconScanner", "Beacons found: ${beacons.map { it.id3 }} in region $region")
+                Log.i(
+                    "AndroidBeaconScanner",
+                    "Beacons found: ${beacons.map { it.id3 }} in region $region"
+                )
                 beacons.forEach { beacon ->
                     coroutineScope.launch {
                         beaconFlow.emit(beacon.toBeaconScanResult())

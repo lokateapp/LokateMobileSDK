@@ -28,10 +28,10 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
             NSLog("Error: $error")
         }
 
-    companion object {
-        private val mainJob = SupervisorJob()
-        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
-    }
+
+    private var mainJob = SupervisorJob()
+    private var coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+
 
     private var running: Boolean = false
 
@@ -60,11 +60,20 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
             setRegions(listOf())
         }
 
+        initJobs()
+
         NSLog("Starting scanning")
 
         running = true
         proximityObserver.startObservingZones(regions)
         flowEmitter()
+    }
+
+    private fun initJobs(){
+        if(!mainJob.isActive){
+            mainJob = SupervisorJob()
+            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+        }
     }
 
     override fun stopScanning() {
