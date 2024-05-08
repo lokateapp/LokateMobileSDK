@@ -242,7 +242,6 @@ public enum class TextFlowObstacleAlignment {
 
 private enum class TextFlowContent { Obstacle, Text }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 internal fun TextFlowCanvas(
     text: AnnotatedString,

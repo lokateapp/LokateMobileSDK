@@ -43,7 +43,6 @@ class AndroidAudioPlayer : AudioPlayer {
         mediaPlayer?.seekTo(position)
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     override fun setDataSource(source: String) {
         val assetManager = applicationContext.assets
         val afd = assetManager.openFd(source)

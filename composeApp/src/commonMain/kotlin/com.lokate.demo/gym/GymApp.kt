@@ -25,8 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import chaintech.videoplayer.ui.VideoPlayerView
 import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.DemoType
-import com.lokate.demo.common.LokateDemoStartScreen
 import com.lokate.demo.common.NextCampaignUIState
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
@@ -35,26 +33,19 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GymApp(vm: GymViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     val closestEquipmentUIState by vm.closestEquipmentUIState.collectAsStateWithLifecycle(null)
     val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
 
-    GymScreen(buttonClicked, vm::toggleLokate, closestEquipmentUIState, nextCampaignUIState)
+    GymScreen(closestEquipmentUIState, nextCampaignUIState)
 }
 
 @Composable
 fun GymScreen(
-    buttonClicked: Boolean,
-    onButtonClick: () -> Unit,
     closestEquipmentUIState: EquipmentUIState?,
     nextCampaignUIState: NextCampaignUIState?,
 ) {
-    if (!buttonClicked) {
-        LokateDemoStartScreen(DemoType.GYM, onButtonClick)
-    } else {
-        CampaignExperience(nextCampaignUIState) {
-            Equipment(closestEquipmentUIState)
-        }
+    CampaignExperience(nextCampaignUIState) {
+        Equipment(closestEquipmentUIState)
     }
 }
 
@@ -85,15 +76,15 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
     if (closestEquipmentUIState != null) {
         Card(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        rotationY = rotation
-                        cameraDistance = 8 * density
-                    }
-                    .clickable {
-                        rotated.value = !rotated.value
-                    },
+            Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    rotationY = rotation
+                    cameraDistance = 8 * density
+                }
+                .clickable {
+                    rotated.value = !rotated.value
+                },
             shape = RoundedCornerShape(14.dp),
         ) {
             if (!rotated.value) {
@@ -109,10 +100,10 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
 
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.TopCenter)
-                                .padding(16.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter)
+                            .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
@@ -124,15 +115,15 @@ fun Equipment(closestEquipmentUIState: EquipmentUIState?) {
             } else {
                 VideoPlayerView(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .graphicsLayer {
-                                alpha = animateBack
-                                rotationY = rotation
-                            }
-                            .clickable {
-                                rotated.value = !rotated.value
-                            },
+                    Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            alpha = animateBack
+                            rotationY = rotation
+                        }
+                        .clickable {
+                            rotated.value = !rotated.value
+                        },
                     showSeekBar = true,
                     url = closestEquipmentUIState.videoPath,
                 )

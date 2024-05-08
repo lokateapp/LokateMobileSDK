@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
