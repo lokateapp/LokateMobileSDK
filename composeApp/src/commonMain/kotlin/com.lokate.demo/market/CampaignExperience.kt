@@ -15,7 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -41,18 +45,32 @@ fun CampaignExperience(
             }
         }
         // Bottom part, next campaign experience (1/4 of the screen)
-        if (nextCampaignUIState != null) {
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, Color.Black),
+        Surface(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(2.dp, Color.Black),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
+                if (nextCampaignUIState != null) {
+                    // Icon()
                     Text(
-                        text = "Next campaign: to be implemented",
+                        text =
+                            buildAnnotatedString {
+                                append("İzlediğiniz rotaya göre sıradaki önerim:")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
+                                    append(nextCampaignUIState.information)
+                                }
+                            },
+                        modifier = Modifier.wrapContentSize(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body1,
+                    )
+                } else {
+                    Text(
+                        text = "Rotanıza uygun sıradaki ürünü belirleyemedim. Alışverişinize devam ettikçe size özel sıradaki ürünleri buradan paylaşacağım.",
                         modifier = Modifier.wrapContentSize(),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.body1,

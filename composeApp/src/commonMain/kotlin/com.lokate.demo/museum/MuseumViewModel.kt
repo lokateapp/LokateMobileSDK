@@ -39,10 +39,10 @@ class MuseumViewModel : LokateViewModel() {
                 logger.d { "Closest beacon changed: $it" }
                 if (it != null) {
                     val mapped = it.toExhibitionUIState()
-                    if (mapped != null) {
+                    if (mapped != null && mapped != closestExhibitionUIState.value) {
                         setPlayer(mapped)
-                        _closestExhibitionUIState.emit(mapped)
                     }
+                    _closestExhibitionUIState.emit(mapped)
                 }
             }
         }

@@ -24,7 +24,7 @@ class MarketViewModel : LokateViewModel() {
                 logger.d { "Closest beacon changed: $it" }
                 if (it != null) {
                     val mapped = it.toDiscountUIState()
-                    if (mapped != null) {
+                    if (mapped != null && mapped != closestDiscountUIState.value) {
                         updateLocationBasedRecommendations()
                     }
                     _closestDiscountUIState.emit(mapped)
@@ -39,24 +39,47 @@ class MarketViewModel : LokateViewModel() {
     private fun updateLocationBasedRecommendations() {
         viewModelScope.launch {
             val (affinedCampaigns, nextCampaign) = getLocationBasedRecommendations(customerId)
-            _affinedCampaigns.value = affinedCampaigns
             _nextCampaignUIState.value = nextCampaign.toNextCampaignUIState()
+            _affinedCampaigns.value = affinedCampaigns
         }
     }
 
     private fun LokateBeacon.toDiscountUIState(): DiscountUIState? {
         return when (this.campaignName) {
-            "pink" -> selfCare
-            "red" -> electronics
-            "white" -> cloth
-            "yellow" -> homeAppliances
+            "giris" -> giris
+            "bebek bezi" -> bebekBezi
+            "kuruyemis" -> kuruyemis
+            "bira" -> bira
             else -> null
         }
     }
 
     private fun String?.toNextCampaignUIState(): NextCampaignUIState? {
         return when (this) {
-            "Bira" -> bira
+            "bebek bezi" -> bebekBeziNext
+            "kuruyemis" -> kuruyemisNext
+            "bira" -> biraNext
+            "ekmek" -> ekmekNext
+            "bakliyat" -> bakliyatNext
+            "konserve" -> konserveNext
+            "kasap" -> kasapNext
+            "icecek" -> icecekNext
+            "bulasik" -> bulasikNext
+            "deterjan" -> deterjanNext
+            "sut" -> sutNext
+            "cay" -> cayNext
+            "dondurma" -> dondurmaNext
+            "cips" -> cipsNext
+            "kahve" -> kahveNext
+            "cikolata" -> cikolataNext
+            "dondurulmus hazir gida" -> dondurulmusHazirGidaNext
+            "kisisel bakim" -> kisiselBakimNext
+            "sarap" -> sarapNext
+            "kasa" -> kasaNext
+            "sandvic" -> sandvicNext
+            "kagit" -> kagitNext
+            "kalem" -> kalemNext
+            "defter" -> defterNext
             else -> null
         }
     }

@@ -67,12 +67,11 @@ class IOSEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScanner 
         flowEmitter()
     }
 
-    private fun initJobs()  {
-        if (!mainJob.isActive)
-            {
-                mainJob = SupervisorJob()
-                coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
-            }
+    private fun initJobs() {
+        if (!mainJob.isActive) {
+            mainJob = SupervisorJob()
+            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+        }
     }
 
     override fun stopScanning() {

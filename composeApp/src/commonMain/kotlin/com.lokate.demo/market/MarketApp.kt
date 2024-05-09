@@ -41,13 +41,15 @@ fun MarketScreen(
 ) {
     CampaignExperience(nextCampaignUIState) {
         if (closestDiscountUIState != null) {
-            if (closestDiscountUIState.category in affinedCampaigns) {
-                Discount(closestDiscountUIState.pool.random())
+            if (closestDiscountUIState.campaign in affinedCampaigns || closestDiscountUIState.campaign == "giris") {
+                Discount(closestDiscountUIState.pool[0])
             } else {
-                Discount("No relevant discounts nearby")
+                Discount(
+                    "Yakınlarda size önerebileceğimiz bir şey yok :(\nİlginizi çekebilecek ürünlerin yanına yaklaştığınızda sizleri bilgilendireceğiz.",
+                )
             }
         } else {
-            Discount("No nearby campaigns")
+            Discount("Kapsama alanı dışı")
         }
     }
 }

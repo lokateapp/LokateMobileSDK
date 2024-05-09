@@ -21,9 +21,7 @@ class GymViewModel : LokateViewModel() {
                 logger.d { "Closest beacon changed: $it" }
                 if (it != null) {
                     val mapped = it.toEquipmentUIState()
-                    if (mapped != null) {
-                        _closestEquipmentUIState.emit(mapped)
-                    }
+                    _closestEquipmentUIState.emit(mapped)
                 }
             }
         }
