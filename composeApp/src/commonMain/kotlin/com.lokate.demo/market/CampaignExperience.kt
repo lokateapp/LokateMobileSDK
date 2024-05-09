@@ -1,9 +1,11 @@
 package com.lokate.demo.market
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -21,7 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun CampaignExperience(
     nextCampaignUIState: NextCampaignUIState?,
@@ -55,19 +61,24 @@ fun CampaignExperience(
                 contentAlignment = Alignment.Center,
             ) {
                 if (nextCampaignUIState != null) {
-                    // Icon()
-                    Text(
-                        text =
-                            buildAnnotatedString {
-                                append("İzlediğiniz rotaya göre sıradaki önerim:")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
-                                    append(nextCampaignUIState.information)
-                                }
-                            },
-                        modifier = Modifier.wrapContentSize(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body1,
-                    )
+                    Row {
+                        Image(
+                            painter = painterResource(DrawableResource(nextCampaignUIState.iconPath)),
+                            contentDescription = null,
+                        )
+                        Text(
+                            text =
+                                buildAnnotatedString {
+                                    append("Rotanıza göre sıradaki önerim: ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
+                                        append(nextCampaignUIState.information)
+                                    }
+                                },
+                            modifier = Modifier.wrapContentSize(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body1,
+                        )
+                    }
                 } else {
                     Text(
                         text = "Rotanıza uygun sıradaki ürünü belirleyemedim. Alışverişinize devam ettikçe size özel sıradaki ürünleri buradan paylaşacağım.",
