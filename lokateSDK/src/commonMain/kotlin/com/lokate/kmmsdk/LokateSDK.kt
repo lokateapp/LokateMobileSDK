@@ -42,6 +42,7 @@ class LokateSDK(
         data object IBeacon : BeaconScannerType()
 
         data class EstimoteMonitoring(val appId: String, val appToken: String) : BeaconScannerType()
+
     }
 
     companion object {
@@ -89,6 +90,10 @@ class LokateSDK(
         } else {
             log.e { "Cannot set beacon scanner while scanning" }
         }
+    }
+
+    fun getLast(): BeaconScanResult? {
+        return lokateBeacons.minByOrNull { it.accuracy }
     }
 
     fun getCustomerId(): String {

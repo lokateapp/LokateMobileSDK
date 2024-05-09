@@ -37,6 +37,8 @@
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>UWBBB</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -47,6 +49,7 @@
 		<string>bluetooth-central</string>
 		<string>fetch</string>
 		<string>location</string>
+		<string>nearby-interaction</string>
 		<string>processing</string>
 	</array>
 	<key>UILaunchScreen</key>
