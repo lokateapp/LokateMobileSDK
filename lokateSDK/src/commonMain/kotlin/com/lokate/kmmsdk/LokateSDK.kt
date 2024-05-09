@@ -91,7 +91,6 @@ class LokateSDK(
             log.e { "Cannot set beacon scanner while scanning" }
         }
     }
-
     fun getLast(): BeaconScanResult? {
         return lokateBeacons.minByOrNull { it.accuracy }
     }
