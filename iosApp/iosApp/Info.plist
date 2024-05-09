@@ -29,6 +29,8 @@
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
+	<key>NSCameraUsageDescription</key>
+	<string>assist uwb</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>To be able to dfdaskljalşgdaşklsgjdasklgjasldkg</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -61,8 +63,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

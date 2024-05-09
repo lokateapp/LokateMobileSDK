@@ -80,7 +80,7 @@ class EstimoteUWBBeaconScannerManager: NSObject, ObservableObject {
     private func setupUWB() {
         uwbManager = EstimoteUWBManager(delegate: self,
                                         options: EstimoteUWBOptions(shouldHandleConnectivity: true,
-                                                                    isCameraAssisted: false))
+                                                                    isCameraAssisted: true))
     }
     
     func startScanning(){
