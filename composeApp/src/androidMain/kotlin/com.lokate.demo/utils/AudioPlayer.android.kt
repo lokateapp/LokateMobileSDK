@@ -2,10 +2,7 @@ package com.lokate.demo.utils
 
 import android.media.MediaPlayer
 import com.lokate.kmmsdk.applicationContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.lighthousegames.logging.Log
-
-private object AndroidResourceReader
 
 class AndroidAudioPlayer : AudioPlayer {
     private var mediaPlayer: MediaPlayer? = null
@@ -43,7 +40,6 @@ class AndroidAudioPlayer : AudioPlayer {
         mediaPlayer?.seekTo(position)
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     override fun setDataSource(source: String) {
         val assetManager = applicationContext.assets
         val afd = assetManager.openFd(source)

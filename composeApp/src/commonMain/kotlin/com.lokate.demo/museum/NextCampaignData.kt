@@ -1,6 +1,6 @@
 package com.lokate.demo.museum
 
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.market.NextCampaignUIState
 
 val pietaNext =
     NextCampaignUIState(

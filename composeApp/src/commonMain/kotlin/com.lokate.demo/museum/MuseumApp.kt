@@ -30,10 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.DemoType
-import com.lokate.demo.common.LokateDemoStartScreen
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.common.CommonSurface
 import com.lokate.demo.utils.TextFlow
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
@@ -42,29 +39,24 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun MuseumApp(vm: MuseumViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     val closestExhibitionUIState by vm.closestExhibitionUIState.collectAsStateWithLifecycle(null)
-    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
     val isPlaying by vm.isPlaying.collectAsStateWithLifecycle(false)
 
-    MuseumScreen(buttonClicked, vm::toggleLokate, closestExhibitionUIState, nextCampaignUIState, vm::play, isPlaying)
+    MuseumScreen(
+        closestExhibitionUIState,
+        vm::play,
+        isPlaying,
+    )
 }
 
 @Composable
 fun MuseumScreen(
-    buttonClicked: Boolean,
-    onButtonClick: () -> Unit,
     closestExhibitionUIState: ExhibitionUIState?,
-    nextCampaignUIState: NextCampaignUIState?,
     play: () -> Unit,
     isPlaying: Boolean,
 ) {
-    if (!buttonClicked) {
-        LokateDemoStartScreen(DemoType.MUSEUM, onButtonClick)
-    } else {
-        CampaignExperience(nextCampaignUIState) {
-            Exhibition(closestExhibitionUIState, play, isPlaying)
-        }
+    CommonSurface {
+        Exhibition(closestExhibitionUIState, play, isPlaying)
     }
 }
 
@@ -123,7 +115,7 @@ fun Exhibition(
                     painter = painterResource(DrawableResource(closestExhibitionUIState.imagePath)),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize().graphicsLayer { alpha = animateFront },
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = ContentScale.Fit,
                 )
             } else {
                 Scaffold(

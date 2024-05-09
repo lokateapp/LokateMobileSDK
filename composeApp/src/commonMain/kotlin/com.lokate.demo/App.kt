@@ -19,11 +19,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Museum
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -38,14 +33,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lokate.demo.csfair.CSFairApp
-import com.lokate.demo.csfair.CSFairViewModel
-import com.lokate.demo.gym.GymApp
-import com.lokate.demo.gym.GymViewModel
-import com.lokate.demo.market.MarketApp
-import com.lokate.demo.market.MarketViewModel
-import com.lokate.demo.museum.MuseumApp
-import com.lokate.demo.museum.MuseumViewModel
+import com.lokate.demo.common.base.Screen
+import com.lokate.demo.common.base.ScreenList
+import com.lokate.demo.common.base.getNavigationItem
+import com.lokate.demo.common.base.toScene
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
@@ -56,9 +47,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.PreComposeApp
-import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
-import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -125,32 +114,7 @@ fun App() {
                     Scaffold(
                         bottomBar = {
                             NavigationBar(
-                                listOf(
-                                    NavigationItem("Market", Icons.Default.ShoppingCart) {
-                                        navigator.navigate(
-                                            "/market",
-                                            options = NavOptions(launchSingleTop = true),
-                                        )
-                                    },
-                                    NavigationItem("Museum", Icons.Default.Museum) {
-                                        navigator.navigate(
-                                            "/museum",
-                                            options = NavOptions(launchSingleTop = true),
-                                        )
-                                    },
-                                    NavigationItem("Gym", Icons.Default.SportsGymnastics) {
-                                        navigator.navigate(
-                                            "/gym",
-                                            options = NavOptions(launchSingleTop = true),
-                                        )
-                                    },
-                                    NavigationItem("CSFair", Icons.Default.Celebration) {
-                                        navigator.navigate(
-                                            "/csfair",
-                                            options = NavOptions(launchSingleTop = true),
-                                        )
-                                    },
-                                ),
+                                ScreenList.map { it.getNavigationItem(navigator) },
                                 isVisible = isVisible,
                                 isVisibleChanged = { isVisible = it },
                             )
@@ -182,26 +146,10 @@ fun Nav(
         // Navigation transition for the scenes in this NavHost, this is optional
         navTransition = NavTransition(),
         // The start destination
-        initialRoute = "/market",
+        initialRoute = Screen.MarketScreen.route,
     ) {
-        scene(
-            "/market",
-            navTransition = NavTransition(),
-        ) {
-            val vm = koinViewModel(MarketViewModel::class)
-            MarketApp(vm)
-        }
-        scene("/museum", navTransition = NavTransition()) {
-            val vm = koinViewModel(MuseumViewModel::class)
-            MuseumApp(vm)
-        }
-        scene("/gym", navTransition = NavTransition()) {
-            val vm = koinViewModel(GymViewModel::class)
-            GymApp(vm)
-        }
-        scene("/csfair", navTransition = NavTransition()) {
-            val vm = koinViewModel(CSFairViewModel::class)
-            CSFairApp(vm)
+        ScreenList.forEach { screen ->
+            this.toScene(screen)
         }
     }
 }

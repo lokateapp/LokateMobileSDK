@@ -27,16 +27,16 @@ fun audioPlayerModule() =
 
 fun viewModelModule() =
     module {
-        single {
+        factory {
             MarketViewModel()
         }
-        single {
+        factory {
             MuseumViewModel()
         }
-        single {
+        factory {
             GymViewModel()
         }
-        single {
+        factory {
             CSFairViewModel()
         }
     }

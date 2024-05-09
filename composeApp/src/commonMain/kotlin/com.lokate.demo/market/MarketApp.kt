@@ -18,43 +18,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.DemoType
-import com.lokate.demo.common.LokateDemoStartScreen
-import com.lokate.demo.common.NextCampaignUIState
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun MarketApp(vm: MarketViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     val closestDiscountUIState by vm.closestDiscountUIState.collectAsStateWithLifecycle()
     val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle()
     val affinedCampaigns by vm.affinedCampaigns.collectAsStateWithLifecycle()
 
-    MarketScreen(buttonClicked, vm::toggleLokate, closestDiscountUIState, nextCampaignUIState, affinedCampaigns)
+    MarketScreen(
+        closestDiscountUIState,
+        nextCampaignUIState,
+        affinedCampaigns,
+    )
 }
 
 @Composable
 fun MarketScreen(
-    buttonClicked: Boolean,
-    onButtonClick: () -> Unit,
     closestDiscountUIState: DiscountUIState?,
     nextCampaignUIState: NextCampaignUIState?,
     affinedCampaigns: List<String>,
 ) {
-    if (!buttonClicked) {
-        LokateDemoStartScreen(DemoType.MARKET, onButtonClick)
-    } else {
-        CampaignExperience(nextCampaignUIState) {
-            if (closestDiscountUIState != null) {
-                if (closestDiscountUIState.category in affinedCampaigns) {
-                    Discount(closestDiscountUIState.pool.random())
-                } else {
-                    Discount("No relevant discounts nearby")
-                }
+    CampaignExperience(nextCampaignUIState) {
+        if (closestDiscountUIState != null) {
+            if (closestDiscountUIState.category in affinedCampaigns) {
+                Discount(closestDiscountUIState.pool.random())
             } else {
-                Discount("No nearby campaigns")
+                Discount("No relevant discounts nearby")
             }
+        } else {
+            Discount("No nearby campaigns")
         }
     }
 }

@@ -14,29 +14,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.lokate.demo.common.base.Screen
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
-enum class DemoType {
-    MARKET,
-    MUSEUM,
-    GYM,
-    CSFAIR,
-}
-
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LokateDemoStartScreen(
-    demoType: DemoType,
+    demoType: Screen,
     onButtonClick: () -> Unit,
 ) {
     val backgroundPainter: Painter =
         when (demoType) {
-            DemoType.MARKET -> painterResource(DrawableResource("files/market/background.jpg"))
-            DemoType.MUSEUM -> painterResource(DrawableResource("files/museum/background.jpg"))
-            DemoType.GYM -> painterResource(DrawableResource("files/gym/background.jpg"))
-            DemoType.CSFAIR -> painterResource(DrawableResource("files/csfair/background.jpg"))
+            Screen.MarketScreen -> painterResource(DrawableResource("files/market/background.jpg"))
+            Screen.MuseumScreen -> painterResource(DrawableResource("files/museum/background.jpg"))
+            Screen.GymScreen -> painterResource(DrawableResource("files/gym/background.jpg"))
+            Screen.CSFairScreen -> painterResource(DrawableResource("files/csfair/background.jpg"))
         }
 
     Box(

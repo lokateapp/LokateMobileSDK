@@ -30,14 +30,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LokateSDK(
     private val authenticationRepository: AuthenticationRepository,
     private val beaconRepository: BeaconRepository,
-    private val beaconScanner: BeaconScanner,
+    private var beaconScanner: BeaconScanner,
 ) : SDKKoinComponent() {
     sealed class BeaconScannerType {
         data object IBeacon : BeaconScannerType()
@@ -84,13 +83,21 @@ class LokateSDK(
         }
     }
 
+    fun setBeaconScanner(beaconScanner: BeaconScanner) {
+        if (!isActive) {
+            this.beaconScanner = beaconScanner
+        } else {
+            log.e { "Cannot set beacon scanner while scanning" }
+        }
+    }
+
     fun getCustomerId(): String {
         return customerId
     }
 
-    private val lokateJob = SupervisorJob()
-    private val lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
-    private val lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
+    private var lokateJob = SupervisorJob()
+    private var lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
+    private var lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
 
     private val lokateBeacons =
         ConcurrentSetWithSpecialEquals(
@@ -101,9 +108,9 @@ class LokateSDK(
             },
         )
 
-    private val beaconScanResultChannel =
+    private var beaconScanResultChannel =
         Channel<BeaconScanResult>(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
-    private val eventChannel: Channel<EventRequest> =
+    private var eventChannel: Channel<EventRequest> =
         Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
 
     private val closestBeaconFlow: MutableSharedFlow<LokateBeacon?> = MutableSharedFlow()
@@ -201,13 +208,37 @@ class LokateSDK(
             log.e { "Already scanning" }
             return
         }
-
+        initJobsPipeline()
         fetchBranchBeacons {
             beaconScanner.setRegions(branchBeacons)
             beaconScanner.startScanning()
             scanProcessPipeline(beaconScanner.scanResultFlow())
             checkGone()
             isActive = true
+        }
+    }
+
+    /**
+     *     fun stopScanning() {
+     *         isActive = false
+     *         beaconScanner.stopScanning()
+     *         lokateJob.cancel()
+     *         closeChannels()
+     *     }
+     *
+     *     private fun closeChannels() {
+     *         beaconScanResultChannel.close()
+     *         eventChannel.close()
+     *     }
+     */
+    private fun initJobsPipeline() {
+        if (!lokateJob.isActive) {
+            lokateJob = SupervisorJob()
+            lokateScopeNetworkDB = CoroutineScope(Dispatchers.IO + lokateJob)
+            lokateScopeComputation = CoroutineScope(Dispatchers.IO + lokateJob)
+
+            beaconScanResultChannel = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
+            eventChannel = Channel(MAXIMUM_ELEMENTS_IN_SCAN_EVENT_PIPELINE)
         }
     }
 
@@ -320,6 +351,7 @@ class LokateSDK(
     }
 
     fun stopScanning() {
+        log.e { "stopScanning CALLED" }
         isActive = false
         beaconScanner.stopScanning()
         lokateJob.cancel()

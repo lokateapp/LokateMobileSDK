@@ -24,10 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import chaintech.videoplayer.ui.VideoPlayerView
-import com.lokate.demo.common.CampaignExperience
-import com.lokate.demo.common.DemoType
-import com.lokate.demo.common.LokateDemoStartScreen
-import com.lokate.demo.common.NextCampaignUIState
+import com.lokate.demo.common.CommonSurface
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -35,26 +32,15 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GymApp(vm: GymViewModel) {
-    val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
     val closestEquipmentUIState by vm.closestEquipmentUIState.collectAsStateWithLifecycle(null)
-    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle(null)
 
-    GymScreen(buttonClicked, vm::toggleLokate, closestEquipmentUIState, nextCampaignUIState)
+    GymScreen(closestEquipmentUIState)
 }
 
 @Composable
-fun GymScreen(
-    buttonClicked: Boolean,
-    onButtonClick: () -> Unit,
-    closestEquipmentUIState: EquipmentUIState?,
-    nextCampaignUIState: NextCampaignUIState?,
-) {
-    if (!buttonClicked) {
-        LokateDemoStartScreen(DemoType.GYM, onButtonClick)
-    } else {
-        CampaignExperience(nextCampaignUIState) {
-            Equipment(closestEquipmentUIState)
-        }
+fun GymScreen(closestEquipmentUIState: EquipmentUIState?) {
+    CommonSurface {
+        Equipment(closestEquipmentUIState)
     }
 }
 

@@ -25,18 +25,15 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
             .withTelemetryReportingDisabled()
             .withEstimoteSecureMonitoringDisabled()
             .withAnalyticsReportingDisabled() // we will use our own analytics
-            .onError {
-                    error ->
+            .onError { error ->
                 Log.e("AndroidEstimoteBeaconScanner", "Error: ${error.message}")
                 stopScanning()
             }
             .build()
     private var observationHandler: ProximityObserver.Handler? = null
 
-    companion object {
-        private val mainJob = SupervisorJob()
-        private val coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
-    }
+    private var mainJob = SupervisorJob()
+    private var coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
 
     private var running: Boolean = false
 
@@ -44,6 +41,14 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
 
     private val scanResults = mutableSetOf<BeaconScanResult>()
+
+    private fun initJobs()  {
+        if (!mainJob.isActive)
+            {
+                mainJob = SupervisorJob()
+                coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+            }
+    }
 
     override fun startScanning() {
         if (running) {
@@ -53,7 +58,7 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
         if (regions.isEmpty()) {
             setRegions(listOf())
         }
-
+        initJobs()
         Log.d("AndroidEstimoteBeaconScanner", "Starting scanning")
 
         observationHandler =
@@ -108,7 +113,10 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
         coroutineScope.launch {
             while (true) {
                 delay(Defaults.DEFAULT_SCAN_PERIOD)
-                Log.i("AndroidEstimoteBeaconScanner", "Beacons found: ${scanResults.map { it.minor }}")
+                Log.i(
+                    "AndroidEstimoteBeaconScanner",
+                    "Beacons found: ${scanResults.map { it.minor }}",
+                )
                 scanResults.forEach {
                     beaconFlow.emit(it.copy(seen = System.currentTimeMillis()))
                 }
