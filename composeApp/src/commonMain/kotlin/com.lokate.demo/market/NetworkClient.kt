@@ -18,10 +18,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-internal data class NextCampaignApiResult(val nextCampaignName: String)
+internal data class ApiResult(val affinedCampaigns: List<String>, val nextCampaign: String)
 
 // TODO: extract HTTP client to a separate object and do not create it on each function call
-suspend fun getNextCampaign(customerId: String): String? {
+suspend fun getLocationBasedRecommendations(customerId: String): Pair<List<String>, String?> {
     val client =
         HttpClient {
             expectSuccess = true
@@ -53,18 +53,20 @@ suspend fun getNextCampaign(customerId: String): String? {
             protocol = URLProtocol.HTTP
             host = BuildKonfig.MOBILE_API_IP_ADDRESS
             port = 5173
-            pathSegments = listOf("mobile", "demo", "next-campaign")
+            pathSegments = listOf("mobile", "demo", "market")
             parameters.append("customerId", customerId)
         }
 
     return try {
         val response: HttpResponse = client.get(url.buildString())
-        val nextCampaignName = response.body<NextCampaignApiResult>().nextCampaignName
-        log.d { "Next campaign based on the order of visits: $nextCampaignName" }
-        nextCampaignName
+        val affinedCampaigns = response.body<ApiResult>().affinedCampaigns
+        log.d { "Affined campaigns based on purchase and visit history: $affinedCampaigns" }
+        val nextCampaign = response.body<ApiResult>().nextCampaign
+        log.d { "Next campaign based on the order of visits: $nextCampaign" }
+        Pair(affinedCampaigns, nextCampaign)
     } catch (e: Exception) {
-        log.e { "Getting next campaign failed: ${e.message}" }
-        null
+        log.e { "Getting relevant location information failed: ${e.message}" }
+        Pair(emptyList(), null)
     } finally {
         client.close()
     }

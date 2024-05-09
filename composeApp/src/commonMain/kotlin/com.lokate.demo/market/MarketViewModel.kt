@@ -25,8 +25,7 @@ class MarketViewModel : LokateViewModel() {
                 if (it != null) {
                     val mapped = it.toDiscountUIState()
                     if (mapped != null) {
-                        getAffinedCampaigns()
-                        updateNextCampaign()
+                        updateLocationBasedRecommendations()
                     }
                     _closestDiscountUIState.emit(mapped)
                 }
@@ -37,15 +36,11 @@ class MarketViewModel : LokateViewModel() {
     private val _nextCampaignUIState = MutableStateFlow<NextCampaignUIState?>(null)
     val nextCampaignUIState = _nextCampaignUIState.asStateFlow()
 
-    private fun getAffinedCampaigns() {
+    private fun updateLocationBasedRecommendations() {
         viewModelScope.launch {
-            _affinedCampaigns.value = getAffinedCampaigns(customerId)
-        }
-    }
-
-    private fun updateNextCampaign() {
-        viewModelScope.launch {
-            _nextCampaignUIState.value = getNextCampaign(customerId).toNextCampaignUIState()
+            val (affinedCampaigns, nextCampaign) = getLocationBasedRecommendations(customerId)
+            _affinedCampaigns.value = affinedCampaigns
+            _nextCampaignUIState.value = nextCampaign.toNextCampaignUIState()
         }
     }
 
