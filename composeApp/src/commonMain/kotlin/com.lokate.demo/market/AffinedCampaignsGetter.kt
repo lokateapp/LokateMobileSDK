@@ -18,9 +18,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class ApiResult(val affinedCampaigns: List<String>, val campaignVisitOrders: List<List<String>>)
+data class ApiResult(val affinedCampaigns: List<String>)
 
-// TODO: extract demo HTTP client to a separate object and do not create it on each function call
+// TODO: extract HTTP client to a separate object and do not create it on each function call
 suspend fun getAffinedCampaigns(customerId: String): List<String> {
     val client =
         HttpClient {
@@ -53,14 +53,14 @@ suspend fun getAffinedCampaigns(customerId: String): List<String> {
             protocol = URLProtocol.HTTP
             host = BuildKonfig.MOBILE_API_IP_ADDRESS
             port = 5173
-            pathSegments = listOf("mobile", "demo", "market")
+            pathSegments = listOf("mobile", "demo", "market", "affined-campaigns")
             parameters.append("customerId", customerId)
         }
 
     return try {
         val response: HttpResponse = client.get(url.buildString())
         val affinedCampaigns = response.body<ApiResult>().affinedCampaigns
-        log.d { "Successfuly retrieved affined campaigns: $affinedCampaigns" }
+        log.d { "Successfully retrieved affined campaigns: $affinedCampaigns" }
         affinedCampaigns
     } catch (e: Exception) {
         log.e { "Getting affined campaigns failed: ${e.message}" }

@@ -1,15 +1,11 @@
 package com.lokate.demo.market
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -22,111 +18,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lokate.demo.common.CampaignExperience
+import com.lokate.demo.common.DemoType
+import com.lokate.demo.common.LokateDemoStartScreen
+import com.lokate.demo.common.NextCampaignUIState
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 
 @Composable
 fun MarketApp(vm: MarketViewModel) {
     val buttonClicked by vm.buttonClicked.collectAsStateWithLifecycle()
-    val campaignName by vm.campaignName.collectAsStateWithLifecycle()
+    val closestDiscountUIState by vm.closestDiscountUIState.collectAsStateWithLifecycle()
+    val nextCampaignUIState by vm.nextCampaignUIState.collectAsStateWithLifecycle()
     val affinedCampaigns by vm.affinedCampaigns.collectAsStateWithLifecycle()
-    val notification by vm.notification.collectAsStateWithLifecycle()
 
-    GreetingView(buttonClicked, vm::toggleLokate, campaignName, affinedCampaigns, notification)
+    MarketScreen(buttonClicked, vm::toggleLokate, closestDiscountUIState, nextCampaignUIState, affinedCampaigns)
 }
 
 @Composable
-fun GreetingView(
+fun MarketScreen(
     buttonClicked: Boolean,
     onButtonClick: () -> Unit,
-    campaignName: String?,
+    closestDiscountUIState: DiscountUIState?,
+    nextCampaignUIState: NextCampaignUIState?,
     affinedCampaigns: List<String>,
-    notification: String,
 ) {
     if (!buttonClicked) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "Lokate Demo",
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 32.dp),
-                style = MaterialTheme.typography.h1.copy(color = MaterialTheme.colors.primary),
-                textAlign = TextAlign.Center,
-            )
-
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onButtonClick,
-            ) {
-                Text(text = "Start Scanning")
+        LokateDemoStartScreen(DemoType.MARKET, onButtonClick)
+    } else {
+        CampaignExperience(nextCampaignUIState) {
+            if (closestDiscountUIState != null) {
+                if (closestDiscountUIState.category in affinedCampaigns) {
+                    Discount(closestDiscountUIState.pool.random())
+                } else {
+                    Discount("No relevant discounts nearby")
+                }
+            } else {
+                Discount("No nearby campaigns")
             }
         }
-    } else {
-        CampaignExperience(campaignName, affinedCampaigns, notification)
     }
 }
 
 @Composable
-fun CampaignExperience(
-    campaignName: String?,
-    affinedCampaigns: List<String>,
-    notification: String,
-) {
-    if (campaignName != null) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            // Upper part, current campaign experience (3/4 of the screen)
-            Surface(
-                modifier = Modifier.weight(3f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, Color.Black),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (campaignName in affinedCampaigns) {
-                        Notification(notification)
-                    } else {
-                        Notification("No relevant campaign in the current location")
-                    }
-                }
-            }
-
-            // Bottom part, next campaign experience (1/4 of the screen)
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, Color.Black),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Next campaign: to be implemented",
-                        modifier = Modifier.wrapContentSize(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body1,
-                    )
-                }
-            }
-        }
-    } else {
-        Notification("No campaign available")
-    }
-}
-
-@Composable
-fun Notification(message: String) {
+fun Discount(message: String) {
     Surface(
         modifier = Modifier.padding(8.dp),
         shape = RoundedCornerShape(8.dp),

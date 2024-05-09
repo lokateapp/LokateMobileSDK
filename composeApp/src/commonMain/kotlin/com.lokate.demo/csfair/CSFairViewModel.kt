@@ -1,8 +1,7 @@
-package com.lokate.demo.museum
+package com.lokate.demo.csfair
 
 import com.lokate.demo.common.NextCampaignUIState
 import com.lokate.demo.common.getNextCampaign
-import com.lokate.demo.utils.AudioPlayer
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,36 +13,21 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.lighthousegames.logging.logging
 
-class MuseumViewModel : ViewModel(), KoinComponent {
-    private val logger = logging("MuseumViewModel")
+class CSFairViewModel : ViewModel(), KoinComponent {
+    private val logger = logging("CSFairViewModel")
 
     private val lokateSDK: LokateSDK = get()
-    private val player: AudioPlayer = get()
 
     private val closestBeaconFlow = lokateSDK.getClosestBeaconFlow()
 
     private val _buttonClicked = MutableStateFlow(false)
     val buttonClicked = _buttonClicked.asStateFlow()
 
-    private val _closestExhibitionUIState = MutableStateFlow<ExhibitionUIState?>(null)
-    val closestExhibitionUIState = _closestExhibitionUIState.asStateFlow()
-
-    private val _isPlaying = MutableStateFlow(false)
-    val isPlaying = _isPlaying.asStateFlow()
+    private val _closestStandUIState = MutableStateFlow<StandUIState?>(null)
+    val closestStandUIState = _closestStandUIState.asStateFlow()
 
     init {
-        logger.d { "MuseumViewModel init" }
         collectClosestBeacon()
-    }
-
-    fun play() {
-        if (player.isRunning) {
-            player.pause()
-            _isPlaying.value = false
-            return
-        }
-        player.play()
-        _isPlaying.value = true
     }
 
     private fun collectClosestBeacon() {
@@ -51,12 +35,11 @@ class MuseumViewModel : ViewModel(), KoinComponent {
             closestBeaconFlow.collect {
                 logger.d { "Closest beacon changed: $it" }
                 if (it != null) {
-                    val mapped = it.toExhibitionUIState()
+                    val mapped = it.toStandUIState()
                     if (mapped != null) {
-                        setPlayer(mapped)
                         updateNextCampaign()
                     }
-                    _closestExhibitionUIState.emit(mapped)
+                    _closestStandUIState.emit(mapped)
                 }
             }
         }
@@ -76,25 +59,19 @@ class MuseumViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    private fun setPlayer(mapped: ExhibitionUIState) {
-        player.stop()
-        _isPlaying.value = false
-        player.setDataSource(mapped.audioUrl)
-    }
-
-    private fun LokateBeacon.toExhibitionUIState(): ExhibitionUIState? {
+    private fun LokateBeacon.toStandUIState(): StandUIState? {
         return when (this.campaignName) {
-            "pink" -> pieta
-            "red" -> schoolOfAthens
-            "white" -> venusDeMilo
-            "yellow" -> monaLisa
+            "pink" -> lokate
+            "red" -> lokate
+            "white" -> lokate
+            "yellow" -> lokate
             else -> null
         }
     }
 
     private fun String?.toNextCampaignUIState(): NextCampaignUIState? {
         return when (this) {
-            "Pieta" -> pietaNext
+            "Lokate" -> lokateNext
             else -> null
         }
     }

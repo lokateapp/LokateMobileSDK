@@ -39,7 +39,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lokate.demo.csfair.CSFairApp
+import com.lokate.demo.csfair.CSFairViewModel
 import com.lokate.demo.gym.GymApp
+import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketApp
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumApp
@@ -130,9 +132,9 @@ fun App() {
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("CSFair", Icons.Default.Celebration) {
+                                    NavigationItem("Museum", Icons.Default.Museum) {
                                         navigator.navigate(
-                                            "/csfair",
+                                            "/museum",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
@@ -142,9 +144,9 @@ fun App() {
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
-                                    NavigationItem("Museum", Icons.Default.Museum) {
+                                    NavigationItem("CSFair", Icons.Default.Celebration) {
                                         navigator.navigate(
-                                            "/files/museum",
+                                            "/csfair",
                                             options = NavOptions(launchSingleTop = true),
                                         )
                                     },
@@ -189,15 +191,17 @@ fun Nav(
             val vm = koinViewModel(MarketViewModel::class)
             MarketApp(vm)
         }
-        scene("/csfair", navTransition = NavTransition()) {
-            CSFairApp()
-        }
-        scene("/gym", navTransition = NavTransition()) {
-            GymApp()
-        }
-        scene("/files/museum", navTransition = NavTransition()) {
+        scene("/museum", navTransition = NavTransition()) {
             val vm = koinViewModel(MuseumViewModel::class)
             MuseumApp(vm)
+        }
+        scene("/gym", navTransition = NavTransition()) {
+            val vm = koinViewModel(GymViewModel::class)
+            GymApp(vm)
+        }
+        scene("/csfair", navTransition = NavTransition()) {
+            val vm = koinViewModel(CSFairViewModel::class)
+            CSFairApp(vm)
         }
     }
 }
@@ -211,7 +215,7 @@ fun NavigationBar(
     isVisibleChanged: (Boolean) -> Unit = {},
 ) {
     LaunchedEffect(isVisible) {
-        delay(5000)
+        delay(3000)
         isVisibleChanged(false)
     }
     Box(

@@ -42,6 +42,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(compose.materialIconsExtended)
+            implementation(libs.compose.multiplatform.media.player)
             implementation(libs.permissions.compose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

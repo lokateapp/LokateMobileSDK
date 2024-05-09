@@ -1,6 +1,8 @@
 package com.lokate.demo.di
 
 import com.lokate.demo.BuildKonfig
+import com.lokate.demo.csfair.CSFairViewModel
+import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumViewModel
 import com.lokate.demo.utils.getAudioPlayer
@@ -30,6 +32,12 @@ fun viewModelModule() =
         }
         single {
             MuseumViewModel()
+        }
+        single {
+            GymViewModel()
+        }
+        single {
+            CSFairViewModel()
         }
     }
 
