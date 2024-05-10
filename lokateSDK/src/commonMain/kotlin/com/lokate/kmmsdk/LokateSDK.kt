@@ -164,7 +164,7 @@ class LokateSDK(
                             }
                         }
                     }
-                }?.plus(DEFAULT_BEACONS) ?: DEFAULT_BEACONS
+                }?: DEFAULT_BEACONS
 
             branchBeacons.addAll(beacons)
 

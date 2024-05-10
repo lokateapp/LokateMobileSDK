@@ -20,9 +20,9 @@ class BeaconRepositoryImpl(
         longitude: Double,
     ): RepositoryResult<List<LokateBeacon>> {
         val appToken = authenticationRepository.getAppToken()
-        if (appToken !is RepositoryResult.Success) {
-            return RepositoryResult.Error("Couldn't fetch!", "No auth token!")
-        }
+                // if (appToken !is RepositoryResult.Success) {
+            //return RepositoryResult.Error("Couldn't fetch!", "No auth token!")
+        //}
 
         if (latitude == 0.0 && longitude == 0.0) {
             return RepositoryResult.Error("Couldn't fetch!", "Current geolocation is unknown!")
