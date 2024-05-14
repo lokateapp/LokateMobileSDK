@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.lighthousegames.logging.logging
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LokateSDK(
@@ -42,6 +44,7 @@ class LokateSDK(
         data object IBeacon : BeaconScannerType()
 
         data class EstimoteMonitoring(val appId: String, val appToken: String) : BeaconScannerType()
+
     }
 
     companion object {
@@ -90,6 +93,9 @@ class LokateSDK(
             log.e { "Cannot set beacon scanner while scanning" }
         }
     }
+    fun getLast(): BeaconScanResult? {
+        return lokateBeacons.minByOrNull { it.accuracy }
+    }
 
     fun getCustomerId(): String {
         return customerId
@@ -117,6 +123,8 @@ class LokateSDK(
 
     private var appTokenSet: Boolean = false
 
+    @OptIn(ExperimentalObjCRefinement::class)
+    @HiddenFromObjC
     fun getClosestBeaconFlow(): SharedFlow<LokateBeacon?> {
         return closestBeaconFlow
     }

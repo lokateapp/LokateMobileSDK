@@ -6,6 +6,7 @@ import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumViewModel
 import com.lokate.demo.utils.getAudioPlayer
+import com.lokate.kmmsdk.BeaconScanner
 import com.lokate.kmmsdk.LokateSDK
 import com.lokate.kmmsdk.di.SDKSettings
 import org.koin.core.context.startKoin
@@ -40,6 +41,16 @@ fun viewModelModule() =
             CSFairViewModel()
         }
     }
+
+fun scannerInjection(scanner: BeaconScanner) {
+    val scannerType = SDKSettings.beaconScannerType
+    startKoin {
+        modules(audioPlayerModule(), viewModelModule(), lokateModule(scannerType))
+    }
+    LokateSDK.getInstance(scannerType).apply {
+        this.setBeaconScanner(scanner)
+    }
+}
 
 fun initKoin(scannerType: LokateSDK.BeaconScannerType) {
     SDKSettings.beaconScannerType = scannerType

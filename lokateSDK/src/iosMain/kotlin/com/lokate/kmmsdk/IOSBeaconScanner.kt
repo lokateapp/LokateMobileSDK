@@ -6,6 +6,7 @@ import com.lokate.kmmsdk.domain.model.beacon.LokateBeacon
 import com.lokate.kmmsdk.utils.AUTHORIZED_ALWAYS
 import com.lokate.kmmsdk.utils.AUTHORIZED_WHEN_IN_USE
 import com.lokate.kmmsdk.utils.DENIED
+import com.lokate.kmmsdk.utils.IOSBeaconScannerHelper
 import com.lokate.kmmsdk.utils.NOT_DETERMINED
 import com.lokate.kmmsdk.utils.RESTRICTED
 import com.lokate.kmmsdk.utils.toBeaconScanResult
@@ -28,7 +29,10 @@ class IOSBeaconScanner : BeaconScanner, SDKKoinComponent() {
 
     private var mainJob = SupervisorJob()
     private var coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+    var workAround: IOSBeaconScannerHelper? = null
+    set(value) {
 
+    }
     private var regions: List<CLBeaconRegion> = listOf()
     private val beaconFlow: MutableSharedFlow<BeaconScanResult> = MutableSharedFlow()
     private var running: Boolean = false
