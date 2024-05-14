@@ -23,6 +23,7 @@ kotlin {
         summary = "KMM SDK"
         homepage = "lokate.tech"
         version = "1.0.0"
+        ios.deploymentTarget = "15.0"
         pod("EstimoteProximitySDK") {
             version = "1.8.0"
             moduleName = "EstimoteProximitySDK"

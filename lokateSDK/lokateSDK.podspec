@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
     spec.summary                  = 'KMM SDK'
     spec.vendored_frameworks      = 'build/cocoapods/framework/lokateSDK.framework'
     spec.libraries                = 'c++'
-                
+    spec.ios.deployment_target = '15.0'
     spec.dependency 'EstimoteProximitySDK', '1.8.0'
                 
     if !Dir.exist?('build/cocoapods/framework/lokateSDK.framework') || Dir.empty?('build/cocoapods/framework/lokateSDK.framework')
