@@ -18,7 +18,7 @@ object Defaults {
                 major = 1,
                 minor = 1,
                 campaignName = "pink",
-                radius = 0.05,
+                radius = 0.03,
             ),
             LokateBeacon(
                 // red
@@ -26,7 +26,7 @@ object Defaults {
                 major = 1,
                 minor = 2,
                 campaignName = "red",
-                radius = 0.05,
+                radius = 0.03,
             ),
             LokateBeacon(
                 // white
@@ -34,7 +34,7 @@ object Defaults {
                 major = 1,
                 minor = 3,
                 campaignName = "white",
-                radius = 0.05,
+                radius = 0.03,
             ),
             LokateBeacon(
                 // yellow
@@ -42,7 +42,7 @@ object Defaults {
                 major = 1,
                 minor = 4,
                 campaignName = "yellow",
-                radius = 0.05,
+                radius = 0.03,
             ),
         )
 }
