@@ -26,8 +26,8 @@ class MarketViewModel : LokateViewModel() {
                     val mapped = it.toDiscountUIState()
                     if (mapped != null && mapped != closestDiscountUIState.value) {
                         updateLocationBasedRecommendations()
+                        _closestDiscountUIState.emit(mapped)
                     }
-                    _closestDiscountUIState.emit(mapped)
                 }
             }
         }
@@ -46,10 +46,10 @@ class MarketViewModel : LokateViewModel() {
 
     private fun LokateBeacon.toDiscountUIState(): DiscountUIState? {
         return when (this.campaignName) {
-            "giris" -> giris
-            "bebek bezi" -> bebekBezi
-            "kuruyemis" -> kuruyemis
-            "bira" -> bira
+            "pink" -> giris
+            "red" -> bebekBezi
+            "white" -> kuruyemis
+            "yellow" -> bira
             else -> null
         }
     }

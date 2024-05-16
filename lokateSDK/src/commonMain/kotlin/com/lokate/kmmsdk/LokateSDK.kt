@@ -135,47 +135,59 @@ class LokateSDK(
             log.e { "Already scanning, stop scanning and get beacons again" }
             return
         }
-        lokateScopeNetworkDB.launch {
-            val (latitude, longitude) =
-                withTimeoutOrNull(10000) {
-                    try {
-                        getCurrentGeolocation()
-                    } catch (e: Exception) {
-                        log.e { "Failed to get current location: ${e.message}" }
-                        Pair(0.0, 0.0)
-                    }
-                } ?: Pair(0.0, 0.0)
 
-            log.d { "latitude: $latitude, longitude: $longitude" }
+        val beacons = DEFAULT_BEACONS
+        branchBeacons.addAll(beacons)
 
-            val beacons =
-                withTimeoutOrNull(5000) {
-                    beaconRepository.fetchBeacons(latitude, longitude).let {
-                        when (it) {
-                            is RepositoryResult.Success -> {
-                                log.d { "Successfully fetched beacons" }
-                                it.body
-                            }
-
-                            is RepositoryResult.Error -> {
-                                log.e { "Failed to fetch beacons: ${it.message}, ${it.errorType}" }
-                                log.d { "Default beacons will be scanned" }
-                                DEFAULT_BEACONS
-                            }
-                        }
-                    }
-                }?: DEFAULT_BEACONS
-
-            branchBeacons.addAll(beacons)
-
-            log.d { "Branch beacons:" }.also {
-                for (beacon in branchBeacons) {
-                    log.d { "$beacon" }
-                }
+        log.d { "Branch beacons:" }.also {
+            for (beacon in branchBeacons) {
+                log.d { "$beacon" }
             }
-
-            afterFetch()
         }
+
+        afterFetch()
+
+       //  lokateScopeNetworkDB.launch {
+       //      val (latitude, longitude) =
+       //          withTimeoutOrNull(10000) {
+       //              try {
+       //                  getCurrentGeolocation()
+       //              } catch (e: Exception) {
+       //                  log.e { "Failed to get current location: ${e.message}" }
+       //                  Pair(0.0, 0.0)
+       //              }
+       //          } ?: Pair(0.0, 0.0)
+
+       //      log.d { "latitude: $latitude, longitude: $longitude" }
+
+       //      val beacons =
+       //          withTimeoutOrNull(5000) {
+       //              beaconRepository.fetchBeacons(latitude, longitude).let {
+       //                  when (it) {
+       //                      is RepositoryResult.Success -> {
+       //                          log.d { "Successfully fetched beacons" }
+       //                          it.body
+       //                      }
+
+       //                      is RepositoryResult.Error -> {
+       //                          log.e { "Failed to fetch beacons: ${it.message}, ${it.errorType}" }
+       //                          log.d { "Default beacons will be scanned" }
+       //                          DEFAULT_BEACONS
+       //                      }
+       //                  }
+       //              }
+       //          }?: DEFAULT_BEACONS
+
+       //      branchBeacons.addAll(beacons)
+
+       //      log.d { "Branch beacons:" }.also {
+       //          for (beacon in branchBeacons) {
+       //              log.d { "$beacon" }
+       //          }
+       //      }
+
+       //      afterFetch()
+       //  }
     }
 
     private fun checkAppToken() {

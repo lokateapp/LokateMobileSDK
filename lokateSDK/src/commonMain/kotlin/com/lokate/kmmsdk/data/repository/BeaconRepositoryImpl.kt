@@ -40,6 +40,7 @@ class BeaconRepositoryImpl(
             logging("LokateSDK").e { "Fetching from remote failed: $remoteBeacons" }
         }
 
+        return RepositoryResult.Error("Couldn't fetch!", "Default beacons!")
         val localBeacons = localDS.fetchBeacons(latitude, longitude).toRepositoryResult()
         return if (localBeacons is RepositoryResult.Success && localBeacons.body.isNotEmpty()) {
             localBeacons.also {

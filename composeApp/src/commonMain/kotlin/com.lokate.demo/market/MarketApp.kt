@@ -47,17 +47,10 @@ fun MarketScreen(
     affinedCampaigns: List<String>,
 ) {
     CampaignExperience(nextCampaignUIState) {
-        if (closestDiscountUIState != null) {
-            if (closestDiscountUIState.campaign in affinedCampaigns || closestDiscountUIState.campaign == "giris") {
-                Discount(closestDiscountUIState.pool[0], closestDiscountUIState.imagePath)
-            } else {
-                Discount(
-                    "Yakınlarda size önerebileceğimiz bir şey yok :(\nİlginizi çekebilecek ürünlerin yanına yaklaştığınızda sizleri bilgilendireceğim.",
-                    null,
-                )
-            }
-        } else {
+        if (closestDiscountUIState == null) {
             Discount("Kapsama alanı dışı", null)
+        } else {
+                Discount(closestDiscountUIState.pool[0], closestDiscountUIState.imagePath)
         }
     }
 }

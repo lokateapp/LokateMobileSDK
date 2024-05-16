@@ -29,10 +29,10 @@ class GymViewModel : LokateViewModel() {
 
     private fun LokateBeacon.toEquipmentUIState(): EquipmentUIState? {
         return when (this.campaignName) {
-            "giris" -> benchPress
-            "bebek bezi" -> cableRow
-            "kuruyemis" -> latPulldown
-            "bira" -> squat
+            "pink" -> benchPress
+            "red" -> cableRow
+            "white" -> latPulldown
+            "yellow" -> squat
             else -> null
         }
     }

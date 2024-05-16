@@ -1,15 +1,12 @@
 package com.lokate.demo.common.base
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Museum
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.lokate.demo.NavigationItem
-import com.lokate.demo.csfair.CSFairApp
-import com.lokate.demo.csfair.CSFairViewModel
 import com.lokate.demo.gym.GymApp
 import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketApp
@@ -31,9 +28,6 @@ sealed class Screen(val title: String, val route: String, val navIcon: ImageVect
 
     data object GymScreen :
         Screen(title = "Gym", route = "/gym", navIcon = Icons.Default.SportsGymnastics)
-
-    data object CSFairScreen :
-        Screen(title = "CSFair", route = "/csfair", navIcon = Icons.Default.Celebration)
 }
 
 val ScreenList =
@@ -41,7 +35,6 @@ val ScreenList =
         Screen.MarketScreen,
         Screen.MuseumScreen,
         Screen.GymScreen,
-        Screen.CSFairScreen,
     )
 
 fun Screen.getVM() =
@@ -49,7 +42,6 @@ fun Screen.getVM() =
         Screen.MarketScreen -> MarketViewModel::class
         Screen.MuseumScreen -> MuseumViewModel::class
         Screen.GymScreen -> GymViewModel::class
-        Screen.CSFairScreen -> CSFairViewModel::class
     }
 
 @Composable
@@ -58,7 +50,6 @@ fun Screen.getScreen(vm: ViewModel) =
         Screen.MarketScreen -> MarketApp(vm as MarketViewModel)
         Screen.MuseumScreen -> MuseumApp(vm as MuseumViewModel)
         Screen.GymScreen -> GymApp(vm as GymViewModel)
-        Screen.CSFairScreen -> CSFairApp(vm as CSFairViewModel)
     }
 
 fun RouteBuilder.toScene(screen: Screen) =

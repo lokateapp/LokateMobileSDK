@@ -41,8 +41,8 @@ class MuseumViewModel : LokateViewModel() {
                     val mapped = it.toExhibitionUIState()
                     if (mapped != null && mapped != closestExhibitionUIState.value) {
                         setPlayer(mapped)
+                        _closestExhibitionUIState.emit(mapped)
                     }
-                    _closestExhibitionUIState.emit(mapped)
                 }
             }
         }
