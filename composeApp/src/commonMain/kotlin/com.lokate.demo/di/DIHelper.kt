@@ -1,7 +1,7 @@
 package com.lokate.demo.di
 
 import com.lokate.demo.BuildKonfig
-import com.lokate.demo.csfair.CSFairViewModel
+import com.lokate.demo.game.GameViewModel
 import com.lokate.demo.gym.GymViewModel
 import com.lokate.demo.market.MarketViewModel
 import com.lokate.demo.museum.MuseumViewModel
@@ -37,7 +37,7 @@ fun viewModelModule() =
             GymViewModel()
         }
         factory {
-            CSFairViewModel()
+            GameViewModel()
         }
     }
 

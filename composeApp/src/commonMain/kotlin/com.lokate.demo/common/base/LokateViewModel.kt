@@ -42,7 +42,7 @@ open class LokateViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    fun toggleLokate() {
+    open fun toggleLokate() {
         logger.e { "TOGGLE LOKATE $isLokateRunning" }
         if (!isLokateRunning) {
             lokateSDK.startScanning()

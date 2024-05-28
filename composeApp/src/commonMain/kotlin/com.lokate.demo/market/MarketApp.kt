@@ -1,8 +1,12 @@
 package com.lokate.demo.market
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun MarketApp(vm: MarketViewModel) {
@@ -40,24 +47,24 @@ fun MarketScreen(
     affinedCampaigns: List<String>,
 ) {
     CampaignExperience(nextCampaignUIState) {
-        if (closestDiscountUIState != null) {
-            if (closestDiscountUIState.category in affinedCampaigns) {
-                Discount(closestDiscountUIState.pool.random())
-            } else {
-                Discount("No relevant discounts nearby")
-            }
+        if (closestDiscountUIState == null) {
+            Discount("Kapsama alanı dışı", null)
         } else {
-            Discount("No nearby campaigns")
+                Discount(closestDiscountUIState.pool[0], closestDiscountUIState.imagePath)
         }
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
-fun Discount(message: String) {
+fun Discount(
+    message: String,
+    imagePath: String?,
+) {
     Surface(
         modifier = Modifier.padding(8.dp),
         shape = RoundedCornerShape(8.dp),
-        color = Color.LightGray,
+        color = Color.Transparent,
         border = BorderStroke(2.dp, Color.Gray),
     ) {
         Box(
@@ -67,14 +74,25 @@ fun Discount(message: String) {
                     .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = message,
-                modifier = Modifier.wrapContentSize(),
-                textAlign = TextAlign.Center,
-                style =
-                    MaterialTheme.typography.subtitle1
-                        .copy(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black),
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = message,
+                    modifier = Modifier.wrapContentSize(),
+                    textAlign = TextAlign.Center,
+                    style =
+                        MaterialTheme.typography.subtitle1
+                            .copy(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                if (imagePath != null) {
+                    Image(
+                        painter = painterResource(DrawableResource(imagePath)),
+                        contentDescription = null,
+                    )
+                }
+            }
         }
     }
 }

@@ -42,12 +42,11 @@ class AndroidEstimoteBeaconScanner(appId: String, appToken: String) : BeaconScan
 
     private val scanResults = mutableSetOf<BeaconScanResult>()
 
-    private fun initJobs()  {
-        if (!mainJob.isActive)
-            {
-                mainJob = SupervisorJob()
-                coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
-            }
+    private fun initJobs() {
+        if (!mainJob.isActive) {
+            mainJob = SupervisorJob()
+            coroutineScope = CoroutineScope(Dispatchers.IO + mainJob)
+        }
     }
 
     override fun startScanning() {

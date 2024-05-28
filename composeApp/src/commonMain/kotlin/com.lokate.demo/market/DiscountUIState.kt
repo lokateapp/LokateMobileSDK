@@ -1,47 +1,61 @@
 package com.lokate.demo.market
 
 data class DiscountUIState(
-    val category: String,
+    val campaign: String,
+    val imagePath: String,
     val pool: List<String>,
 )
 
-val selfCare =
+val giris =
     DiscountUIState(
-        category = "Self Care",
+        campaign = "giris",
+        imagePath = "files/market/giris.png",
         pool =
             listOf(
-                "There is a discount on \"Head & Shoulders Mentol 400ML\"",
-                "Buy 2, get 1 free on Dove shampoo",
-                "Save 30% on L'Oreal hair care products",
+                "Lokate Market'e Hoşgeldiniz, alışverişiniz boyunca size konum bazlı öneriler sunacağım.",
             ),
     )
-val electronics =
+val bebekBezi =
     DiscountUIState(
-        category = "Electronics",
+        campaign = "bebek bezi",
+        imagePath = "files/market/bebek_bezi.jpg",
         pool =
             listOf(
-                "Special offer on electronics this weekend",
-                "Get a free wireless charger with any smartphone purchase",
-                "Limited stock: 50% off on selected laptops",
+                "100'lü Prima Bebek Bezi %30 indirimde!",
+                "30'lu Molfix Bebek Bezi %10 indirimde!",
+                "Aptamil devam sütü 400 gr yalnızca 449 ₺!",
             ),
     )
-val cloth =
+val kuruyemis =
     DiscountUIState(
-        category = "Cloth",
+        campaign = "kuruyemis",
+        imagePath = "files/market/kuruyemis.jpg",
         pool =
             listOf(
-                "Get 20% off on all clothing items",
-                "New arrivals: Explore our latest fashion collection",
-                "Buy one dress, get the second one at half price",
+                "Peyman karışık kuruyemiş paketi %20 indirimde!",
+                "Tadım Antep fıstığı 500 gr yalnızca 29.99 ₺!",
+                "Amigo Kavrulmuş badem 250 gr %15 indirimde!",
             ),
     )
-val homeAppliances =
+val bira =
     DiscountUIState(
-        category = "Home Appliances",
+        campaign = "bira",
+        imagePath = "files/market/bira.jpg",
         pool =
             listOf(
-                "Limited time offer: Buy one get one free on selected items",
-                "Flash sale: Up to 50% off on home appliances",
-                "Exclusive deals for loyalty members only",
+                "Efes Pilsen 6'lı kutu %20 indirimde!",
+                "Tuborg Gold 4'lü kutu %15 indirimde!",
+                "Leffe Blonde 33 cl %10 indirimde!",
+            ),
+    )
+val kahve =
+    DiscountUIState(
+        campaign = "kahve",
+        imagePath = "files/market/kahve.jpg",
+        pool =
+            listOf(
+                "Starbucks Espresso Kahve %25 indirimde!",
+                "Nescafe Gold 200 gr yalnızca 24.99 ₺!",
+                "Kahve Makinesi alana Lavazza kahve kapsülü hediye!",
             ),
     )
